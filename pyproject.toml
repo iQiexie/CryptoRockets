@@ -1,0 +1,126 @@
+[tool.poetry]
+name = "back"
+version = "0.1.0"
+description = ""
+authors = []
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.112.2"
+sqlalchemy = "^2.0.32"
+uvicorn = "^0.30.6"
+pydantic-settings = "^2.4.0"
+ruff = "^0.6.2"
+asyncpg = "^0.29.0"
+redis = "^5.0.8"
+async-timeout = "^4.0.3"
+alembic = "^1.13.2"
+greenlet = "^3.0.3"
+structlog = "^24.4.0"
+python-rapidjson = "^1.20"
+bcrypt = "^4.2.0"
+python-jose = "^3.3.0"
+gunicorn = "^23.0.0"
+starlette-exporter = "^0.23.0"
+aiohttp = "^3.10.5"
+websockets = "^13.0.1"
+opentelemetry-instrumentation-sqlalchemy = "^0.48b0"
+opentelemetry-instrumentation-aiohttp-client = "^0.48b0"
+opentelemetry-instrumentation-asgi = "^0.48b0"
+opentelemetry-instrumentation-fastapi = "^0.48b0"
+opentelemetry-exporter-otlp-proto-grpc = "^1.27.0"
+opentelemetry-instrumentation-system-metrics = "^0.48b0"
+opentelemetry-exporter-otlp-proto-http = "^1.27.0"
+cryptography = "^43.0.1"
+python-multipart = "^0.0.9"
+boto3 = "^1.35.63"
+pydantic = "^2.10.5"
+aiogram = "^3.17.0"
+orjson = "^3.10.15"
+openpyxl = "^3.1.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.black]
+line-length = 119
+
+
+[tool.isort]
+profile = "black"
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+
+[tool.ruff]
+line-length = 119
+exclude = [
+    "__pycache__",
+    ".git",
+    "test*.py",
+    "temp*.py",
+    "deploy-cryptorockets",
+    "cron",
+    "locustfile.py",
+    "logs.py",
+]
+target-version = "py310"
+
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+unfixable = ["ERA001"]
+select = [
+    "E", # pycodestyle (Error)
+    "W", # pycodestyle (Warning)
+    "F", # Pyflakes
+    "PL", # Pylint
+    "ANN", # flake8-annotations
+    "B", # flake8-bugbear
+    "ERA", # eradicate
+    "I", # isort
+    "ARG", # flake8-unused-arguments
+    "N", # pep8-naming,
+    "S", # flake8-bandit
+    "T20", # flake8-print
+    "Q", # flake8-quotes
+]
+ignore = [
+    "ANN002", # Missing type annotation for `*args`
+    "ANN003", # Missing type annotation for `**kwargs`
+    "ANN101", # Missing type annotation for `self` in method
+    "ANN102", # Missing type annotation for `cls` in classmethod
+    "ANN204", # Missing return type annotation for special method
+    "ANN401", #  Dynamically typed expressions (typing.Any) are disallowed
+    "B008", # Do not perform function call in argument defaults
+    "B904", # Within an except clause, raise exceptions with `raise ... from err` or `raise ... from None`
+    "N818", # Exception name should be named with an Error suffix,
+    "PLR0911", # Too many return statements
+    "PLR0912", # Too many branches
+    "PLR0913", # Too many arguments to function call
+    "PLR0915", # Too many statements
+    "S101", # Use of assert detected
+]
+
+
+[tool.ruff.lint.per-file-ignores]
+"app/services/dto/*" = [
+    "ANN001", # Missing type annotation for function argument
+    "N805", # First argument of a method should be named `self`
+    "N815", # Variable in class scope should not be mixedCase
+]
+"app/db/migrations/versions/*" = [
+    "E501", # Line too long
+]
+"app/api/routes/*" = [
+    "ANN201", # Missing return type annotation for public function
+    "ANN202", # Missing return type annotation for private function
+]
+
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"

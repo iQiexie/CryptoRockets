@@ -1,0 +1,11 @@
+.idea
+.env
+.venv
+env
+.env.dev
+.pyc
+__pycache__
+.DS_Store
+.directory
+.ruff_cache
+deploy-cryptorockets/prometheus-temp

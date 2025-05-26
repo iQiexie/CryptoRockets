@@ -1,0 +1,3 @@
+*/5 * * * * URL=/api/v1/task/broadcast_unpaid_users /usr/local/bin/python /usr/app/cron/cron.py > /var/log/crontab.log 2>&1
+*/5 * * * * URL=/api/v1/task/check_runpod_balance /usr/local/bin/python /usr/app/cron/cron.py > /var/log/crontab.log 2>&1
+*/5 * * * * URL=/api/v1/task/check_stuck_photos /usr/local/bin/python /usr/app/cron/cron.py > /var/log/crontab.log 2>&1
