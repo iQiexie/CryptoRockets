@@ -1,14 +1,7 @@
 import datetime
 from typing import Any, Dict
 
-from sqlalchemy import (
-    BigInteger,
-    Boolean,
-    Integer,
-    String,
-    func,
-    inspect,
-)
+from sqlalchemy import BigInteger, Boolean, Integer, String, func, inspect
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql.functions import current_timestamp

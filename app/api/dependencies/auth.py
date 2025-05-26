@@ -1,7 +1,7 @@
 import secrets
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import APIKeyHeader, HTTPBasic, HTTPBasicCredentials
 from starlette import status
 
@@ -10,7 +10,6 @@ from app.api.dependencies.stubs import dependency_adapters, dependency_services
 from app.api.exceptions import ClientError
 from app.services.base.services import Services
 from app.services.dto.auth import WebappData
-from fastapi import Request
 
 BasicAuth = HTTPBasic()
 AuthTaskHeader = APIKeyHeader(name="token", scheme_name="AuthTask", auto_error=True)

@@ -61,7 +61,7 @@ class UserService(BaseService):
         )
 
         if data.country:
-            user['country'] = data.country
+            user["country"] = data.country
 
         if user:
             user = await self.repo.update_user(telegram_id=user.telegram_id, bot_banned=False, **user_data)
