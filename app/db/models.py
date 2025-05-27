@@ -45,8 +45,8 @@ class TaskTypeEnum(str, Enum):
     watch_ad = "watch_ad"
 
 
-class TaskStatusEnum(str, Enum):
-    completed = "completed"
+class TaskRewardEnum(str, Enum):
+    fuel = "fuel"
 
 
 class RocketTypeEnum(str, Enum):
@@ -158,6 +158,8 @@ class Task(_TimestampMixin, Base):
     __tablename__ = "tasks"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    reward: Mapped[TaskRewardEnum] = mapped_column(String)
+    reward_amount: Mapped[float] = mapped_column(Numeric)
     task_type: Mapped[TaskTypeEnum] = mapped_column(String)
     url: Mapped[str] = mapped_column(String)
 
@@ -166,9 +168,8 @@ class TaskUser(_TimestampMixin, Base):
     __tablename__ = "tasks_users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"))
-    status: Mapped[TaskStatusEnum] = mapped_column(String)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"), index=True)
 
 
 class Advert(_TimestampMixin, Base):

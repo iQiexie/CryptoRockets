@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from app.services.transaction import TransactionService
     from app.services.user import UserService
     from app.services.websocket import WebsocketService
+    from app.services.user_task import UserTaskService
 
 
 class Services:
@@ -70,3 +71,9 @@ class Services:
         from app.services.transaction import TransactionService
 
         return TransactionService(session_factory=self.session_factory, adapters=self.adapters, session=self.session)
+
+    @property
+    def user_task(self) -> "UserTaskService":
+        from app.services.user_task import UserTaskService
+
+        return UserTaskService(session_factory=self.session_factory, adapters=self.adapters, session=self.session)
