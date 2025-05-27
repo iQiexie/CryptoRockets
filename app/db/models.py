@@ -18,10 +18,7 @@ from sqlalchemy.sql.functions import current_timestamp
 
 
 class TransactionTypeEnum(str, Enum):
-    deposit = "deposit"
-    refund = "refund"
-    ads = "ads"
-    referral = "referral"
+    wheel_spin = "wheel_spin"
     rocket_launch = "rocket_launch"
 
 
@@ -35,6 +32,7 @@ class CurrenciesEnum(str, Enum):
     ton = "ton"
     usdt = "usdt"
     token = "token"  # noqa: S105
+    fuel = "fuel"
 
 
 class AdStatusEnum(str, Enum):
@@ -95,6 +93,7 @@ class User(_TimestampMixin, Base):
     ton_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     usdt_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     token_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
+    fuel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
 
     referral_from: Mapped[str] = mapped_column(String, nullable=True)
     referral: Mapped[str] = mapped_column(String, unique=False)

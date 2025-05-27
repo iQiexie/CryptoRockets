@@ -1,6 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config.constants import ROCKET_CAPACITY_DEFAULT
+from app.config.constants import ROCKET_CAPACITY_OFFLINE
+from app.config.constants import ROCKET_CAPACITY_PREMIUM
 from app.db.models import Rocket, RocketTypeEnum, User
 from app.db.repos.base.base import BaseRepo
 
@@ -17,9 +20,9 @@ class UserRepo(BaseRepo):
     async def create_user(self, **kwargs) -> User:
         user = User(**kwargs)
 
-        rocket1 = Rocket(type=RocketTypeEnum.default, fuel_capacity=60, current_fuel=0)
-        rocket2 = Rocket(type=RocketTypeEnum.offline, fuel_capacity=120, current_fuel=0)
-        rocket3 = Rocket(type=RocketTypeEnum.premium, fuel_capacity=180, current_fuel=0)
+        rocket1 = Rocket(type=RocketTypeEnum.default, fuel_capacity=ROCKET_CAPACITY_DEFAULT, current_fuel=0)
+        rocket2 = Rocket(type=RocketTypeEnum.offline, fuel_capacity=ROCKET_CAPACITY_OFFLINE, current_fuel=0)
+        rocket3 = Rocket(type=RocketTypeEnum.premium, fuel_capacity=ROCKET_CAPACITY_PREMIUM, current_fuel=0)
 
         user.rockets = [rocket1, rocket2, rocket3]
         self.session.add(user)
