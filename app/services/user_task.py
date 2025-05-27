@@ -6,9 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from app.adapters.base import Adapters
-from app.api.dependencies.stubs import dependency_adapters
-from app.api.dependencies.stubs import dependency_session_factory
-from app.api.dependencies.stubs import placeholder
+from app.api.dependencies.stubs import (
+    dependency_adapters,
+    dependency_session_factory,
+    placeholder,
+)
 from app.db.models import Task
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData

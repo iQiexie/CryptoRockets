@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import APIRouter, Depends
 from starlette import status
 
 from app.api.dependencies.auth import get_current_user
@@ -23,4 +22,3 @@ async def get_all_eligible_tasks(
     service: Annotated[UserTaskService, Depends()],
 ) -> list[Task]:
     return await service.get_tasks(current_user=current_user)
-

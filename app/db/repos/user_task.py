@@ -1,8 +1,7 @@
-from sqlalchemy import case
-from sqlalchemy import select
+from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models import Task
-from app.db.models import TaskUser
+
+from app.db.models import Task, TaskUser
 from app.db.repos.base.base import BaseRepo
 
 
@@ -13,17 +12,9 @@ class UserTaskRepo(BaseRepo):
     async def get_user_tasks(self, telegram_id: int) -> list[Task]:
         stmt = (
             select(Task)
-            .add_columns(
-                case(
-                    (TaskUser.user_id.isnot(None), True),
-                    else_=False
-                ).label("completed")
-            )
+            .add_columns(case((TaskUser.user_id.isnot(None), True), else_=False).label("completed"))
             .outerjoin(TaskUser, (Task.id == TaskUser.task_id) & (TaskUser.user_id == telegram_id))
         )
-
-        from sqlalchemy.dialects import postgresql;
-        print(stmt.compile(compile_kwargs={"literal_binds": True}, dialect=postgresql.dialect()))
 
         query = await self.session.execute(stmt)
         tasks = query.mappings().all()

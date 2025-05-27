@@ -11,8 +11,8 @@ if TYPE_CHECKING:
     from app.services.task import TaskService
     from app.services.transaction import TransactionService
     from app.services.user import UserService
-    from app.services.websocket import WebsocketService
     from app.services.user_task import UserTaskService
+    from app.services.websocket import WebsocketService
 
 
 class Services:
