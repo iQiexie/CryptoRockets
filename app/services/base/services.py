@@ -7,11 +7,11 @@ from app.adapters.base import Adapters
 
 if TYPE_CHECKING:
     from app.services.auth import AuthService
+    from app.services.game import GameService
     from app.services.task import TaskService
+    from app.services.transaction import TransactionService
     from app.services.user import UserService
     from app.services.websocket import WebsocketService
-    from app.services.game import GameService
-    from app.services.transaction import TransactionService
 
 
 class Services:

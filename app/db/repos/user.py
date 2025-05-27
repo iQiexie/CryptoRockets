@@ -1,10 +1,7 @@
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Rocket
-from app.db.models import RocketTypeEnum
-from app.db.models import User
+from app.db.models import Rocket, RocketTypeEnum, User
 from app.db.repos.base.base import BaseRepo
 
 

@@ -66,4 +66,4 @@ async def safe_answer(message: Message | CallbackQuery | int) -> None:
 def generate_random_string(seed: int, length: int = 10) -> str:
     random.seed(seed)
     characters = string.ascii_letters + string.digits
-    return ''.join(random.choices(characters, k=length))
+    return "".join(random.choices(characters, k=length))  # noqa: S311

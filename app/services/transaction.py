@@ -1,6 +1,4 @@
-import random
 from typing import Annotated
-from typing import Literal
 
 import structlog
 from fastapi.params import Depends
@@ -14,16 +12,14 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
-from app.api.dto.user.request import UpdateUserRequest
 from app.api.exceptions import ClientError
-from app.db.models import CurrenciesEnum
-from app.db.models import TransactionStatusEnum
-from app.db.models import TransactionTypeEnum
-from app.db.models import User
+from app.db.models import (
+    CurrenciesEnum,
+    TransactionStatusEnum,
+    TransactionTypeEnum,
+)
 from app.services.base.base import BaseService
-from app.services.dto.auth import WebappData
 from app.services.dto.transaction import ChangeUserBalanceDTO
-from app.utils import generate_random_string
 
 logger = structlog.stdlib.get_logger()
 
@@ -51,7 +47,7 @@ class TransactionService(BaseService):
     ) -> ChangeUserBalanceDTO:
         user = await self.repos.user.get_user_for_update(telegram_id=telegram_id)
 
-        balance_name = f'balance_{currency.value}'
+        balance_name = f"balance_{currency.value}"
         balance_before = getattr(user, balance_name)
         balance_after = balance_before + amount
 
@@ -77,9 +73,8 @@ class TransactionService(BaseService):
             balance_currency=currency,
             tx_type=tx_type,
             status=TransactionStatusEnum.success,
-            **tx_kwargs
+            **tx_kwargs,
         )
         await self.session.flush()
 
         return ChangeUserBalanceDTO(user=user, transaction=tx)
-

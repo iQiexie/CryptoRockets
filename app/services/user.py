@@ -1,4 +1,3 @@
-import random
 from typing import Annotated
 
 import structlog
@@ -13,9 +12,7 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.dto.user.request import UpdateUserRequest
-from app.db.models import RocketTypeEnum
-from app.db.models import TransactionTypeEnum
-from app.db.models import User
+from app.db.models import RocketTypeEnum, User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 from app.utils import generate_random_string
@@ -73,8 +70,8 @@ class UserService(BaseService):
             await self.session.refresh(user)
             return user
 
-        user_data['referral_from'] = data.start_param
-        user_data['referral'] = generate_random_string(seed=data.telegram_id)
+        user_data["referral_from"] = data.start_param
+        user_data["referral"] = generate_random_string(seed=data.telegram_id)
 
         referral_from = await self.repo.get_user_by_referral(referral=data.start_param)
         if referral_from:

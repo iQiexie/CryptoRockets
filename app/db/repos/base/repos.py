@@ -20,4 +20,3 @@ class Repos:
     @property
     def transaction(self) -> TransactionRepo:
         return TransactionRepo(session=self.session)
-

@@ -2,13 +2,18 @@ import datetime
 from enum import Enum
 from typing import Any, Dict
 
-from sqlalchemy import BigInteger, Boolean, Integer, String, func, inspect
-from sqlalchemy import ForeignKey
-from sqlalchemy import Numeric
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.dialects.postgresql import TIMESTAMP
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy.orm import relationship
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    func,
+    inspect,
+)
+from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import current_timestamp
 
 
@@ -29,7 +34,7 @@ class TransactionStatusEnum(str, Enum):
 class CurrenciesEnum(str, Enum):
     ton = "ton"
     usdt = "usdt"
-    token = "token"
+    token = "token"  # noqa: S105
 
 
 class AdStatusEnum(str, Enum):
@@ -94,7 +99,9 @@ class User(_TimestampMixin, Base):
     referral_from: Mapped[str] = mapped_column(String, nullable=True)
     referral: Mapped[str] = mapped_column(String, unique=False)
 
-    rockets: Mapped[list["Rocket"]] = relationship(back_populates="user", cascade="all, delete-orphan", lazy="selectin")
+    rockets: Mapped[list["Rocket"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", lazy="selectin"
+    )
 
 
 class Rocket(_TimestampMixin, Base):

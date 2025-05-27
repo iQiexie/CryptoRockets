@@ -13,15 +13,10 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.dto.game.request import LaunchResponse
-from app.api.dto.user.request import UpdateUserRequest
 from app.api.exceptions import ClientError
-from app.db.models import CurrenciesEnum
-from app.db.models import RocketTypeEnum
-from app.db.models import TransactionTypeEnum
-from app.db.models import User
+from app.db.models import CurrenciesEnum, RocketTypeEnum, TransactionTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
-from app.utils import generate_random_string
 
 logger = structlog.stdlib.get_logger()
 
@@ -51,8 +46,8 @@ class GameService(BaseService):
         if not rocket.enabled:
             raise ClientError(message="Rocket is not enabled")
 
-        balance_diff = random.uniform(0.01, 0.1)
-        currency = random.choice([CurrenciesEnum.usdt, CurrenciesEnum.ton])
+        balance_diff = random.uniform(0.01, 0.1)  # noqa: S311
+        currency = random.choice([CurrenciesEnum.usdt, CurrenciesEnum.ton])  # noqa: S311
 
         await self.services.transaction.change_user_balance(
             telegram_id=current_user.id,
