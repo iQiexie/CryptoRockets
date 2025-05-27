@@ -1,6 +1,6 @@
 from fastapi import APIRouter, FastAPI
 
-from app.api.routes import docs, task, telegram, user, game
+from app.api.routes import docs, game, task, telegram, user
 
 
 def setup_routes(app: FastAPI) -> FastAPI:

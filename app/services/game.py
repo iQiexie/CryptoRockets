@@ -12,8 +12,12 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
-from app.api.dto.game.response import LaunchResponse
-from app.api.dto.game.response import WHEEL_PRIZES, WheelPrizeEnum, WheelPrizeResponse
+from app.api.dto.game.response import (
+    WHEEL_PRIZES,
+    LaunchResponse,
+    WheelPrizeEnum,
+    WheelPrizeResponse,
+)
 from app.api.exceptions import ClientError
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
 from app.db.models import CurrenciesEnum, RocketTypeEnum, TransactionTypeEnum
