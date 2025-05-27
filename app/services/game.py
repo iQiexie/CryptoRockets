@@ -13,9 +13,7 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.dto.game.request import LaunchResponse
-from app.api.dto.game.response import WHEEL_PRIZES
-from app.api.dto.game.response import WheelPrizeEnum
-from app.api.dto.game.response import WheelPrizeResponse
+from app.api.dto.game.response import WHEEL_PRIZES, WheelPrizeEnum, WheelPrizeResponse
 from app.api.exceptions import ClientError
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
 from app.db.models import CurrenciesEnum, RocketTypeEnum, TransactionTypeEnum
@@ -39,7 +37,7 @@ class GameService(BaseService):
 
     @BaseService.single_transaction
     async def spin_wheel(self, current_user: WebappData) -> WheelPrizeResponse:
-        prize = random.choices(
+        prize = random.choices(  # noqa: S311
             population=WHEEL_PRIZES,
             weights=[prize.weight for prize in WHEEL_PRIZES],
             k=1,

@@ -1,9 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config.constants import ROCKET_CAPACITY_DEFAULT
-from app.config.constants import ROCKET_CAPACITY_OFFLINE
-from app.config.constants import ROCKET_CAPACITY_PREMIUM
+from app.config.constants import (
+    ROCKET_CAPACITY_DEFAULT,
+    ROCKET_CAPACITY_OFFLINE,
+    ROCKET_CAPACITY_PREMIUM,
+)
 from app.db.models import Rocket, RocketTypeEnum, User
 from app.db.repos.base.base import BaseRepo
 

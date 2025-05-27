@@ -13,11 +13,7 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.exceptions import ClientError
-from app.db.models import (
-    CurrenciesEnum,
-    TransactionStatusEnum,
-    TransactionTypeEnum,
-)
+from app.db.models import CurrenciesEnum, TransactionStatusEnum, TransactionTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.transaction import ChangeUserBalanceDTO
 

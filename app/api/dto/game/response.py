@@ -1,7 +1,8 @@
+from enum import Enum
+
 from pydantic import Field
 
 from app.api.dto.base import BaseResponse
-from enum import Enum
 
 
 class WheelPrizeEnum(str, Enum):
