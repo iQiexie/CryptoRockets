@@ -1,10 +1,54 @@
 import datetime
+from enum import Enum
 from typing import Any, Dict
 
 from sqlalchemy import BigInteger, Boolean, Integer, String, func, inspect
+from sqlalchemy import ForeignKey
+from sqlalchemy import Numeric
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import current_timestamp
+
+
+class TransactionTypeEnum(str, Enum):
+    deposit = "deposit"
+    refund = "refund"
+    ads = "ads"
+    referral = "referral"
+    rocket_launch = "rocket_launch"
+
+
+class TransactionStatusEnum(str, Enum):
+    created = "created"
+    success = "success"
+    error = "error"
+
+
+class CurrenciesEnum(str, Enum):
+    ton = "ton"
+    usdt = "usdt"
+    token = "token"
+
+
+class AdStatusEnum(str, Enum):
+    watched = "watched"
+
+
+class TaskTypeEnum(str, Enum):
+    subscribe = "subscribe"
+    watch_ad = "watch_ad"
+
+
+class TaskStatusEnum(str, Enum):
+    completed = "completed"
+
+
+class RocketTypeEnum(str, Enum):
+    default = "default"
+    offline = "offline"
+    premium = "premium"
 
 
 class Base(DeclarativeBase):
@@ -42,3 +86,89 @@ class User(_TimestampMixin, Base):
     tg_photo_url: Mapped[str] = mapped_column(String, nullable=True)
     bot_banned: Mapped[bool] = mapped_column(Boolean, nullable=True)
     country: Mapped[str] = mapped_column(String, nullable=True)
+
+    ton_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
+    usdt_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
+    token_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
+
+    referral_from: Mapped[str] = mapped_column(String, nullable=True)
+    referral: Mapped[str] = mapped_column(String, unique=False)
+
+    rockets: Mapped[list["Rocket"]] = relationship(back_populates="user", cascade="all, delete-orphan", lazy="selectin")
+
+
+class Rocket(_TimestampMixin, Base):
+    __tablename__ = "rockets"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id", ondelete="CASCADE"))
+    type: Mapped[RocketTypeEnum] = mapped_column(String)
+
+    fuel_capacity: Mapped[int] = mapped_column(Integer)
+    current_fuel: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    count: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+
+    user: Mapped[User] = relationship(back_populates="rockets")
+
+
+class Transaction(_TimestampMixin, Base):
+    __tablename__ = "transactions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"))
+
+    balance_before: Mapped[float] = mapped_column(Numeric, nullable=True)
+    balance_after: Mapped[float] = mapped_column(Numeric, nullable=True)
+    balance_amount: Mapped[float] = mapped_column(Numeric, nullable=True)
+    balance_currency: Mapped[CurrenciesEnum] = mapped_column(String)
+
+    type: Mapped[TransactionTypeEnum] = mapped_column(String)
+    status: Mapped[TransactionStatusEnum] = mapped_column(String)
+    refund_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"), nullable=True)
+
+
+class Invoice(_TimestampMixin, Base):
+    __tablename__ = "invoices"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"))
+    external_id: Mapped[str] = mapped_column(String, unique=True, nullable=True)
+
+    status: Mapped[TransactionStatusEnum] = mapped_column(String)
+
+    currency: Mapped[CurrenciesEnum] = mapped_column(String)
+    currency_amount: Mapped[float] = mapped_column(Numeric)
+    currency_fee: Mapped[float] = mapped_column(Numeric, default=0, server_default="0")
+    usd_amount: Mapped[float] = mapped_column(Numeric)
+
+    callback_data: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    refunded: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+
+
+class Task(_TimestampMixin, Base):
+    __tablename__ = "tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    task_type: Mapped[TaskTypeEnum] = mapped_column(String)
+    url: Mapped[str] = mapped_column(String)
+
+
+class TaskUser(_TimestampMixin, Base):
+    __tablename__ = "tasks_users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"))
+    status: Mapped[TaskStatusEnum] = mapped_column(String)
+
+
+class Advert(_TimestampMixin, Base):
+    __tablename__ = "ads"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    user_id: Mapped[int] = mapped_column(Integer)
+    external_id: Mapped[str] = mapped_column(String, unique=True, nullable=True)
+    status: Mapped[AdStatusEnum] = mapped_column(String)
+    usd_amount: Mapped[float] = mapped_column(Numeric)

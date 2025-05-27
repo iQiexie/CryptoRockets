@@ -1,3 +1,4 @@
+import random
 from typing import Annotated
 
 import structlog
@@ -12,9 +13,12 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.dto.user.request import UpdateUserRequest
+from app.db.models import RocketTypeEnum
+from app.db.models import TransactionTypeEnum
 from app.db.models import User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
+from app.utils import generate_random_string
 
 logger = structlog.stdlib.get_logger()
 
@@ -69,6 +73,30 @@ class UserService(BaseService):
             await self.session.refresh(user)
             return user
 
-        await self.repo.create_user(telegram_id=data.telegram_id, **user_data)
-        user = await self.repo.get_user_by_telegram_id(telegram_id=data.telegram_id)
+        user_data['referral_from'] = data.start_param
+        user_data['referral'] = generate_random_string(seed=data.telegram_id)
+
+        referral_from = await self.repo.get_user_by_referral(referral=data.start_param)
+        if referral_from:
+            await self.handle_referral(referral_from=referral_from, data=data)
+
+        user = await self.repo.create_user(telegram_id=data.telegram_id, **user_data)
+        await self.session.commit()
+        await self.session.refresh(user)
         return user
+
+    async def handle_referral(self, referral_from: User, data: WebappData) -> None:
+        rocket = await self.repos.game.get_rocket_for_update(
+            telegram_id=referral_from.telegram_id,
+            rocket_type=RocketTypeEnum.premium,
+        )
+
+        current_fuel = rocket.fuel_capacity
+        if data.is_premium:
+            current_fuel += rocket.fuel_capacity
+
+        await self.repos.game.update_rocket(
+            telegram_id=referral_from.telegram_id,
+            rocket_type=RocketTypeEnum.premium,
+            current_fuel=current_fuel,
+        )

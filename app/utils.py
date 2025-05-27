@@ -1,4 +1,6 @@
 import json
+import random
+import string
 import traceback
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Callable
@@ -59,3 +61,9 @@ async def safe_answer(message: Message | CallbackQuery | int) -> None:
         await message.answer()
     except TelegramBadRequest:
         pass
+
+
+def generate_random_string(seed: int, length: int = 10) -> str:
+    random.seed(seed)
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choices(characters, k=length))

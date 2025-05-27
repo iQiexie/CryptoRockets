@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     from app.services.task import TaskService
     from app.services.user import UserService
     from app.services.websocket import WebsocketService
+    from app.services.game import GameService
+    from app.services.transaction import TransactionService
 
 
 class Services:
@@ -56,3 +58,15 @@ class Services:
         from app.services.user import UserService
 
         return UserService(session_factory=self.session_factory, adapters=self.adapters, session=self.session)
+
+    @property
+    def game(self) -> "GameService":
+        from app.services.game import GameService
+
+        return GameService(session_factory=self.session_factory, adapters=self.adapters, session=self.session)
+
+    @property
+    def transaction(self) -> "TransactionService":
+        from app.services.transaction import TransactionService
+
+        return TransactionService(session_factory=self.session_factory, adapters=self.adapters, session=self.session)
