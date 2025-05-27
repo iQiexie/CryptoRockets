@@ -1,6 +1,6 @@
-from app.init.base_models import BaseModel
+from app.api.dto.base import BaseRequest
+from app.db.models import RocketTypeEnum
 
 
-class LaunchResponse(BaseModel):
-    new_balance_usdt: float | None = None
-    new_balance_ton: float | None = None
+class LaunchRocket(BaseRequest):
+    type: RocketTypeEnum

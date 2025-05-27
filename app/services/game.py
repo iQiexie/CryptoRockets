@@ -12,7 +12,7 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
-from app.api.dto.game.request import LaunchResponse
+from app.api.dto.game.response import LaunchResponse
 from app.api.dto.game.response import WHEEL_PRIZES, WheelPrizeEnum, WheelPrizeResponse
 from app.api.exceptions import ClientError
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
@@ -37,34 +37,41 @@ class GameService(BaseService):
 
     @BaseService.single_transaction
     async def spin_wheel(self, current_user: WebappData) -> WheelPrizeResponse:
+        await self.services.transaction.change_user_balance(
+            telegram_id=current_user.telegram_id,
+            currency=CurrenciesEnum.wheel,
+            amount=-1,
+            tx_type=TransactionTypeEnum.wheel_spin,
+        )
+
         prize = random.choices(  # noqa: S311
             population=WHEEL_PRIZES,
-            weights=[prize.weight for prize in WHEEL_PRIZES],
+            weights=[prize.chance for prize in WHEEL_PRIZES],
             k=1,
         )[0]
 
         if prize.type == WheelPrizeEnum.tokens:
             await self.services.transaction.change_user_balance(
-                telegram_id=current_user.id,
+                telegram_id=current_user.telegram_id,
                 currency=CurrenciesEnum.token,
                 amount=prize.amount,
                 tx_type=TransactionTypeEnum.wheel_spin,
             )
         elif prize.type == WheelPrizeEnum.fuel:
             await self.services.transaction.change_user_balance(
-                telegram_id=current_user.id,
+                telegram_id=current_user.telegram_id,
                 currency=CurrenciesEnum.fuel,
                 amount=prize.amount,
                 tx_type=TransactionTypeEnum.wheel_spin,
             )
         elif prize.type == WheelPrizeEnum.premium_rocket_full:
             await self.give_rocket(
-                telegram_id=current_user.id,
+                telegram_id=current_user.telegram_id,
                 rocket_type=RocketTypeEnum.premium,
                 fuel=ROCKET_CAPACITY_PREMIUM,
             )
         elif prize.type == WheelPrizeEnum.premium_rocket:
-            await self.give_rocket(telegram_id=current_user.id, rocket_type=RocketTypeEnum.premium, fuel=0)
+            await self.give_rocket(telegram_id=current_user.telegram_id, rocket_type=RocketTypeEnum.premium, fuel=0)
         else:
             raise NotImplementedError
 
@@ -81,7 +88,7 @@ class GameService(BaseService):
 
     @BaseService.single_transaction
     async def launch_rocket(self, current_user: WebappData, rocket_type: RocketTypeEnum) -> LaunchResponse:
-        rocket = await self.repo.get_rocket_for_update(rocket_type=rocket_type, telegram_id=current_user.id)
+        rocket = await self.repo.get_rocket_for_update(rocket_type=rocket_type, telegram_id=current_user.telegram_id)
 
         if not rocket:
             raise ClientError(message="Rocket not found")
@@ -96,20 +103,20 @@ class GameService(BaseService):
         currency = random.choice([CurrenciesEnum.usdt, CurrenciesEnum.ton])  # noqa: S311
 
         balance_changes = await self.services.transaction.change_user_balance(
-            telegram_id=current_user.id,
+            telegram_id=current_user.telegram_id,
             currency=currency,
             amount=balance_diff,
             tx_type=TransactionTypeEnum.rocket_launch,
         )
 
         await self.repo.update_rocket(
-            rocker_id=rocket.id,
+            rocket_id=rocket.id,
             current_fuel=rocket.current_fuel - rocket.fuel_capacity,
             count=rocket.count - 1 if rocket.type == RocketTypeEnum.premium else rocket.count,
         )
 
         return LaunchResponse(
             **{
-                f"new_balance_{currency.value}": getattr(balance_changes.user, f"balance_{currency.value}"),
+                f"new_balance_{currency.value}": getattr(balance_changes.user, f"{currency.value}_balance"),
             },
         )

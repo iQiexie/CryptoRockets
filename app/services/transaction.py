@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Annotated
 
 import structlog
@@ -43,9 +44,9 @@ class TransactionService(BaseService):
     ) -> ChangeUserBalanceDTO:
         user = await self.repos.user.get_user_for_update(telegram_id=telegram_id)
 
-        balance_name = f"balance_{currency.value}"
+        balance_name = f"{currency.value}_balance"
         balance_before = getattr(user, balance_name)
-        balance_after = balance_before + amount
+        balance_after = balance_before + Decimal(amount)
 
         if not tx_kwargs:
             tx_kwargs = dict()
@@ -59,7 +60,7 @@ class TransactionService(BaseService):
         user_kwargs[balance_name] = balance_after
 
         logger.info(f"Updating user balance {balance_name=} {balance_after=}, diff={amount}")
-        await self.repos.user.update_user(user_id=user.id, **user_kwargs)
+        user = await self.repos.user.update_user(telegram_id=user.telegram_id, **user_kwargs)
 
         tx = await self.repo.create_transaction(
             user_id=telegram_id,
@@ -67,10 +68,10 @@ class TransactionService(BaseService):
             balance_after=balance_after,
             balance_amount=amount,
             balance_currency=currency,
-            tx_type=tx_type,
+            type=tx_type,
             status=TransactionStatusEnum.success,
             **tx_kwargs,
         )
-        await self.session.flush()
+        await self.session.refresh(user)
 
         return ChangeUserBalanceDTO(user=user, transaction=tx)

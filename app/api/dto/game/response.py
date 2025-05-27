@@ -19,6 +19,11 @@ class WheelPrizeResponse(BaseResponse):
     chance: float = Field(exclude=True)
 
 
+class LaunchResponse(BaseResponse):
+    new_balance_usdt: float | None = None
+    new_balance_ton: float | None = None
+
+
 WHEEL_PRIZES = [
     WheelPrizeResponse(
         type=WheelPrizeEnum.premium_rocket,

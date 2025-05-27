@@ -33,6 +33,7 @@ def upgrade() -> None:
         sa.Column("usdt_balance", sa.Numeric(), server_default="0", nullable=False),
         sa.Column("token_balance", sa.Numeric(), server_default="0", nullable=False),
         sa.Column("fuel_balance", sa.Numeric(), server_default="0", nullable=False),
+        sa.Column("wheel_balance", sa.Numeric(), server_default="0", nullable=False),
         sa.Column("referral_from", sa.String(), nullable=True),
         sa.Column("referral", sa.String(), nullable=False),
         sa.Column("updated_at", postgresql.TIMESTAMP(), server_default=sa.text("now()"), nullable=False),

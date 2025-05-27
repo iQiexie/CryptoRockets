@@ -33,6 +33,7 @@ class CurrenciesEnum(str, Enum):
     usdt = "usdt"
     token = "token"  # noqa: S105
     fuel = "fuel"
+    wheel = "wheel"
 
 
 class AdStatusEnum(str, Enum):
@@ -94,6 +95,7 @@ class User(_TimestampMixin, Base):
     usdt_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     token_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     fuel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
+    wheel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
 
     referral_from: Mapped[str] = mapped_column(String, nullable=True)
     referral: Mapped[str] = mapped_column(String, unique=False)
