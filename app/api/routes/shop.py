@@ -1,6 +1,5 @@
 from typing import Annotated
 
-from aiogram.types import SuccessfulPayment
 from fastapi import APIRouter, Depends
 from redis.commands.search.query import Query
 from starlette import status
