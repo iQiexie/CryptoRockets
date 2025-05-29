@@ -35,6 +35,7 @@ class CurrenciesEnum(str, Enum):
     token = "token"  # noqa: S105
     fuel = "fuel"
     wheel = "wheel"
+    xtr = "xtr"
 
 
 class AdStatusEnum(str, Enum):

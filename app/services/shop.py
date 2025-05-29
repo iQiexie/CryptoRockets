@@ -1,7 +1,6 @@
 from typing import Annotated
 
 import structlog
-from aiogram.types import SuccessfulPayment
 from fastapi.params import Depends
 from pydantic_core import to_json
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +17,7 @@ from app.api.dto.shop.response import UrlResponse
 from app.db.models import TransactionStatusEnum, TransactionTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
+from app.services.dto.shop import XTRPaymentCallbackDTO
 
 logger = structlog.stdlib.get_logger()
 
@@ -35,15 +35,15 @@ class ShopService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
-    async def handle_payment_callback(self, telegram_id: int, item_id: int, data: SuccessfulPayment) -> None:
-        item = SHOP_ITEMS[item_id]
+    async def handle_payment_callback(self, data: XTRPaymentCallbackDTO) -> None:
+        item = SHOP_ITEMS[data.item_id]
 
         transaction_id = None
         rocket_id = None
 
         if item.amount and item.currency:
             tx = await self.services.transaction.change_user_balance(
-                telegram_id=telegram_id,
+                telegram_id=data.telegram_id,
                 currency=item.currency,
                 amount=item.amount,
                 tx_type=TransactionTypeEnum.purchase,
@@ -51,7 +51,7 @@ class ShopService(BaseService):
             transaction_id = tx.transaction.id
         elif item.rocket_skin and item.rocket_type:
             rocket = await self.repos.game.get_rocket_for_update(
-                telegram_id=telegram_id,
+                telegram_id=data.telegram_id,
                 rocket_type=item.rocket_type,
             )
             await self.repos.game.update_rocket(
@@ -64,17 +64,17 @@ class ShopService(BaseService):
             raise NotImplementedError
 
         await self.repo.create_invoice(
-            user_id=telegram_id,
-            external_id=data.telegram_payment_charge_id,
+            user_id=data.telegram_id,
+            external_id=data.external_id,
             status=TransactionStatusEnum.success,
-            currency="XTR",
-            amount=data.total_amount,
+            currency=data.currency,
+            currency_amount=data.amount,
             currency_fee=0,
-            usd_amount=data.total_amount * 0.013,
+            usd_amount=data.usd_amount,
             transaction_id=transaction_id,
             rocket_id=rocket_id,
             rocket_skin=item.rocket_skin,
-            callback_data=data.model_dump(),
+            callback_data=data.callback_data,
         )
 
     async def get_invoice_url(self, shop_item_id: int, current_user: WebappData) -> UrlResponse:

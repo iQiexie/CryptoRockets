@@ -18,6 +18,7 @@ class RocketResponse(BaseResponse):
 
 class UserResponse(BaseResponse):
     id: int
+    telegram_id: int
     ton_balance: float
     usdt_balance: float
     token_balance: float
