@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from app.services.user import UserService
     from app.services.user_task import UserTaskService
     from app.services.websocket import WebsocketService
+    from app.services.shop import ShopService
 
 
 class Services:
@@ -77,3 +78,9 @@ class Services:
         from app.services.user_task import UserTaskService
 
         return UserTaskService(session_factory=self.session_factory, adapters=self.adapters, session=self.session)
+
+    @property
+    def shop(self) -> "ShopService":
+        from app.services.shop import ShopService
+
+        return ShopService(session_factory=self.session_factory, adapters=self.adapters, session=self.session)

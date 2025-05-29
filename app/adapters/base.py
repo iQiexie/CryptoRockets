@@ -2,6 +2,7 @@ from app.adapters.alerts import AlertsAdapter
 from app.adapters.redis import RedisAdapter
 from app.config.config import Config
 from app.external.base.aiohttp_client import AioHttpClient
+from app.external.telegram_client import TelegramClient
 from app.telegram.patches import Bot
 from i18n.service import I18n
 
@@ -15,3 +16,4 @@ class Adapters:
 
         self.redis = RedisAdapter(config=config.redis)
         self.bot = Bot(config=config.bot, i18n=self.i18n, token=config.bot.TELEGRAM_BOT_TOKEN)
+        self.telegram = TelegramClient(config=config)

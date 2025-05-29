@@ -20,6 +20,7 @@ from sqlalchemy.sql.functions import current_timestamp
 class TransactionTypeEnum(str, Enum):
     wheel_spin = "wheel_spin"
     rocket_launch = "rocket_launch"
+    purchase = "purchase"
 
 
 class TransactionStatusEnum(str, Enum):
@@ -123,6 +124,9 @@ class Rocket(_TimestampMixin, Base):
     current_fuel: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     count: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    skin: Mapped[str] = mapped_column(String, default="default", server_default="default")
+    price_tokens: Mapped[float] = mapped_column(Numeric, default=0, server_default="0")
+    price_stars: Mapped[float] = mapped_column(Numeric, default=0, server_default="0")
 
     user: Mapped[User] = relationship(back_populates="rockets")
 
@@ -169,6 +173,9 @@ class Invoice(_TimestampMixin, Base):
     currency_amount: Mapped[float] = mapped_column(Numeric)
     currency_fee: Mapped[float] = mapped_column(Numeric, default=0, server_default="0")
     usd_amount: Mapped[float] = mapped_column(Numeric)
+
+    transaction_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"), nullable=True)
+    rocket_id: Mapped[int] = mapped_column(ForeignKey("rockets.id"), nullable=True)
 
     callback_data: Mapped[dict] = mapped_column(JSONB, nullable=True)
     refunded: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")

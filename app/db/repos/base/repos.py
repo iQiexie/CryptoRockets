@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.repos.game import GameRepo
+from app.db.repos.shop import ShopRepo
 from app.db.repos.transaction import TransactionRepo
 from app.db.repos.user import UserRepo
 from app.db.repos.user_task import UserTaskRepo
@@ -25,3 +26,7 @@ class Repos:
     @property
     def user_task(self) -> UserTaskRepo:
         return UserTaskRepo(session=self.session)
+
+    @property
+    def shop(self) -> ShopRepo:
+        return ShopRepo(session=self.session)
