@@ -5,7 +5,9 @@ from starlette import status
 
 from app.api.dependencies.auth import get_current_user
 from app.api.dto.game.request import LaunchRocket
+from app.api.dto.game.response import LatestWheelPrizeResponse
 from app.api.dto.game.response import WHEEL_PRIZES, LaunchResponse, WheelPrizeResponse
+from app.db.models import WheelPrize
 from app.services.dto.auth import WebappData
 from app.services.game import GameService
 
@@ -35,6 +37,17 @@ async def spin_wheel(
     service: Annotated[GameService, Depends()],
 ) -> WheelPrizeResponse:
     return await service.spin_wheel(current_user=current_user)
+
+
+@router.get(
+    path="/game/wheel/winners",
+    status_code=status.HTTP_200_OK,
+    response_model=list[LatestWheelPrizeResponse],
+)
+async def get_winners(
+    service: Annotated[GameService, Depends()],
+) -> list[WheelPrize]:
+    return await service.get_latest_wheel_winners()
 
 
 @router.get(

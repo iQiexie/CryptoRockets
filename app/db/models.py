@@ -55,6 +55,13 @@ class RocketTypeEnum(str, Enum):
     premium = "premium"
 
 
+class WheelPrizeEnum(str, Enum):
+    premium_rocket = "premium_rocket"
+    premium_rocket_full = "premium_rocket_full"
+    fuel = "fuel"
+    tokens = "tokens"
+
+
 class Base(DeclarativeBase):
     def object_as_dict(self) -> Dict[str, Any]:
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}  # noqa
@@ -134,6 +141,19 @@ class Transaction(_TimestampMixin, Base):
     type: Mapped[TransactionTypeEnum] = mapped_column(String)
     status: Mapped[TransactionStatusEnum] = mapped_column(String)
     refund_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"), nullable=True)
+
+
+class WheelPrize(_TimestampMixin, Base):
+    __tablename__ = "wheel_prizes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"))
+
+    type: Mapped[WheelPrizeEnum] = mapped_column(String)
+    amount: Mapped[float] = mapped_column(Numeric, nullable=True)
+    icon: Mapped[str] = mapped_column(String)
+
+    user = relationship("User", foreign_keys=[user_id], viewonly=True)
 
 
 class Invoice(_TimestampMixin, Base):

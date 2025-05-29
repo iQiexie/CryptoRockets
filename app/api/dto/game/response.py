@@ -1,15 +1,8 @@
-from enum import Enum
-
 from pydantic import Field
 
 from app.api.dto.base import BaseResponse
-
-
-class WheelPrizeEnum(str, Enum):
-    premium_rocket = "premium_rocket"
-    premium_rocket_full = "premium_rocket_full"
-    fuel = "fuel"
-    tokens = "tokens"
+from app.api.dto.user.response import PublicUserResponse
+from app.db.models import WheelPrizeEnum
 
 
 class WheelPrizeResponse(BaseResponse):
@@ -17,6 +10,13 @@ class WheelPrizeResponse(BaseResponse):
     amount: float
     icon: str
     chance: float = Field(exclude=True)
+
+
+class LatestWheelPrizeResponse(BaseResponse):
+    type: WheelPrizeEnum
+    amount: float
+    icon: str
+    user: PublicUserResponse
 
 
 class LaunchResponse(BaseResponse):

@@ -21,6 +21,7 @@ from app.api.dto.game.response import (
 from app.api.exceptions import ClientError
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
 from app.db.models import CurrenciesEnum, RocketTypeEnum, TransactionTypeEnum
+from app.db.models import WheelPrize
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -38,6 +39,10 @@ class GameService(BaseService):
 
         self.repo = self.repos.game
         self.adapters = adapters
+
+    @BaseService.single_transaction
+    async def get_latest_wheel_winners(self) -> list[WheelPrize]:
+        return await self.repo.get_wheel_winners()
 
     @BaseService.single_transaction
     async def spin_wheel(self, current_user: WebappData) -> WheelPrizeResponse:
@@ -78,6 +83,13 @@ class GameService(BaseService):
             await self.give_rocket(telegram_id=current_user.telegram_id, rocket_type=RocketTypeEnum.premium, fuel=0)
         else:
             raise NotImplementedError
+
+        await self.repo.create_prize(
+            user_id=current_user.telegram_id,
+            type=prize.type,
+            amount=prize.amount,
+            icon=prize.icon,
+        )
 
         return prize
 
