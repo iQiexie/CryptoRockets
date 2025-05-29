@@ -20,8 +20,12 @@ from app.api.dto.game.response import (
 )
 from app.api.exceptions import ClientError
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
-from app.db.models import CurrenciesEnum, RocketTypeEnum, TransactionTypeEnum
-from app.db.models import WheelPrize
+from app.db.models import (
+    CurrenciesEnum,
+    RocketTypeEnum,
+    TransactionTypeEnum,
+    WheelPrize,
+)
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 

@@ -1,13 +1,10 @@
 from typing import Sequence
 
-from sqlalchemy import func
-from sqlalchemy import literal_column
-from sqlalchemy import select
+from sqlalchemy import func, literal_column, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from app.db.models import Rocket, RocketTypeEnum
-from app.db.models import WheelPrize
+from app.db.models import Rocket, RocketTypeEnum, WheelPrize
 from app.db.repos.base.base import BaseRepo
 
 
@@ -18,9 +15,7 @@ class GameRepo(BaseRepo):
     async def get_wheel_winners(self) -> Sequence[WheelPrize]:
         stmt = (
             select(WheelPrize)
-            .where(
-                WheelPrize.created_at > (func.now() - literal_column("interval '60 seconds'"))
-            )
+            .where(WheelPrize.created_at > (func.now() - literal_column("interval '60 seconds'")))
             .options(joinedload(WheelPrize.user))
         )
 

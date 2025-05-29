@@ -5,19 +5,24 @@ from starlette import status
 
 from app.api.dependencies.auth import get_current_user
 from app.api.dto.game.request import LaunchRocket
-from app.api.dto.game.response import LatestWheelPrizeResponse
-from app.api.dto.game.response import WHEEL_PRIZES, LaunchResponse, WheelPrizeResponse
+from app.api.dto.game.response import (
+    WHEEL_PRIZES,
+    LatestWheelPrizeResponse,
+    LaunchResponse,
+    WheelPrizeResponse,
+)
 from app.db.models import WheelPrize
 from app.services.dto.auth import WebappData
 from app.services.game import GameService
 
-router = APIRouter(tags=["Game"])
+router = APIRouter()
 
 
 @router.post(
     path="/game/rocket/launch",
     status_code=status.HTTP_200_OK,
     response_model=LaunchResponse,
+    tags=["Game"],
 )
 async def launch_rocket(
     current_user: Annotated[WebappData, Depends(get_current_user)],
@@ -31,6 +36,7 @@ async def launch_rocket(
     path="/game/wheel/spin",
     status_code=status.HTTP_200_OK,
     response_model=WheelPrizeResponse,
+    tags=["Wheel"],
 )
 async def spin_wheel(
     current_user: Annotated[WebappData, Depends(get_current_user)],
@@ -43,6 +49,7 @@ async def spin_wheel(
     path="/game/wheel/winners",
     status_code=status.HTTP_200_OK,
     response_model=list[LatestWheelPrizeResponse],
+    tags=["Wheel"],
 )
 async def get_winners(
     service: Annotated[GameService, Depends()],
@@ -54,6 +61,7 @@ async def get_winners(
     path="/game/wheel/prizes",
     status_code=status.HTTP_200_OK,
     response_model=list[WheelPrizeResponse],
+    tags=["Wheel"],
 )
 async def wheel_prizes() -> list[WheelPrizeResponse]:
     return WHEEL_PRIZES

@@ -1,6 +1,4 @@
-from pydantic import ConfigDict
-from pydantic import Field
-from pydantic import computed_field
+from pydantic import ConfigDict, Field, computed_field
 
 from app.api.dto.base import BaseResponse
 from app.db.models import RocketTypeEnum
