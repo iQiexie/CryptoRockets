@@ -1,13 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import APIRouter, Depends
 from redis.commands.search.query import Query
 from starlette import status
 
 from app.api.dependencies.auth import get_current_user
-from app.api.dto.shop.request import SHOP_ITEMS
-from app.api.dto.shop.request import ShopItem
+from app.api.dto.shop.request import SHOP_ITEMS, ShopItem
 from app.api.dto.shop.response import UrlResponse
 from app.services.dto.auth import WebappData
 from app.services.shop import ShopService
@@ -35,5 +33,3 @@ async def get_invoice_url(
 )
 async def get_shop_items() -> list[ShopItem]:
     return SHOP_ITEMS.values()
-
-

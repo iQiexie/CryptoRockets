@@ -16,4 +16,3 @@ class TelegramClient:
 
     async def send_method(self, method: str, params: dict) -> dict:
         return await self.http_client.request(method="GET", url=f"/{method}", params=params, return_json=True)
-

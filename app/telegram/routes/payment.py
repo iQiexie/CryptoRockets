@@ -1,8 +1,7 @@
-from aiogram import F
-from aiogram import Router
+from aiogram import F, Router
 from aiogram.methods import TelegramMethod
-from aiogram.types import Message
-from aiogram.types import PreCheckoutQuery
+from aiogram.types import Message, PreCheckoutQuery
+
 from app.services.base.services import Services
 
 router = Router()

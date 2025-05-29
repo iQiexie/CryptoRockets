@@ -8,13 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from app.adapters.base import Adapters
-from app.api.dependencies.stubs import dependency_adapters
-from app.api.dependencies.stubs import dependency_session_factory
-from app.api.dependencies.stubs import placeholder
+from app.api.dependencies.stubs import (
+    dependency_adapters,
+    dependency_session_factory,
+    placeholder,
+)
 from app.api.dto.shop.request import SHOP_ITEMS
 from app.api.dto.shop.response import UrlResponse
-from app.db.models import TransactionStatusEnum
-from app.db.models import TransactionTypeEnum
+from app.db.models import TransactionStatusEnum, TransactionTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -82,4 +83,3 @@ class ShopService(BaseService):
 
         resp = await self.adapters.telegram.send_method(method="createInvoiceLink", params=params)
         return UrlResponse(url=resp["result"])
-

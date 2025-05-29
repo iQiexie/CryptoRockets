@@ -46,7 +46,7 @@ async def on_request_end(_: ClientSession, context: SimpleNamespace, params: Tra
             request_duration=(datetime.utcnow() - context.trace_request_ctx["start_time"]).total_seconds(),
             request=dict(
                 headers=context.headers,
-                body=getattr(context, 'body', ""),
+                body=getattr(context, "body", ""),
                 method=context.method,
                 url=context.url,
             ),
