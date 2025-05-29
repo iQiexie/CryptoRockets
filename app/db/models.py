@@ -131,8 +131,12 @@ class Rocket(_TimestampMixin, Base):
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
 
     user: Mapped[User] = relationship(back_populates="rockets")
-    skins: Mapped[list[RocketSkinEnum]] = mapped_column(JSONB, default=[RocketSkinEnum.default], server_default=f'["{RocketSkinEnum.default.value}"]')
-    current_skin: Mapped[RocketSkinEnum] = mapped_column(String, default=RocketSkinEnum.default, server_default=f'"{RocketSkinEnum.default.value}"')
+    skins: Mapped[list[RocketSkinEnum]] = mapped_column(
+        JSONB, default=[RocketSkinEnum.default], server_default=f'["{RocketSkinEnum.default.value}"]'
+    )
+    current_skin: Mapped[RocketSkinEnum] = mapped_column(
+        String, default=RocketSkinEnum.default, server_default=f'"{RocketSkinEnum.default.value}"'
+    )
 
 
 class Transaction(_TimestampMixin, Base):

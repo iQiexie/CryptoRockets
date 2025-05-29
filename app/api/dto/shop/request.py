@@ -1,7 +1,5 @@
 from app.api.dto.base import BaseResponse
-from app.db.models import CurrenciesEnum
-from app.db.models import RocketSkinEnum
-from app.db.models import RocketTypeEnum
+from app.db.models import CurrenciesEnum, RocketSkinEnum, RocketTypeEnum
 
 
 class ShopItem(BaseResponse):

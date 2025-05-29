@@ -1,6 +1,5 @@
 from app.api.dto.base import BaseRequest
-from app.db.models import RocketSkinEnum
-from app.db.models import RocketTypeEnum
+from app.db.models import RocketSkinEnum, RocketTypeEnum
 
 
 class LaunchRocket(BaseRequest):

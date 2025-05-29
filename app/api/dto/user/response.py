@@ -1,8 +1,7 @@
 from pydantic import ConfigDict, Field, computed_field
 
 from app.api.dto.base import BaseResponse
-from app.db.models import RocketSkinEnum
-from app.db.models import RocketTypeEnum
+from app.db.models import RocketSkinEnum, RocketTypeEnum
 
 
 class RocketResponse(BaseResponse):

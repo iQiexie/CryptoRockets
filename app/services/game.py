@@ -23,11 +23,11 @@ from app.api.exceptions import ClientError
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
 from app.db.models import (
     CurrenciesEnum,
+    Rocket,
     RocketTypeEnum,
     TransactionTypeEnum,
     WheelPrize,
 )
-from app.db.models import Rocket
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
