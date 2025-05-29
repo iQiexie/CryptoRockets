@@ -12,6 +12,7 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
+from app.api.dto.game.request import UpdateRocketRequest
 from app.api.dto.game.response import (
     WHEEL_PRIZES,
     LaunchResponse,
@@ -26,6 +27,7 @@ from app.db.models import (
     TransactionTypeEnum,
     WheelPrize,
 )
+from app.db.models import Rocket
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -43,6 +45,20 @@ class GameService(BaseService):
 
         self.repo = self.repos.game
         self.adapters = adapters
+
+    @BaseService.single_transaction
+    async def update_rocket(self, current_user: WebappData, rocket_id: int, data: UpdateRocketRequest) -> Rocket:
+        rocket = await self.repo.get_rocket_for_update(rocket_id=rocket_id, telegram_id=current_user.telegram_id)
+
+        if not rocket:
+            raise ClientError(message="Rocket not found")
+
+        if data.skin not in rocket.skins:
+            raise ClientError(message="Invalid skin")
+
+        rocket = await self.repo.update_rocket(rocket_id=rocket.id, current_skin=data.skin)
+
+        return rocket
 
     @BaseService.single_transaction
     async def get_latest_wheel_winners(self) -> list[WheelPrize]:

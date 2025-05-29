@@ -30,6 +30,11 @@ class UserRepo(BaseRepo):
         self.session.add(user)
         return user
 
+    async def create_user_rocket(self, **kwargs) -> Rocket:
+        rocket = Rocket(**kwargs)
+        self.session.add(rocket)
+        return rocket
+
     async def get_user_by_telegram_id(self, telegram_id: int = None) -> User | None:
         stmt = select(User).filter(User.telegram_id == telegram_id)
         query = await self.session.execute(stmt)

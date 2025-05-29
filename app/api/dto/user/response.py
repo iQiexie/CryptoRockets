@@ -1,16 +1,20 @@
 from pydantic import ConfigDict, Field, computed_field
 
 from app.api.dto.base import BaseResponse
+from app.db.models import RocketSkinEnum
 from app.db.models import RocketTypeEnum
 
 
 class RocketResponse(BaseResponse):
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
+    id: int
     type: RocketTypeEnum
     fuel_capacity: int
     current_fuel: int
     enabled: bool
+    skins: list[RocketSkinEnum]
+    current_skin: RocketSkinEnum
 
 
 class UserResponse(BaseResponse):

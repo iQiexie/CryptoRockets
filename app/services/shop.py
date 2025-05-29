@@ -49,8 +49,14 @@ class ShopService(BaseService):
                 tx_type=TransactionTypeEnum.purchase,
             )
             transaction_id = tx.transaction.id
-        elif item.rocket_id:
-            raise NotImplementedError
+        elif item.rocket_skin and item.rocket_type:
+            rocket = await self.repos.game.get_rocket_for_update(telegram_id=telegram_id, rocket_type=item.rocket_type,)
+            await self.repos.game.update_rocket(
+                rocket_id=rocket.id,
+                rocket_skins=list(rocket.skins) + [item.rocket_skin],
+                current_skin=item.rocket_skin,
+            )
+            rocket_id = rocket.id
         else:
             raise NotImplementedError
 
@@ -64,6 +70,7 @@ class ShopService(BaseService):
             usd_amount=data.total_amount * 0.013,
             transaction_id=transaction_id,
             rocket_id=rocket_id,
+            rocket_skin=item.rocket_skin,
             callback_data=data.model_dump(),
         )
 

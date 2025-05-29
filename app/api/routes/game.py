@@ -1,16 +1,20 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from fastapi import Path
 from starlette import status
 
 from app.api.dependencies.auth import get_current_user
 from app.api.dto.game.request import LaunchRocket
+from app.api.dto.game.request import UpdateRocketRequest
 from app.api.dto.game.response import (
     WHEEL_PRIZES,
     LatestWheelPrizeResponse,
     LaunchResponse,
     WheelPrizeResponse,
 )
+from app.api.dto.user.response import RocketResponse
+from app.db.models import Rocket
 from app.db.models import WheelPrize
 from app.services.dto.auth import WebappData
 from app.services.game import GameService
@@ -22,7 +26,7 @@ router = APIRouter()
     path="/game/rocket/launch",
     status_code=status.HTTP_200_OK,
     response_model=LaunchResponse,
-    tags=["Game"],
+    tags=["Rockets"],
 )
 async def launch_rocket(
     current_user: Annotated[WebappData, Depends(get_current_user)],
@@ -30,6 +34,21 @@ async def launch_rocket(
     data: LaunchRocket,
 ) -> LaunchResponse:
     return await service.launch_rocket(current_user=current_user, rocket_type=data.type)
+
+
+@router.patch(
+    path="/game/rocket/{rocket_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=RocketResponse,
+    tags=["Rockets"],
+)
+async def update_rocket(
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+    service: Annotated[GameService, Depends()],
+    data: UpdateRocketRequest,
+    rocket_id: int = Path(...),
+) -> Rocket:
+    return await service.update_rocket(current_user=current_user, rocket_id=rocket_id, data=data)
 
 
 @router.post(

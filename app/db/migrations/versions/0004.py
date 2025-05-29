@@ -47,13 +47,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("external_id"),
     )
-    op.add_column("rockets", sa.Column("skin", sa.String(), server_default="default", nullable=False))
-    op.add_column("rockets", sa.Column("price_tokens", sa.Numeric(), server_default="0", nullable=False))
-    op.add_column("rockets", sa.Column("price_stars", sa.Numeric(), server_default="0", nullable=False))
 
 
 def downgrade() -> None:
-    op.drop_column("rockets", "price_stars")
-    op.drop_column("rockets", "price_tokens")
-    op.drop_column("rockets", "skin")
     op.drop_table("invoices")
