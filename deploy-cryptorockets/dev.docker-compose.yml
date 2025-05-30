@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  cryptorockets-backend:
+    container_name: cryptorockets-backend
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+    build:
+      context: ../
+      dockerfile: /Dockerfile
+    entrypoint: ["/bin/sh","-c"]
+    command:
+      - |
+        service cron start
+        alembic upgrade head && gunicorn \
+          --config deploy-cryptorockets/gunicorn_config.py \
+          --worker-class deploy-cryptorockets.gunicorn_config.CustomUvicornWorker app.main:get_app \
+          --bind 0.0.0.0:8000
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      - "8001:8000"
+    volumes:
+      - ../:/usr/app/
+    networks:
+      voiceover-network:
+
+networks:
+  voiceover-network:
+    external: true
