@@ -8,7 +8,7 @@ services:
       logging_jobname: "containerlogs"
     build:
       context: ../
-      dockerfile: /Dockerfile
+      dockerfile: ./deploy-cryptorockets/Dockerfile
     entrypoint: ["/bin/sh","-c"]
     command:
       - |
