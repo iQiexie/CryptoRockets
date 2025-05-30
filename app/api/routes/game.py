@@ -20,7 +20,7 @@ router = APIRouter()
 
 
 @router.post(
-    path="/game/rocket/launch",
+    path="/rocket/launch",
     status_code=status.HTTP_200_OK,
     response_model=LaunchResponse,
     tags=["Rockets"],
@@ -34,7 +34,7 @@ async def launch_rocket(
 
 
 @router.patch(
-    path="/game/rocket/{rocket_id}",
+    path="/rocket/{rocket_id}",
     status_code=status.HTTP_200_OK,
     response_model=RocketResponse,
     tags=["Rockets"],
@@ -49,7 +49,7 @@ async def update_rocket(
 
 
 @router.post(
-    path="/game/wheel/spin",
+    path="/wheel/spin",
     status_code=status.HTTP_200_OK,
     response_model=WheelPrizeResponse,
     tags=["Wheel"],
@@ -62,7 +62,7 @@ async def spin_wheel(
 
 
 @router.get(
-    path="/game/wheel/winners",
+    path="/wheel/winners",
     status_code=status.HTTP_200_OK,
     response_model=list[LatestWheelPrizeResponse],
     tags=["Wheel"],
@@ -74,7 +74,7 @@ async def get_winners(
 
 
 @router.get(
-    path="/game/wheel/prizes",
+    path="/wheel/prizes",
     status_code=status.HTTP_200_OK,
     response_model=list[WheelPrizeResponse],
     tags=["Wheel"],
