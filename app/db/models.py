@@ -103,7 +103,7 @@ class User(_TimestampMixin, Base):
     tg_username: Mapped[str] = mapped_column(String, nullable=True)
     tg_first_name: Mapped[str] = mapped_column(String, nullable=True)
     tg_last_name: Mapped[str] = mapped_column(String, nullable=True)
-    tg_is_premium: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    tg_is_premium: Mapped[bool] = mapped_column(Boolean, server_default='false', default=False)
     tg_language_code: Mapped[str] = mapped_column(String, nullable=True)
     tg_photo_url: Mapped[str] = mapped_column(String, nullable=True)
     bot_banned: Mapped[bool] = mapped_column(Boolean, nullable=True)
@@ -116,7 +116,7 @@ class User(_TimestampMixin, Base):
     wheel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
 
     referral_from: Mapped[str] = mapped_column(ForeignKey("users.referral", ondelete="CASCADE"), nullable=True, index=True)
-    referral: Mapped[str] = mapped_column(String, unique=False)
+    referral: Mapped[str] = mapped_column(String, unique=True)
 
     rockets: Mapped[list["Rocket"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"
