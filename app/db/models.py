@@ -53,7 +53,8 @@ class TaskTypeEnum(str, Enum):
 
 
 class TaskRewardEnum(str, Enum):
-    fuel = "fuel"
+    fuel = CurrenciesEnum.fuel.value
+    token = CurrenciesEnum.token.value
 
 
 class RocketTypeEnum(str, Enum):
