@@ -3,7 +3,7 @@ import random
 import string
 import traceback
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 import structlog
 from aiogram.exceptions import TelegramBadRequest
@@ -16,7 +16,7 @@ logger = structlog.stdlib.get_logger()
 
 
 class SafeList(list):
-    def get(self, index, default=None):
+    def get(self, index: int, default: Any = None) -> Any:
         try:
             return self[index]
         except IndexError:

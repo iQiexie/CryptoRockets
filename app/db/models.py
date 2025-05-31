@@ -9,10 +9,10 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    UniqueConstraint,
     func,
     inspect,
 )
-from sqlalchemy import UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import current_timestamp
@@ -103,7 +103,7 @@ class User(_TimestampMixin, Base):
     tg_username: Mapped[str] = mapped_column(String, nullable=True)
     tg_first_name: Mapped[str] = mapped_column(String, nullable=True)
     tg_last_name: Mapped[str] = mapped_column(String, nullable=True)
-    tg_is_premium: Mapped[bool] = mapped_column(Boolean, server_default='false', default=False)
+    tg_is_premium: Mapped[bool] = mapped_column(Boolean, server_default="false", default=False)
     tg_language_code: Mapped[str] = mapped_column(String, nullable=True)
     tg_photo_url: Mapped[str] = mapped_column(String, nullable=True)
     bot_banned: Mapped[bool] = mapped_column(Boolean, nullable=True)
@@ -115,7 +115,9 @@ class User(_TimestampMixin, Base):
     fuel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     wheel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
 
-    referral_from: Mapped[str] = mapped_column(ForeignKey("users.referral", ondelete="CASCADE"), nullable=True, index=True)
+    referral_from: Mapped[str] = mapped_column(
+        ForeignKey("users.referral", ondelete="CASCADE"), nullable=True, index=True
+    )
     referral: Mapped[str] = mapped_column(String, unique=True)
 
     rockets: Mapped[list["Rocket"]] = relationship(
@@ -207,11 +209,11 @@ class Task(_TimestampMixin, Base):
 
     @property
     def rocket_data(self) -> dict | None:
-        if 'rocket' not in self.reward:
+        if "rocket" not in self.reward:
             return
 
         reward = SafeList(self.reward.split("_"))
-        return {"type": reward.get(0), "full": 'full' in (reward.get(2, ""))}
+        return {"type": reward.get(0), "full": "full" in (reward.get(2, ""))}
 
 
 class TaskUser(_TimestampMixin, Base):

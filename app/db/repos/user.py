@@ -8,8 +8,7 @@ from app.config.constants import (
     ROCKET_CAPACITY_PREMIUM,
 )
 from app.db.models import Rocket, RocketTypeEnum, User
-from app.db.repos.base.base import BaseRepo
-from app.db.repos.base.base import PaginatedResult
+from app.db.repos.base.base import BaseRepo, PaginatedResult
 
 
 class UserRepo(BaseRepo):
@@ -54,4 +53,3 @@ class UserRepo(BaseRepo):
     async def get_referrals(self, referral: str, pagination: PaginatedRequest) -> PaginatedResult[User]:
         stmt = select(User).where(User.referral_from == referral)
         return await self.paginate(stmt=stmt, pagination=pagination, count=User.id)
-

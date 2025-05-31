@@ -14,10 +14,7 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.exceptions import ClientError
-from app.db.models import CurrenciesEnum
-from app.db.models import Task
-from app.db.models import TransactionTypeEnum
-from app.db.models import User
+from app.db.models import CurrenciesEnum, Task, TransactionTypeEnum, User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -67,11 +64,11 @@ class UserTaskService(BaseService):
         await self.repo.create_user_task(task_id=task_id, telegram_id=current_user.telegram_id)
 
         if task.rocket_data:
-            rocket = await self.repos.game.get_rocket(rocket_type=task.rocket_data['type'])
-            fuel = rocket.fuel_capacity if task.rocket_data['full'] else 0
+            rocket = await self.repos.game.get_rocket(rocket_type=task.rocket_data["type"])
+            fuel = rocket.fuel_capacity if task.rocket_data["full"] else 0
             await self.services.game.give_rocket(
                 telegram_id=current_user.telegram_id,
-                rocket_type=task.rocket_data['type'],
+                rocket_type=task.rocket_data["type"],
                 fuel=fuel,
             )
         else:

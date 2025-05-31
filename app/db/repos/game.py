@@ -32,7 +32,9 @@ class GameRepo(BaseRepo):
         self.session.add(model)
         return model
 
-    async def get_rocket_for_update(self, telegram_id: int, rocket_type: RocketTypeEnum | None = None, rocket_id: int | None = None) -> Rocket:
+    async def get_rocket_for_update(
+        self, telegram_id: int, rocket_type: RocketTypeEnum | None = None, rocket_id: int | None = None
+    ) -> Rocket:
         stmt = select(Rocket).where(Rocket.user_id == telegram_id).with_for_update()
 
         if rocket_type:

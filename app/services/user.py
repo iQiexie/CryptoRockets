@@ -11,8 +11,7 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
-from app.api.dto.base import PaginatedRequest
-from app.api.dto.base import PaginatedResponse
+from app.api.dto.base import PaginatedRequest, PaginatedResponse
 from app.api.dto.user.request import UpdateUserRequest
 from app.api.dto.user.response import PublicUserResponse
 from app.db.models import RocketTypeEnum, User
@@ -36,7 +35,9 @@ class UserService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
-    async def get_referrals(self, current_user: WebappData, pagination: PaginatedRequest) -> PaginatedResponse[PublicUserResponse]:
+    async def get_referrals(
+        self, current_user: WebappData, pagination: PaginatedRequest
+    ) -> PaginatedResponse[PublicUserResponse]:
         user = await self.repo.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
         items = await self.repo.get_referrals(referral=user.referral, pagination=pagination)
         return self.paginate(response_model=PublicUserResponse, result=items, pagination=pagination)

@@ -1,14 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from fastapi import Path
+from fastapi import APIRouter, Depends, Path
 from starlette import status
 
 from app.api.dependencies.auth import get_current_user
 from app.api.dto.user.response import UserResponse
 from app.api.dto.user_task.response import TaskResponse
-from app.db.models import Task
-from app.db.models import User
+from app.db.models import Task, User
 from app.services.dto.auth import WebappData
 from app.services.user_task import UserTaskService
 
