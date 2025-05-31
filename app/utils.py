@@ -15,6 +15,14 @@ if TYPE_CHECKING:
 logger = structlog.stdlib.get_logger()
 
 
+class SafeList(list):
+    def get(self, index, default=None):
+        try:
+            return self[index]
+        except IndexError:
+            return default
+
+
 def struct_log(event: str, special_logger: Callable = None, **kwargs) -> None:
     payload = dict(event=event, payload=kwargs)
 

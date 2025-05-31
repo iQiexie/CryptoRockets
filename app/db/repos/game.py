@@ -12,6 +12,11 @@ class GameRepo(BaseRepo):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session)
 
+    async def get_rocket(self, rocket_type: RocketTypeEnum) -> Rocket:
+        stmt = select(Rocket).where(Rocket.type == rocket_type)
+        query = await self.session.execute(stmt)
+        return query.scalar_one()
+
     async def get_wheel_winners(self) -> Sequence[WheelPrize]:
         stmt = (
             select(WheelPrize)

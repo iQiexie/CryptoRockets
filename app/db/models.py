@@ -12,15 +12,19 @@ from sqlalchemy import (
     func,
     inspect,
 )
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import current_timestamp
+
+from app.utils import SafeList
 
 
 class TransactionTypeEnum(str, Enum):
     wheel_spin = "wheel_spin"
     rocket_launch = "rocket_launch"
     purchase = "purchase"
+    task_completion = "task_completion"
 
 
 class TransactionStatusEnum(str, Enum):
@@ -198,7 +202,16 @@ class Task(_TimestampMixin, Base):
     reward: Mapped[TaskRewardEnum] = mapped_column(String)
     reward_amount: Mapped[float] = mapped_column(Numeric)
     task_type: Mapped[TaskTypeEnum] = mapped_column(String)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
     url: Mapped[str] = mapped_column(String)
+
+    @property
+    def rocket_data(self) -> dict | None:
+        if 'rocket' not in self.reward:
+            return
+
+        reward = SafeList(self.reward.split("_"))
+        return {"type": reward.get(0), "full": 'full' in (reward.get(2, ""))}
 
 
 class TaskUser(_TimestampMixin, Base):
@@ -207,6 +220,8 @@ class TaskUser(_TimestampMixin, Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
     task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"), index=True)
+
+    __table_args__ = (UniqueConstraint("user_id", "task_id"),)
 
 
 class Advert(_TimestampMixin, Base):

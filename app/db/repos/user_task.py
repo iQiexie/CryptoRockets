@@ -9,6 +9,21 @@ class UserTaskRepo(BaseRepo):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session)
 
+    async def get_user_task(self, task_id: int, telegram_id: int) -> TaskUser | None:
+        stmt = select(TaskUser).where(TaskUser.task_id == task_id, TaskUser.user_id == telegram_id)
+        query = await self.session.execute(stmt)
+        return query.scalar_one_or_none()
+
+    async def create_user_task(self, task_id: int, telegram_id: int) -> TaskUser:
+        model = TaskUser(task_id=task_id, user_id=telegram_id)
+        self.session.add(model)
+        return model
+
+    async def get_task(self, task_id: int) -> Task:
+        stmt = select(Task).where(Task.id == task_id)
+        query = await self.session.execute(stmt)
+        return query.scalar_one()
+
     async def get_user_tasks(self, telegram_id: int) -> list[Task]:
         stmt = (
             select(Task)

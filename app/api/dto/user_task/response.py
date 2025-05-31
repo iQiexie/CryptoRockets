@@ -3,6 +3,7 @@ from app.db.models import TaskRewardEnum, TaskTypeEnum
 
 
 class TaskResponse(BaseResponse):
+    id: int
     reward: TaskRewardEnum
     reward_amount: float
     task_type: TaskTypeEnum
