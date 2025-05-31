@@ -96,7 +96,7 @@ class UserTaskService(BaseService):
 
         if len(referrals) < task.amount:
             raise ClientError(
-                message=f"Invite at least {task.amount} users",
+                message=f"Invite at least {task.amount - len(referrals)} more users",
                 status_code=status.HTTP_418_IM_A_TEAPOT,
             )
 
