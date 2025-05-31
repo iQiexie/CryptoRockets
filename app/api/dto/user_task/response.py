@@ -7,5 +7,6 @@ class TaskResponse(BaseResponse):
     reward: TaskRewardEnum
     reward_amount: float
     task_type: TaskTypeEnum
-    url: str
+    url: str | None = None
     completed: bool
+    amount: int | None = None
