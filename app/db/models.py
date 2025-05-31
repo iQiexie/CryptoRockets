@@ -115,7 +115,7 @@ class User(_TimestampMixin, Base):
     fuel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     wheel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
 
-    referral_from: Mapped[str] = mapped_column(String, nullable=True)
+    referral_from: Mapped[str] = mapped_column(ForeignKey("users.referral", ondelete="CASCADE"), nullable=True, index=True)
     referral: Mapped[str] = mapped_column(String, unique=False)
 
     rockets: Mapped[list["Rocket"]] = relationship(

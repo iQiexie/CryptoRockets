@@ -4,7 +4,10 @@ from fastapi import APIRouter, Depends, Request
 from starlette import status
 
 from app.api.dependencies.auth import get_current_user
+from app.api.dto.base import PaginatedRequest
+from app.api.dto.base import PaginatedResponse
 from app.api.dto.user.request import UpdateUserRequest
+from app.api.dto.user.response import PublicUserResponse
 from app.api.dto.user.response import UserResponse
 from app.db.models import User
 from app.services.dto.auth import WebappData
@@ -38,3 +41,16 @@ async def update_me(
     current_user: Annotated[WebappData, Depends(get_current_user)],
 ) -> User:
     return await service.update_user(current_user=current_user, data=data)
+
+
+@router.get(
+    path="/user/referrals",
+    status_code=status.HTTP_200_OK,
+    response_model=PaginatedResponse[PublicUserResponse],
+)
+async def get_me(
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+    service: Annotated[UserService, Depends()],
+    pagination: PaginatedRequest = Depends(),
+) -> PaginatedResponse[PublicUserResponse]:
+    return await service.get_referrals(current_user=current_user, pagination=pagination)

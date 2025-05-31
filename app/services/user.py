@@ -11,7 +11,10 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
+from app.api.dto.base import PaginatedRequest
+from app.api.dto.base import PaginatedResponse
 from app.api.dto.user.request import UpdateUserRequest
+from app.api.dto.user.response import PublicUserResponse
 from app.db.models import RocketTypeEnum, User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
@@ -31,6 +34,12 @@ class UserService(BaseService):
 
         self.repo = self.repos.user
         self.adapters = adapters
+
+    @BaseService.single_transaction
+    async def get_referrals(self, current_user: WebappData, pagination: PaginatedRequest) -> PaginatedResponse[PublicUserResponse]:
+        user = await self.repo.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
+        items = await self.repo.get_referrals(referral=user.referral, pagination=pagination)
+        return self.paginate(response_model=PublicUserResponse, result=items, pagination=pagination)
 
     @BaseService.single_transaction
     async def _update_user(self, telegram_id: int, data: UpdateUserRequest) -> None:
@@ -92,8 +101,4 @@ class UserService(BaseService):
         if data.is_premium:
             current_fuel += rocket.fuel_capacity
 
-        await self.repos.game.update_rocket(
-            telegram_id=referral_from.telegram_id,
-            rocket_type=RocketTypeEnum.premium,
-            current_fuel=current_fuel,
-        )
+        await self.repos.game.update_rocket(rocket_id=rocket.id, current_fuel=current_fuel, count=rocket.count + 1)
