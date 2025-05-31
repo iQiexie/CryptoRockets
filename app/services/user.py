@@ -36,10 +36,9 @@ class UserService(BaseService):
 
     @BaseService.single_transaction
     async def get_referrals(
-        self, current_user: WebappData, pagination: PaginatedRequest
+        self, current_user: WebappData, pagination: PaginatedRequest,
     ) -> PaginatedResponse[PublicUserResponse]:
-        user = await self.repo.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
-        items = await self.repo.get_referrals(referral=user.referral, pagination=pagination)
+        items = await self.repo.get_referrals(telegram_id=current_user.telegram_id, pagination=pagination)
         return self.paginate(response_model=PublicUserResponse, result=items, pagination=pagination)
 
     @BaseService.single_transaction
@@ -83,22 +82,20 @@ class UserService(BaseService):
             await self.session.refresh(user)
             return user
 
-        user_data["referral_from"] = data.start_param
-        user_data["referral"] = generate_random_string(seed=data.telegram_id)
-
-        referral_from = await self.repo.get_user_by_referral(referral=data.start_param)
-        if referral_from:
-            await self.handle_referral(referral_from=referral_from, data=data)
+        user_data["referral_from"] = data.referral
+        if data.referral:
+            referral_from = int(data.referral)  # noqa
+            await self.handle_referral(referral_from=referral_from, data=data)  # noqa
 
         user = await self.repo.create_user(telegram_id=data.telegram_id, **user_data)
         await self.session.commit()
         await self.session.refresh(user)
         return user
 
-    async def handle_referral(self, referral_from: User, data: WebappData) -> None:
+    async def handle_referral(self, referral_from: int, data: WebappData) -> None:
         rocket = await self.repos.game.get_rocket_for_update(
-            telegram_id=referral_from.telegram_id,
-            rocket_type=RocketTypeEnum.premium,
+            telegram_id=referral_from,
+            rocket_type=RocketTypeEnum.premium
         )
 
         current_fuel = rocket.fuel_capacity

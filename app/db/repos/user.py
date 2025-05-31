@@ -15,8 +15,8 @@ class UserRepo(BaseRepo):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session)
 
-    async def get_user_by_referral(self, referral: str) -> User | None:
-        stmt = select(User).filter(User.referral == referral)
+    async def get_user_by_referral(self, telegram_id: int) -> User | None:
+        stmt = select(User).filter(User.referral_from == telegram_id)
         query = await self.session.execute(stmt)
         return query.scalar_one_or_none()
 
@@ -50,6 +50,6 @@ class UserRepo(BaseRepo):
     async def update_user(self, telegram_id: int, **kwargs) -> User:
         return await self.update(User, User.telegram_id == telegram_id, **kwargs)
 
-    async def get_referrals(self, referral: str, pagination: PaginatedRequest) -> PaginatedResult[User]:
-        stmt = select(User).where(User.referral_from == referral)
+    async def get_referrals(self, telegram_id: int, pagination: PaginatedRequest) -> PaginatedResult[User]:
+        stmt = select(User).where(User.referral_from == telegram_id)
         return await self.paginate(stmt=stmt, pagination=pagination, count=User.id)

@@ -116,10 +116,9 @@ class User(_TimestampMixin, Base):
     wheel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     last_broadcast_key: Mapped[str] = mapped_column(String, nullable=True)
 
-    referral_from: Mapped[str] = mapped_column(
-        ForeignKey("users.referral", ondelete="CASCADE"), nullable=True, index=True
+    referral_from: Mapped[int] = mapped_column(
+        ForeignKey("users.telegram_id", ondelete="CASCADE"), nullable=True, index=True
     )
-    referral: Mapped[str] = mapped_column(String, unique=True)
 
     rockets: Mapped[list["Rocket"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"
