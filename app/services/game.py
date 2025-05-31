@@ -123,8 +123,8 @@ class GameService(BaseService):
         )
 
     @BaseService.single_transaction
-    async def launch_rocket(self, current_user: WebappData, rocket_type: RocketTypeEnum) -> LaunchResponse:
-        rocket = await self.repo.get_rocket_for_update(rocket_type=rocket_type, telegram_id=current_user.telegram_id)
+    async def launch_rocket(self, current_user: WebappData, rocket_id: int) -> LaunchResponse:
+        rocket = await self.repo.get_rocket_for_update(rocket_id=rocket_id, telegram_id=current_user.telegram_id)
 
         if not rocket:
             raise ClientError(message="Rocket not found")
