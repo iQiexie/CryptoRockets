@@ -1,13 +1,21 @@
+from typing import Sequence
+
 from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Task, TaskUser
+from app.db.models import User
 from app.db.repos.base.base import BaseRepo
 
 
 class UserTaskRepo(BaseRepo):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session)
+
+    async def get_user_referrals(self, telegram_id: int) -> Sequence[User]:
+        stmt = select(User).where(User.referral_from == telegram_id)
+        query = await self.session.execute(stmt)
+        return query.scalars().all()
 
     async def get_user_task(self, task_id: int, telegram_id: int) -> TaskUser | None:
         stmt = select(TaskUser).where(TaskUser.task_id == task_id, TaskUser.user_id == telegram_id)

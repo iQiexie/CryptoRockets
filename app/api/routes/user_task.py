@@ -36,3 +36,16 @@ async def check_subscription(
     task_id: int = Path(...),
 ) -> User:
     return await service.check_subscription(current_user=current_user, task_id=task_id)
+
+
+@router.get(
+    path="/user/tasks/check_invite/{task_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=UserResponse,
+)
+async def check_subscription(
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+    service: Annotated[UserTaskService, Depends()],
+    task_id: int = Path(...),
+) -> User:
+    return await service.check_invite(current_user=current_user, task_id=task_id)

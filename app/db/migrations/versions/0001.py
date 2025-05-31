@@ -23,8 +23,8 @@ def upgrade() -> None:
         sa.Column('reward', sa.String(), nullable=False),
         sa.Column('reward_amount', sa.Numeric(), nullable=False),
         sa.Column('task_type', sa.String(), nullable=False),
-        sa.Column('telegram_id', sa.BigInteger(), nullable=True),
         sa.Column('url', sa.String(), nullable=False),
+        sa.Column('telegram_id', sa.BigInteger(), nullable=True),
         sa.Column('updated_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
         sa.PrimaryKeyConstraint('id')
     )

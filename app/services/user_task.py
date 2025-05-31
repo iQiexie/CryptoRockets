@@ -48,6 +48,25 @@ class UserTaskService(BaseService):
 
         return False
 
+    async def _complete_task(self, task: Task, telegram_id: int) -> None:
+        await self.repo.create_user_task(task_id=task.id, telegram_id=telegram_id)
+
+        if task.rocket_data:
+            rocket = await self.repos.game.get_rocket(rocket_type=task.rocket_data["type"])
+            fuel = rocket.fuel_capacity if task.rocket_data["full"] else 0
+            await self.services.game.give_rocket(
+                telegram_id=telegram_id,
+                rocket_type=task.rocket_data["type"],
+                fuel=fuel,
+            )
+        else:
+            await self.services.transaction.change_user_balance(
+                telegram_id=telegram_id,
+                currency=CurrenciesEnum[task.reward],
+                amount=task.reward_amount,
+                tx_type=TransactionTypeEnum.task_completion,
+            )
+
     @BaseService.single_transaction
     async def check_subscription(self, current_user: WebappData, task_id: int) -> User:
         task = await self.repo.get_task(task_id=task_id)
@@ -61,23 +80,26 @@ class UserTaskService(BaseService):
         if user_task:
             raise ClientError(message="Already completed", status_code=status.HTTP_418_IM_A_TEAPOT)
 
-        await self.repo.create_user_task(task_id=task_id, telegram_id=current_user.telegram_id)
+        await self._complete_task(task=task, telegram_id=current_user.telegram_id)
+        await self.session.commit()
+        return await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
 
-        if task.rocket_data:
-            rocket = await self.repos.game.get_rocket(rocket_type=task.rocket_data["type"])
-            fuel = rocket.fuel_capacity if task.rocket_data["full"] else 0
-            await self.services.game.give_rocket(
-                telegram_id=current_user.telegram_id,
-                rocket_type=task.rocket_data["type"],
-                fuel=fuel,
-            )
-        else:
-            await self.services.transaction.change_user_balance(
-                telegram_id=current_user.telegram_id,
-                currency=CurrenciesEnum[task.reward],
-                amount=task.reward_amount,
-                tx_type=TransactionTypeEnum.task_completion,
+    @BaseService.single_transaction
+    async def check_invite(self, current_user: WebappData, task_id: int) -> User:
+        task = await self.repo.get_task(task_id=task_id)
+        user_task = await self.repo.get_user_task(task_id=task_id, telegram_id=current_user.telegram_id)
+
+        if user_task:
+            raise ClientError(message="Already completed", status_code=status.HTTP_418_IM_A_TEAPOT)
+
+        referrals = await self.repo.get_user_referrals(telegram_id=current_user.telegram_id)
+
+        if len(referrals) < task.amount:
+            raise ClientError(
+                message=f"Invite at least {task.amount} users",
+                status_code=status.HTTP_418_IM_A_TEAPOT,
             )
 
+        await self._complete_task(task=task, telegram_id=current_user.telegram_id)
         await self.session.commit()
         return await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)

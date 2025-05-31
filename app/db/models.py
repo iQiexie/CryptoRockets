@@ -49,6 +49,7 @@ class AdStatusEnum(str, Enum):
 class TaskTypeEnum(str, Enum):
     subscribe = "subscribe"
     watch_ad = "watch_ad"
+    invite = "invite"
 
 
 class TaskRewardEnum(str, Enum):
@@ -204,8 +205,9 @@ class Task(_TimestampMixin, Base):
     reward: Mapped[TaskRewardEnum] = mapped_column(String)
     reward_amount: Mapped[float] = mapped_column(Numeric)
     task_type: Mapped[TaskTypeEnum] = mapped_column(String)
+    url: Mapped[str] = mapped_column(String, nullable=True)
     telegram_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
-    url: Mapped[str] = mapped_column(String)
+    amount: Mapped[float] = mapped_column(Numeric, nullable=True)
 
     @property
     def rocket_data(self) -> dict | None:
