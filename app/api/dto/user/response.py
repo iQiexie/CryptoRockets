@@ -1,7 +1,9 @@
 from pydantic import ConfigDict, Field, computed_field
 
 from app.api.dto.base import BaseResponse
+from app.config.constants import BOT_NAME
 from app.config.constants import REFERRAL_PREFIX
+from app.config.constants import WEBAPP_NAME
 from app.db.models import RocketSkinEnum, RocketTypeEnum
 
 
@@ -28,7 +30,7 @@ class UserResponse(BaseResponse):
 
     @computed_field
     def referral(self) -> str:
-        return f"{REFERRAL_PREFIX}{self.telegram_id}"
+        return f"https://t.me/{BOT_NAME}/{WEBAPP_NAME}?startapp={REFERRAL_PREFIX}{self.telegram_id}"
 
 
 class PublicUserResponse(BaseResponse):
