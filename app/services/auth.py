@@ -47,7 +47,7 @@ class AuthService(BaseService):
 
         try:
             param_hash = parsed_data.pop("hash")
-            max_auth_date = datetime.fromtimestamp(int(parsed_data["auth_date"])) + timedelta(days=7)
+            max_auth_date = datetime.fromtimestamp(int(parsed_data["auth_date"])) + timedelta(days=365)
         except KeyError:
             raise ClientError(message="invalid webapp data", status_code=status.HTTP_401_UNAUTHORIZED)
 

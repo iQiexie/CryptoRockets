@@ -1,23 +1,24 @@
+import asyncio
 from typing import Annotated
 
 import structlog
 from fastapi.params import Depends
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from app.adapters.base import Adapters
-from app.api.dependencies.stubs import (
-    dependency_adapters,
-    dependency_session_factory,
-    placeholder,
-)
-from app.api.dto.base import PaginatedRequest, PaginatedResponse
+from app.api.dependencies.stubs import dependency_adapters
+from app.api.dependencies.stubs import dependency_session_factory
+from app.api.dependencies.stubs import placeholder
+from app.api.dto.base import PaginatedRequest
+from app.api.dto.base import PaginatedResponse
 from app.api.dto.user.request import UpdateUserRequest
 from app.api.dto.user.response import PublicUserResponse
-from app.db.models import RocketTypeEnum, User
+from app.db.models import RocketTypeEnum
+from app.db.models import User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
-from app.utils import generate_random_string
 
 logger = structlog.stdlib.get_logger()
 
@@ -58,6 +59,25 @@ class UserService(BaseService):
     async def get_user(self, telegram_id: int) -> User:
         return await self.repo.get_user_by_telegram_id(telegram_id=telegram_id)
 
+    async def _create_user(self, user_data: dict, data: WebappData) -> User:
+        await asyncio.sleep(5)
+        user = await self.repo.create_user(telegram_id=data.telegram_id, **user_data)
+
+        try:
+            await self.session.flush()
+        except IntegrityError:
+            logger.warning("User with this telegram_id already exists", telegram_id=data.telegram_id)
+            await self.session.rollback()
+            return await self.repo.get_user_by_telegram_id(telegram_id=data.telegram_id)
+
+        if user.referral_from:
+            referral_from = int(data.referral)  # noqa
+            await self.handle_referral(referral_from=referral_from, data=data)  # noqa
+
+        await self.session.commit()
+        await self.session.refresh(user)
+        return user
+
     @BaseService.single_transaction
     async def get_or_create_user(self, data: WebappData) -> User:
         user = await self.repo.get_user_by_telegram_id(telegram_id=data.telegram_id)
@@ -83,14 +103,7 @@ class UserService(BaseService):
             return user
 
         user_data["referral_from"] = data.referral
-        if data.referral:
-            referral_from = int(data.referral)  # noqa
-            await self.handle_referral(referral_from=referral_from, data=data)  # noqa
-
-        user = await self.repo.create_user(telegram_id=data.telegram_id, **user_data)
-        await self.session.commit()
-        await self.session.refresh(user)
-        return user
+        return await self._create_user(user_data=user_data, data=data)
 
     async def handle_referral(self, referral_from: int, data: WebappData) -> None:
         rocket = await self.repos.game.get_rocket_for_update(
