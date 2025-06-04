@@ -25,6 +25,7 @@ class UserResponse(BaseResponse):
     ton_balance: float
     usdt_balance: float
     token_balance: float
+    wheel_balance: float
 
     rockets: list[RocketResponse]
 

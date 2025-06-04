@@ -50,6 +50,7 @@ class TaskTypeEnum(str, Enum):
     subscribe = "subscribe"
     watch_ad = "watch_ad"
     invite = "invite"
+    bot = "bot"
 
 
 class TaskRewardEnum(str, Enum):
@@ -72,7 +73,10 @@ class WheelPrizeEnum(str, Enum):
     premium_rocket = "premium_rocket"
     premium_rocket_full = "premium_rocket_full"
     fuel = "fuel"
-    tokens = "tokens"
+    token = "token"
+    usdt = "usdt"
+    ton = "ton"
+    wheel = "wheel"
 
 
 class Base(DeclarativeBase):
@@ -209,6 +213,8 @@ class Task(_TimestampMixin, Base):
     url: Mapped[str] = mapped_column(String, nullable=True)
     telegram_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
     amount: Mapped[float] = mapped_column(Numeric, nullable=True)
+    icon: Mapped[str] = mapped_column(String)
+    name: Mapped[str] = mapped_column(String)
 
     @property
     def rocket_data(self) -> dict | None:

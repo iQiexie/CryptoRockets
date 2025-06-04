@@ -10,3 +10,6 @@ class TaskResponse(BaseResponse):
     url: str | None = None
     completed: bool
     amount: int | None = None
+    icon: str
+    name: str
+    rocket_data: dict | None = None
