@@ -20,6 +20,7 @@ from app.api.dto.game.response import (
     WheelPrizeResponse,
 )
 from app.api.exceptions import ClientError
+from app.config.constants import MAX_BALANCE
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
 from app.db.models import (
     CurrenciesEnum,
@@ -28,6 +29,7 @@ from app.db.models import (
     TransactionTypeEnum,
     WheelPrize,
 )
+from app.db.models import User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -122,6 +124,32 @@ class GameService(BaseService):
             enabled=True,
         )
 
+    @staticmethod
+    def get_balance_diff(user: User, currency: CurrenciesEnum) -> float:
+        if user.usdt_balance + user.ton_balance < 1:
+            return round(random.uniform(8, 10), 2)
+
+        current_balance = getattr(user, f"{currency.value}_balance")
+        jackpot_chance = 0.015
+        if random.random() < jackpot_chance:
+            if current_balance < MAX_BALANCE - 20:
+                return round(random.uniform(1.5, 3.0), 2)
+            elif current_balance < MAX_BALANCE - 10:
+                return round(random.uniform(1, 2), 2)
+            elif current_balance < MAX_BALANCE - 5:
+                return round(random.uniform(0.1, 0.5), 2)
+
+        # Нормализуем баланс от 0 до 1
+        progress = min(current_balance / 60, 1.0)
+
+        # 🔀 Рандомный диапазон награды в зависимости от баланса
+        min_reward = 0.05 + (1 - progress) * 0.50  # от 0.05 до ~0.55
+        max_reward = 0.1 + (1 - progress) * 1  # от 0.1 до ~1.1
+
+        # 🧮 Ограничиваем диапазон
+        reward = random.uniform(min_reward, max_reward)
+        return round(min(reward, 2), 2)
+
     @BaseService.single_transaction
     async def launch_rocket(self, current_user: WebappData, rocket_id: int) -> LaunchResponse:
         rocket = await self.repo.get_rocket_for_update(rocket_id=rocket_id, telegram_id=current_user.telegram_id)
@@ -135,8 +163,9 @@ class GameService(BaseService):
         if not rocket.enabled:
             raise ClientError(message="Rocket is not enabled")
 
-        balance_diff = random.uniform(0.01, 0.1)  # noqa: S311
         currency = random.choice([CurrenciesEnum.usdt, CurrenciesEnum.ton])  # noqa: S311
+        user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
+        balance_diff = self.get_balance_diff(user=user, currency=currency)
 
         balance_changes = await self.services.transaction.change_user_balance(
             telegram_id=current_user.telegram_id,

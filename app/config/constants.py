@@ -26,3 +26,6 @@ ROCKET_CAPACITY_PREMIUM = 180
 REFERRAL_PREFIX = "pilot_"
 BOT_NAME = "CryptoRocketsBot"
 WEBAPP_NAME = "launch"
+
+
+MAX_BALANCE = 60
