@@ -105,7 +105,7 @@ class GameService(BaseService):
                 current_fuel=ROCKET_CAPACITY_PREMIUM,
             )
         else:
-            raise NotImplementedError
+            raise NotImplementedError(f"Prize type {prize.type} is not implemented")
 
         await self.repo.create_prize(
             user_id=current_user.telegram_id,
