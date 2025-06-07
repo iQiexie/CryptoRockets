@@ -76,10 +76,17 @@ class GameService(BaseService):
                 amount=prize.amount,
                 tx_type=TransactionTypeEnum.wheel_spin,
             )
-        elif prize.type == WheelPrizeEnum.fuel:
+        elif prize.type == WheelPrizeEnum.usdt:
             await self.services.transaction.change_user_balance(
                 telegram_id=current_user.telegram_id,
-                currency=CurrenciesEnum.fuel,
+                currency=CurrenciesEnum.usdt,
+                amount=prize.amount,
+                tx_type=TransactionTypeEnum.wheel_spin,
+            )
+        elif prize.type == WheelPrizeEnum.ton:
+            await self.services.transaction.change_user_balance(
+                telegram_id=current_user.telegram_id,
+                currency=CurrenciesEnum.ton,
                 amount=prize.amount,
                 tx_type=TransactionTypeEnum.wheel_spin,
             )
