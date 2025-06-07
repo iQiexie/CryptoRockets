@@ -20,6 +20,7 @@ iota = iota_generator()
 
 
 class WheelPrizeResponse(BaseResponse):
+    id: int
     type: WheelPrizeEnum
     amount: float
     icon: str
@@ -27,7 +28,6 @@ class WheelPrizeResponse(BaseResponse):
 
 
 class LatestWheelPrizeResponse(BaseResponse):
-    id: int
     type: WheelPrizeEnum
     amount: float
     icon: str
