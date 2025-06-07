@@ -129,7 +129,7 @@ class GameService(BaseService):
         if user.usdt_balance + user.ton_balance < 1:
             return round(random.uniform(8, 10), 2)
 
-        current_balance = getattr(user, f"{currency.value}_balance")
+        current_balance = float(getattr(user, f"{currency.value}_balance"))
         jackpot_chance = 0.015
         if random.random() < jackpot_chance:
             if current_balance < MAX_BALANCE - 20:
