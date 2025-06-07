@@ -21,6 +21,8 @@ from app.api.dto.game.response import (
 )
 from app.api.exceptions import ClientError
 from app.config.constants import MAX_BALANCE
+from app.config.constants import ROCKET_CAPACITY_DEFAULT
+from app.config.constants import ROCKET_CAPACITY_OFFLINE
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
 from app.db.models import (
     CurrenciesEnum,
@@ -81,19 +83,26 @@ class GameService(BaseService):
                 amount=prize.amount,
                 tx_type=TransactionTypeEnum.wheel_spin,
             )
-        elif prize.type == WheelPrizeEnum.premium_rocket_full:
+        elif prize.type == WheelPrizeEnum.default_rocket:
             await self.repos.user.create_user_rocket(
                 user_id=current_user.telegram_id,
-                type=RocketTypeEnum.premium,
-                fuel_capacity=ROCKET_CAPACITY_PREMIUM,
-                current_fuel=ROCKET_CAPACITY_PREMIUM,
+                type=RocketTypeEnum.default,
+                fuel_capacity=ROCKET_CAPACITY_DEFAULT,
+                current_fuel=ROCKET_CAPACITY_DEFAULT,
+            )
+        elif prize.type == WheelPrizeEnum.offline_rocket:
+            await self.repos.user.create_user_rocket(
+                user_id=current_user.telegram_id,
+                type=RocketTypeEnum.offline,
+                fuel_capacity=ROCKET_CAPACITY_OFFLINE,
+                current_fuel=ROCKET_CAPACITY_OFFLINE,
             )
         elif prize.type == WheelPrizeEnum.premium_rocket:
             await self.repos.user.create_user_rocket(
                 user_id=current_user.telegram_id,
                 type=RocketTypeEnum.premium,
                 fuel_capacity=ROCKET_CAPACITY_PREMIUM,
-                current_fuel=0,
+                current_fuel=ROCKET_CAPACITY_PREMIUM,
             )
         else:
             raise NotImplementedError

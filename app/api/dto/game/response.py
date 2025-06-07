@@ -42,6 +42,20 @@ class LaunchResponse(BaseResponse):
 WHEEL_PRIZES = [
     WheelPrizeResponse(
         id=iota(),
+        type=WheelPrizeEnum.default_rocket,
+        amount=1,
+        icon="NotImplemented",
+        chance=10,
+    ),
+    WheelPrizeResponse(
+        id=iota(),
+        type=WheelPrizeEnum.offline_rocket,
+        amount=1,
+        icon="NotImplemented",
+        chance=10,
+    ),
+    WheelPrizeResponse(
+        id=iota(),
         type=WheelPrizeEnum.premium_rocket,
         amount=1,
         icon="NotImplemented",
@@ -49,7 +63,7 @@ WHEEL_PRIZES = [
     ),
     WheelPrizeResponse(
         id=iota(),
-        type=WheelPrizeEnum.premium_rocket_full,
+        type=WheelPrizeEnum.wheel,
         amount=1,
         icon="NotImplemented",
         chance=10,
@@ -57,21 +71,21 @@ WHEEL_PRIZES = [
     WheelPrizeResponse(
         id=iota(),
         type=WheelPrizeEnum.usdt,
-        amount=20,
+        amount=100,
+        icon="NotImplemented",
+        chance=0,
+    ),
+    WheelPrizeResponse(
+        id=iota(),
+        type=WheelPrizeEnum.usdt,
+        amount=1,
         icon="NotImplemented",
         chance=10,
     ),
     WheelPrizeResponse(
         id=iota(),
         type=WheelPrizeEnum.ton,
-        amount=40,
-        icon="NotImplemented",
-        chance=10,
-    ),
-    WheelPrizeResponse(
-        id=iota(),
-        type=WheelPrizeEnum.wheel,
-        amount=60,
+        amount=1,
         icon="NotImplemented",
         chance=10,
     ),
@@ -85,15 +99,15 @@ WHEEL_PRIZES = [
     WheelPrizeResponse(
         id=iota(),
         type=WheelPrizeEnum.token,
-        amount=2_000,
+        amount=5_000,
         icon="NotImplemented",
         chance=10,
     ),
     WheelPrizeResponse(
         id=iota(),
-        type=WheelPrizeEnum.token,
-        amount=5_000,
+        type=WheelPrizeEnum.ton,
+        amount=50,
         icon="NotImplemented",
-        chance=10,
+        chance=0,
     ),
 ]

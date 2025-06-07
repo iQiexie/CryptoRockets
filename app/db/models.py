@@ -71,7 +71,8 @@ class RocketSkinEnum(str, Enum):
 
 class WheelPrizeEnum(str, Enum):
     premium_rocket = "premium_rocket"
-    premium_rocket_full = "premium_rocket_full"
+    default_rocket = "default_rocket"
+    offline_rocket = "offline_rocket"
     fuel = "fuel"
     token = "token"
     usdt = "usdt"
