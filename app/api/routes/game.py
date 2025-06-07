@@ -33,21 +33,6 @@ async def launch_rocket(
     return await service.launch_rocket(current_user=current_user, rocket_id=rocket_id)
 
 
-@router.patch(
-    path="/rocket/{rocket_id}",
-    status_code=status.HTTP_200_OK,
-    response_model=RocketResponse,
-    tags=["Rockets"],
-)
-async def update_rocket(
-    current_user: Annotated[WebappData, Depends(get_current_user)],
-    service: Annotated[GameService, Depends()],
-    data: UpdateRocketRequest,
-    rocket_id: int = Path(...),
-) -> Rocket:
-    return await service.update_rocket(current_user=current_user, rocket_id=rocket_id, data=data)
-
-
 @router.post(
     path="/wheel/spin",
     status_code=status.HTTP_200_OK,

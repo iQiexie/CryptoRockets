@@ -127,7 +127,11 @@ class User(_TimestampMixin, Base):
     )
 
     rockets: Mapped[list["Rocket"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan", lazy="selectin"
+        "Rocket",
+        primaryjoin="and_(User.telegram_id == Rocket.user_id, Rocket.enabled == True)",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
 
@@ -140,16 +144,9 @@ class Rocket(_TimestampMixin, Base):
 
     fuel_capacity: Mapped[int] = mapped_column(Integer)
     current_fuel: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
-    count: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
 
     user: Mapped[User] = relationship(back_populates="rockets")
-    skins: Mapped[list[RocketSkinEnum]] = mapped_column(
-        JSONB, default=[RocketSkinEnum.default], server_default=f'["{RocketSkinEnum.default.value}"]'
-    )
-    current_skin: Mapped[RocketSkinEnum] = mapped_column(
-        String, default=RocketSkinEnum.default, server_default=f'"{RocketSkinEnum.default.value}"'
-    )
 
 
 class Transaction(_TimestampMixin, Base):

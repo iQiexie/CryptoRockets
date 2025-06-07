@@ -23,11 +23,23 @@ class UserRepo(BaseRepo):
     async def create_user(self, **kwargs) -> User:
         user = User(**kwargs)
 
-        rocket1 = Rocket(type=RocketTypeEnum.default, fuel_capacity=ROCKET_CAPACITY_DEFAULT, current_fuel=0)
-        rocket2 = Rocket(type=RocketTypeEnum.offline, fuel_capacity=ROCKET_CAPACITY_OFFLINE, current_fuel=0)
-        rocket3 = Rocket(type=RocketTypeEnum.premium, fuel_capacity=ROCKET_CAPACITY_PREMIUM, current_fuel=0)
-
-        user.rockets = [rocket1, rocket2, rocket3]
+        user.rockets = [
+            Rocket(
+                type=RocketTypeEnum.premium,
+                fuel_capacity=ROCKET_CAPACITY_PREMIUM,
+                current_fuel=ROCKET_CAPACITY_PREMIUM,
+            ),
+            Rocket(
+                type=RocketTypeEnum.default,
+                fuel_capacity=ROCKET_CAPACITY_DEFAULT,
+                current_fuel=ROCKET_CAPACITY_DEFAULT,
+            ),
+            Rocket(
+                type=RocketTypeEnum.default,
+                fuel_capacity=ROCKET_CAPACITY_DEFAULT,
+                current_fuel=0,
+            ),
+        ]
         self.session.add(user)
         return user
 

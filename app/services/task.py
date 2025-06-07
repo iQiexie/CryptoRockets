@@ -11,6 +11,10 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
+from app.config.constants import ROCKET_CAPACITY_DEFAULT
+from app.config.constants import ROCKET_CAPACITY_OFFLINE
+from app.config.constants import ROCKET_CAPACITY_PREMIUM
+from app.db.models import RocketTypeEnum
 from app.services.base.base import BaseService
 
 logger = structlog.stdlib.get_logger()
@@ -28,5 +32,17 @@ class TaskService(BaseService):
         self.repo = self.repos.user
         self.adapters = adapters
 
-    async def example(self) -> None:
-        return
+    @BaseService.single_transaction
+    async def give_rocket(self, rocket_type: RocketTypeEnum, fool: bool, telegram_id: int) -> None:
+        fuel_capacity = {
+            RocketTypeEnum.default: ROCKET_CAPACITY_DEFAULT,
+            RocketTypeEnum.offline: ROCKET_CAPACITY_OFFLINE,
+            RocketTypeEnum.premium: ROCKET_CAPACITY_PREMIUM,
+        }[rocket_type]
+
+        await self.repo.create_user_rocket(
+            type=rocket_type,
+            user_id=telegram_id,
+            fuel_capacity=fuel_capacity,
+            current_fuel=fuel_capacity if fool else 0,
+        )

@@ -50,16 +50,7 @@ class ShopService(BaseService):
             )
             transaction_id = tx.transaction.id
         elif item.rocket_skin and item.rocket_type:
-            rocket = await self.repos.game.get_rocket_for_update(
-                telegram_id=data.telegram_id,
-                rocket_type=item.rocket_type,
-            )
-            await self.repos.game.update_rocket(
-                rocket_id=rocket.id,
-                rocket_skins=list(rocket.skins) + [item.rocket_skin],
-                current_skin=item.rocket_skin,
-            )
-            rocket_id = rocket.id
+            raise NotImplementedError("Rocket skin purchases are not implemented yet")
         else:
             raise NotImplementedError
 

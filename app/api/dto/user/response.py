@@ -15,8 +15,6 @@ class RocketResponse(BaseResponse):
     fuel_capacity: int
     current_fuel: int
     enabled: bool
-    skins: list[RocketSkinEnum]
-    current_skin: RocketSkinEnum
 
 
 class UserResponse(BaseResponse):
