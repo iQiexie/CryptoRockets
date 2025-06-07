@@ -83,6 +83,13 @@ class GameService(BaseService):
                 amount=prize.amount,
                 tx_type=TransactionTypeEnum.wheel_spin,
             )
+        elif prize.type == WheelPrizeEnum.wheel:
+            await self.services.transaction.change_user_balance(
+                telegram_id=current_user.telegram_id,
+                currency=CurrenciesEnum.wheel,
+                amount=prize.amount,
+                tx_type=TransactionTypeEnum.wheel_spin,
+            )
         elif prize.type == WheelPrizeEnum.default_rocket:
             await self.repos.user.create_user_rocket(
                 user_id=current_user.telegram_id,
