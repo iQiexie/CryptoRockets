@@ -61,6 +61,33 @@ _items = (
         xtr_price=1,
         token_price=1,
     ),
+    ShopItem(
+        id=iota(),
+        label="wheel_tickets",
+        item=WheelPrizeEnum.super_rocket,
+        amount=1,
+        ton_price=10,
+        xtr_price=10,
+        token_price=10,
+    ),
+    ShopItem(
+        id=iota(),
+        label="wheel_tickets",
+        item=WheelPrizeEnum.mega_rocket,
+        amount=1,
+        ton_price=10,
+        xtr_price=10,
+        token_price=10,
+    ),
+    ShopItem(
+        id=iota(),
+        label="wheel_tickets",
+        item=WheelPrizeEnum.ultra_rocket,
+        amount=1,
+        ton_price=10,
+        xtr_price=10,
+        token_price=10,
+    ),
 )
 
 

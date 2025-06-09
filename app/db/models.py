@@ -62,6 +62,9 @@ class RocketTypeEnum(str, Enum):
     default = "default"
     offline = "offline"
     premium = "premium"
+    super = "super"
+    mega = "mega"
+    ultra = "ultra"
 
 
 class RocketSkinEnum(str, Enum):
@@ -73,6 +76,11 @@ class WheelPrizeEnum(str, Enum):
     premium_rocket = "premium_rocket"
     default_rocket = "default_rocket"
     offline_rocket = "offline_rocket"
+
+    super_rocket = "super_rocket"
+    mega_rocket = "mega_rocket"
+    ultra_rocket = "ultra_rocket"
+
     fuel = "fuel"
     token = "token"
     usdt = "usdt"
