@@ -119,7 +119,7 @@ class User(_TimestampMixin, Base):
     tg_username: Mapped[str] = mapped_column(String, nullable=True)
     tg_first_name: Mapped[str] = mapped_column(String, nullable=True)
     tg_last_name: Mapped[str] = mapped_column(String, nullable=True)
-    tg_is_premium: Mapped[bool] = mapped_column(Boolean, server_default="false", default=False)
+    tg_is_premium: Mapped[bool] = mapped_column(Boolean, nullable=True)
     tg_language_code: Mapped[str] = mapped_column(String, nullable=True)
     tg_photo_url: Mapped[str] = mapped_column(String, nullable=True)
     bot_banned: Mapped[bool] = mapped_column(Boolean, nullable=True)
