@@ -1,4 +1,4 @@
-from locale import currency
+import base64
 from typing import Annotated
 
 import structlog
@@ -6,6 +6,7 @@ from fastapi.params import Depends
 from pydantic_core import to_json
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+from tonsdk.boc import Cell
 
 from app.adapters.base import Adapters
 from app.api.dependencies.stubs import (
@@ -117,6 +118,8 @@ class ShopService(BaseService):
         if payment_method == "xtr":
             return await self._get_invoice_url_xtr(item=item, current_user=current_user)
         if payment_method == "ton":
-            return UrlResponse(url=f"{current_user.telegram_id};{shop_item_id}")
+            payload = f"{current_user.telegram_id}:{shop_item_id}"
+            boc = Cell().bits.write_bytes(payload.encode('utf-8')).to_boc()
+            return UrlResponse(url=base64.b64encode(boc).decode())
 
         raise NotImplementedError
