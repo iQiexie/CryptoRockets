@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.orm import sessionmaker
@@ -22,6 +23,8 @@ def setup_dependencies(
 ) -> FastAPI:
     services = Services(session_factory=session_factory, adapters=adapters, engine=engine)
     websocket_service = WebsocketService(session_factory=session_factory, adapters=adapters)
+
+    asyncio.create_task(websocket_service.consume())
 
     app.dependency_overrides[dependency_adapters] = lambda: adapters
     app.dependency_overrides[dependency_session_factory] = lambda: session_factory

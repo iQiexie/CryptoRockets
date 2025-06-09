@@ -4,7 +4,7 @@ from app.init.base_models import BaseModel
 
 
 class WsEventsEnum(str, Enum):
-    purchase = "purchase"
+    user_notification = "user_notification"
 
 
 class WSMessage(BaseModel):

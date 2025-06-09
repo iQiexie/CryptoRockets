@@ -62,6 +62,7 @@ class WebsocketService(BaseService):
 
         async for msg in channel.listen():
             data = from_json(msg.get("data"))
+            logger.info(f"Got {data=}")
             message = WSMessage(**data)
 
             websocket = self._find_websocket(event=message.event, telegram_id=message.telegram_id)
@@ -73,6 +74,7 @@ class WebsocketService(BaseService):
                 )
 
             if not websocket:
+                logger.info(f"Websocket not found for {data=}. {self._clients=}")
                 continue
 
             logger.info(f"Websocket channel received: {data}")
@@ -86,7 +88,7 @@ class WebsocketService(BaseService):
             await websocket.send_text(data=data)
 
     async def subscribe(self, websocket: WebSocket, telegram_id: int) -> None:
-        event = WsEventsEnum.purchase
+        event = WsEventsEnum.user_notification
         await self._add_consumer(event=event, telegram_id=telegram_id, websocket=websocket)
 
         try:

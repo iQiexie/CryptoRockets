@@ -77,8 +77,7 @@ class ShopService(BaseService):
 
             transaction_id = _resp.transaction.id
             user = _resp.user
-        elif item.item in (
-        WheelPrizeEnum.super_rocket, WheelPrizeEnum.mega_rocket, WheelPrizeEnum.ultra_rocket):
+        elif item.item in (WheelPrizeEnum.super_rocket, WheelPrizeEnum.mega_rocket, WheelPrizeEnum.ultra_rocket):
             _rocket = await self.repos.user.create_user_rocket(
                 user_id=data.telegram_id,
                 type=RocketTypeEnum[item.item.value.replace("_rocket", "")],
@@ -110,11 +109,13 @@ class ShopService(BaseService):
 
     async def handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
         user = await self._handle_payment_callback(data=data)
-        await self.services.websocket.publish(message=WSMessage(
-            event=WsEventsEnum.purchase,
-            telegram_id=data.telegram_id,
-            message=dict(user=UserResponse.model_validate(user).model_dump(by_alias=True))
-        ))
+        await self.services.websocket.publish(
+            message=WSMessage(
+                event=WsEventsEnum.user_notification,
+                telegram_id=data.telegram_id,
+                message=dict(user=UserResponse.model_validate(user).model_dump(by_alias=True))
+            )
+        )
 
     async def _get_invoice_url_xtr(self, item: ShopItem, current_user: WebappData) -> UrlResponse:
         item_label = self.adapters.i18n.t(message=item.label, lang=current_user.language_code)

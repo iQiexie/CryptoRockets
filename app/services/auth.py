@@ -43,7 +43,6 @@ class AuthService(BaseService):
     @staticmethod
     def auth_webapp(webapp_data: str, adapters: Adapters) -> WebappData:
         parsed_data = dict(parse_qsl(webapp_data))
-        logger.error(f"{parsed_data=}")
 
         try:
             param_hash = parsed_data.pop("hash")
