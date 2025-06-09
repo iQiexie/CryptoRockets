@@ -2,19 +2,7 @@ from pydantic import Field
 from app.api.dto.base import BaseResponse
 from app.api.dto.user.response import PublicUserResponse
 from app.db.models import WheelPrizeEnum
-from typing import Callable
-
-
-def iota_generator() -> Callable[[], int]:
-    counter = -1
-
-    def next_label() -> int:
-        nonlocal counter
-        counter += 1
-        return counter
-
-    return next_label
-
+from app.utils import iota_generator
 
 iota = iota_generator()
 

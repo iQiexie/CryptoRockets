@@ -1,4 +1,6 @@
+import os
 import structlog
+from pydantic_core import from_json
 
 logger = structlog.stdlib.get_logger()
 
@@ -12,7 +14,20 @@ class I18n:
         return self._translations
 
     def _load_translations(self) -> None:
-        return
+        translations_dir = "i18n/translations"
+
+        for filename in os.listdir(translations_dir):
+            if not filename.endswith(".json"):
+                continue
+
+            file_path = os.path.join(translations_dir, filename)
+            with open(file_path, "r", encoding="utf-8") as f:
+                language_code = filename.split(".")[0]
+
+                try:
+                    self._translations[language_code] = from_json(f.read())
+                except Exception as e:
+                    logger.error(f"Failed to load language {language_code}: {e}")
 
     @property
     def languages(self) -> list[str]:

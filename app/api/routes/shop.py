@@ -32,8 +32,16 @@ async def get_invoice_url(
     status_code=status.HTTP_200_OK,
     response_model=list[ShopItem],
 )
-async def get_shop_items() -> list[ShopItem]:
-    return SHOP_ITEMS.values()
+async def get_shop_items(
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+    service: Annotated[ShopService, Depends()],
+) -> list[ShopItem]:
+    resp = []
+    for i in SHOP_ITEMS.values():
+        i.label = service.adapters.i18n.t(i.label, current_user.language_code)
+        resp.append(i)
+
+    return resp
 
 
 @router.post(path="/shop/item", status_code=status.HTTP_200_OK)

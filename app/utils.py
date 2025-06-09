@@ -75,3 +75,14 @@ def generate_random_string(seed: int, length: int = 10) -> str:
     random.seed(seed)
     characters = string.ascii_letters + string.digits
     return "".join(random.choices(characters, k=length))  # noqa: S311
+
+
+def iota_generator() -> Callable[[], int]:
+    counter = -1
+
+    def next_label() -> int:
+        nonlocal counter
+        counter += 1
+        return counter
+
+    return next_label
