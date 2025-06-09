@@ -35,7 +35,6 @@ services:
     build:
       context: ../
       dockerfile: ./deploy-cryptorockets/scanner.Dockerfile
-    entrypoint: ["/bin/sh","-c"]
     restart: unless-stopped
     env_file:
       - ../.env
