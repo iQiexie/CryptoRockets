@@ -71,13 +71,12 @@ class ShopService(BaseService):
 
     async def _get_invoice_url_xtr(self, item: ShopItem, current_user: WebappData) -> UrlResponse:
         item_label = self.adapters.i18n.t(message=item.label, lang=current_user.language_code)
-        description = self.adapters.i18n.t(message=item.description, lang=current_user.language_code)
 
         params = {
             "currency": "XTR",
-            "description": description,
+            "description": item_label,
             "payload": f"{item.id}",
-            "prices": to_json([{"label": item_label, "amount": item.price}]).decode("utf-8"),
+            "prices": to_json([{"label": item_label, "amount": int(item.xtr_price)}]).decode("utf-8"),
             "title": item_label,
         }
 
