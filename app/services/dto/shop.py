@@ -7,7 +7,7 @@ from app.init.base_models import BaseModel
 class PaymentCallbackDTO(BaseModel):
     telegram_id: int
     item_id: int
-    amount: int
+    amount: float
     usd_amount: float
     currency: CurrenciesEnum
     external_id: str
