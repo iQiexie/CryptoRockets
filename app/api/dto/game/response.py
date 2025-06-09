@@ -55,7 +55,7 @@ WHEEL_PRIZES = [
         type=WheelPrizeEnum.wheel,
         amount=1,
         icon="NotImplemented",
-        chance=10,
+        chance=100,
     ),
     WheelPrizeResponse(
         id=iota(),
