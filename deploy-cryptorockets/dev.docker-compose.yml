@@ -27,6 +27,28 @@ services:
     networks:
       voiceover-network:
 
+  cryptorockets-scanner:
+    container_name: cryptorockets-scanner
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+    build:
+      context: ../
+      dockerfile: ./deploy-cryptorockets/scanner.Dockerfile
+    entrypoint: ["/bin/sh","-c"]
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    volumes:
+      - ../:/usr/app/
+      - scanner-data:/usr/app/transactions.db
+    networks:
+      voiceover-network:
+
+volumes:
+  transactions-data:
+
 networks:
   voiceover-network:
     external: true
+

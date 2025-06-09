@@ -16,7 +16,6 @@ from app.api.dto.ads.request import AdRequest
 from app.api.exceptions import ClientError
 from app.db.models import AdStatusEnum
 from app.db.models import Advert
-from app.db.models import RocketTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
