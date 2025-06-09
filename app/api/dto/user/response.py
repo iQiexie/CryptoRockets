@@ -22,6 +22,7 @@ class UserResponse(BaseResponse):
     usdt_balance: float
     token_balance: float
     wheel_balance: float
+    payment_address: str = "UQA824RWvHtNCPlMp-mRA1u3geuf98zyt4VZjXdGAZCAwDHC"
 
     rockets: list[RocketResponse]
 
