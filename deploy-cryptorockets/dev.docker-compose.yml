@@ -46,7 +46,7 @@ services:
       voiceover-network:
 
 volumes:
-  transactions-data:
+  scanner-data:
 
 networks:
   voiceover-network:
