@@ -111,7 +111,7 @@ class ShopService(BaseService):
         user = await self._handle_payment_callback(data=data)
         await self.services.websocket.publish(
             message=WSMessage(
-                event=WsEventsEnum.user_notification,
+                event=WsEventsEnum.purchase,
                 telegram_id=data.telegram_id,
                 message=dict(user=UserResponse.model_validate(user).model_dump(by_alias=True))
             )
