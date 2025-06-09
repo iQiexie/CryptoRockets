@@ -18,8 +18,8 @@ class ShopItem(BaseResponse):
     amount: int | None = None
 
 
-SHOP_ITEMS = {
-    iota(): ShopItem(
+_items = (
+    ShopItem(
         id=iota(),
         description="some_key",
         label="wheel_tickets",
@@ -29,7 +29,7 @@ SHOP_ITEMS = {
         xtr_price=1,
         token_price=1,
     ),
-    iota(): ShopItem(
+    ShopItem(
         id=iota(),
         description="some_key",
         label="wheel_tickets",
@@ -39,7 +39,7 @@ SHOP_ITEMS = {
         xtr_price=1,
         token_price=1,
     ),
-    iota(): ShopItem(
+    ShopItem(
         id=iota(),
         description="some_key",
         label="wheel_tickets",
@@ -49,7 +49,7 @@ SHOP_ITEMS = {
         xtr_price=1,
         token_price=1,
     ),
-    iota(): ShopItem(
+    ShopItem(
         id=iota(),
         description="some_key",
         label="wheel_tickets",
@@ -59,7 +59,7 @@ SHOP_ITEMS = {
         xtr_price=1,
         token_price=1,
     ),
-    iota(): ShopItem(
+    ShopItem(
         id=iota(),
         description="some_key",
         label="wheel_tickets",
@@ -69,4 +69,8 @@ SHOP_ITEMS = {
         xtr_price=1,
         token_price=1,
     ),
-}
+)
+
+
+SHOP_ITEMS = {i.id: i for i in _items}
+
