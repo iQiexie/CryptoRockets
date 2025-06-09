@@ -16,6 +16,7 @@ from app.api.dependencies.stubs import (
 )
 from app.api.dto.shop.request import SHOP_ITEMS, ShopItem
 from app.api.dto.shop.response import UrlResponse
+from app.api.dto.user.response import UserResponse
 from app.api.exceptions import ClientError
 from app.db.models import (
     CurrenciesEnum,
@@ -24,9 +25,12 @@ from app.db.models import (
     TransactionTypeEnum,
     WheelPrizeEnum,
 )
+from app.db.models import User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 from app.services.dto.shop import PaymentCallbackDTO
+from app.services.dto.websocket import WSMessage
+from app.services.dto.websocket import WsEventsEnum
 from app.utils import struct_log
 
 logger = structlog.stdlib.get_logger()
@@ -45,11 +49,12 @@ class ShopService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
-    async def handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
+    async def _handle_payment_callback(self, data: PaymentCallbackDTO) -> User:
         item = SHOP_ITEMS[data.item_id]
 
         transaction_id = None
         rocket_id = None
+        user = None
         item_price = getattr(item, f"{data.currency.value}_price", None)
 
         if item_price < data.amount:
@@ -69,8 +74,11 @@ class ShopService(BaseService):
                 amount=item.amount,
                 tx_type=TransactionTypeEnum.purchase,
             )
+
             transaction_id = _resp.transaction.id
-        elif item.item in (WheelPrizeEnum.super_rocket, WheelPrizeEnum.mega_rocket, WheelPrizeEnum.ultra_rocket):
+            user = _resp.user
+        elif item.item in (
+        WheelPrizeEnum.super_rocket, WheelPrizeEnum.mega_rocket, WheelPrizeEnum.ultra_rocket):
             _rocket = await self.repos.user.create_user_rocket(
                 user_id=data.telegram_id,
                 type=RocketTypeEnum[item.item.value.replace("_rocket", "")],
@@ -93,6 +101,20 @@ class ShopService(BaseService):
             rocket_id=rocket_id,
             callback_data=data.callback_data,
         )
+
+        if not user:
+            await self.session.flush()
+            user = await self.repos.user.get_user_by_telegram_id(telegram_id=data.telegram_id)
+
+        return user
+
+    async def handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
+        user = await self._handle_payment_callback(data=data)
+        await self.services.websocket.publish(message=WSMessage(
+            event=WsEventsEnum.purchase,
+            telegram_id=data.telegram_id,
+            message=dict(user=UserResponse.model_validate(user).model_dump(by_alias=True))
+        ))
 
     async def _get_invoice_url_xtr(self, item: ShopItem, current_user: WebappData) -> UrlResponse:
         item_label = self.adapters.i18n.t(message=item.label, lang=current_user.language_code)
