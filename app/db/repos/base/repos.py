@@ -5,6 +5,7 @@ from app.db.repos.shop import ShopRepo
 from app.db.repos.transaction import TransactionRepo
 from app.db.repos.user import UserRepo
 from app.db.repos.user_task import UserTaskRepo
+from app.db.repos.ads import AdsRepo
 
 
 class Repos:
@@ -30,3 +31,7 @@ class Repos:
     @property
     def shop(self) -> ShopRepo:
         return ShopRepo(session=self.session)
+
+    @property
+    def ads(self) -> AdsRepo:
+        return AdsRepo(session=self.session)

@@ -43,6 +43,7 @@ class CurrenciesEnum(str, Enum):
 
 
 class AdStatusEnum(str, Enum):
+    created = "created"
     watched = "watched"
 
 
@@ -245,9 +246,9 @@ class TaskUser(_TimestampMixin, Base):
 class Advert(_TimestampMixin, Base):
     __tablename__ = "ads"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
 
     user_id: Mapped[int] = mapped_column(Integer)
-    external_id: Mapped[str] = mapped_column(String, unique=True, nullable=True)
+    provider: Mapped[str] = mapped_column(String)
     status: Mapped[AdStatusEnum] = mapped_column(String)
-    usd_amount: Mapped[float] = mapped_column(Numeric)
+    rocket_id: Mapped[int] = mapped_column(ForeignKey("rockets.id"), nullable=True)
