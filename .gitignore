@@ -9,3 +9,4 @@ __pycache__
 .directory
 .ruff_cache
 deploy-cryptorockets/prometheus-temp
+transactions.db

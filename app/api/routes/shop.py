@@ -8,7 +8,7 @@ from app.api.dependencies.auth import get_current_user
 from app.api.dto.shop.request import SHOP_ITEMS, ShopItem
 from app.api.dto.shop.response import UrlResponse
 from app.services.dto.auth import WebappData
-from app.services.dto.shop import XTRPaymentCallbackDTO
+from app.services.dto.shop import PaymentCallbackDTO
 from app.services.shop import ShopService
 
 router = APIRouter(tags=["Shop"])
@@ -52,6 +52,6 @@ async def get_shop_items(
 @router.post(path="/shop/item", status_code=status.HTTP_200_OK)
 async def grant_shop_item(
     service: Annotated[ShopService, Depends()],
-    data: XTRPaymentCallbackDTO,
+    data: PaymentCallbackDTO,
 ) -> None:
     return await service.handle_payment_callback(data=data)

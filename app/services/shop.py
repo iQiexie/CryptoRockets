@@ -18,7 +18,7 @@ from app.api.dto.shop.response import UrlResponse
 from app.db.models import TransactionStatusEnum, TransactionTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
-from app.services.dto.shop import XTRPaymentCallbackDTO
+from app.services.dto.shop import PaymentCallbackDTO
 
 logger = structlog.stdlib.get_logger()
 
@@ -36,7 +36,7 @@ class ShopService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
-    async def handle_payment_callback(self, data: XTRPaymentCallbackDTO) -> None:
+    async def handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
         item = SHOP_ITEMS[data.item_id]
 
         transaction_id = None

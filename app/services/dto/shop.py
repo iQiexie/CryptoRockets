@@ -2,7 +2,7 @@ from app.db.models import CurrenciesEnum
 from app.init.base_models import BaseModel
 
 
-class XTRPaymentCallbackDTO(BaseModel):
+class PaymentCallbackDTO(BaseModel):
     telegram_id: int
     item_id: int
     amount: int

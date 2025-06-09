@@ -4,7 +4,7 @@ from aiogram.types import Message, PreCheckoutQuery
 
 from app.db.models import CurrenciesEnum
 from app.services.base.services import Services
-from app.services.dto.shop import XTRPaymentCallbackDTO
+from app.services.dto.shop import PaymentCallbackDTO
 
 router = Router()
 
@@ -17,7 +17,7 @@ async def pre_checkout_handler(pre_checkout_query: PreCheckoutQuery) -> Telegram
 @router.message(F.successful_payment)
 async def success_payment_handler(message: Message, services: Services) -> None:
     return await services.shop.handle_payment_callback(
-        data=XTRPaymentCallbackDTO(
+        data=PaymentCallbackDTO(
             telegram_id=message.from_user.id,
             item_id=int(message.successful_payment.invoice_payload),
             amount=message.successful_payment.total_amount,
