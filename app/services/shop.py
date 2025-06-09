@@ -17,6 +17,7 @@ from app.api.dto.shop.request import ShopItem
 from app.api.dto.shop.response import UrlResponse
 from app.api.exceptions import ClientError
 from app.db.models import CurrenciesEnum
+from app.db.models import RocketTypeEnum
 from app.db.models import TransactionStatusEnum, TransactionTypeEnum
 from app.db.models import WheelPrizeEnum
 from app.services.base.base import BaseService
@@ -64,8 +65,17 @@ class ShopService(BaseService):
                 amount=item.amount,
                 tx_type=TransactionTypeEnum.purchase,
             )
-
             transaction_id = _resp.transaction.id
+        elif item.item in (WheelPrizeEnum.super_rocket, WheelPrizeEnum.mega_rocket, WheelPrizeEnum.ultra_rocket):
+            _rocket = await self.repos.user.create_user_rocket(
+                user_id=data.telegram_id,
+                type=RocketTypeEnum[item.item.value.replace('_rocket', '')],
+                fuel_capacity=1,
+                current_fuel=1,
+            )
+            rocket_id = _rocket.id
+        else:
+            raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")
 
         await self.repo.create_invoice(
             user_id=data.telegram_id,
@@ -77,7 +87,6 @@ class ShopService(BaseService):
             usd_amount=data.usd_amount,
             transaction_id=transaction_id,
             rocket_id=rocket_id,
-            rocket_skin=item.rocket_skin,
             callback_data=data.callback_data,
         )
 
