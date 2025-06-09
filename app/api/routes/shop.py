@@ -1,9 +1,7 @@
-from email.policy import default
 from typing import Annotated
 from typing import Literal
 
-from fastapi import APIRouter, Depends
-from redis.commands.search.query import Query
+from fastapi import APIRouter, Depends, Query
 from starlette import status
 
 from app.api.dependencies.auth import get_current_user
