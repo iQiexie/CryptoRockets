@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends
 from starlette import status
 
+from app.api.exceptions import ClientError
 from app.db.models import CurrenciesEnum
 from app.services.dto.shop import PaymentCallbackDTO
 from app.services.shop import ShopService
@@ -19,9 +20,10 @@ async def ton(
         telegram_id, item_id = body["payload"].split(";")
         usd_amount = 0
     except ValueError:
-        return await service.adapters.alerts.send_alert(
+        await service.adapters.alerts.send_alert(
             message=f"Invalid payload format in TON callback: {body=}",
         )
+        raise ClientError(message="Invalid payload format in TON callback")
 
     return await service.handle_payment_callback(
         data=PaymentCallbackDTO(
