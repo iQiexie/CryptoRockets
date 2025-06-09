@@ -21,7 +21,7 @@ _items = (
         label="wheel_tickets",
         amount=1,
         item=WheelPrizeEnum.wheel,
-        ton_price=1,
+        ton_price=0.1,
         xtr_price=1,
         token_price=1,
     ),
