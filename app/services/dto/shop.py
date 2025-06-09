@@ -1,3 +1,5 @@
+from pydantic import Field
+
 from app.db.models import CurrenciesEnum
 from app.init.base_models import BaseModel
 
@@ -10,3 +12,4 @@ class PaymentCallbackDTO(BaseModel):
     currency: CurrenciesEnum
     external_id: str
     callback_data: dict
+    fee: float | None = Field(default=None)

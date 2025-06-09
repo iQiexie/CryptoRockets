@@ -15,10 +15,14 @@ from app.api.dependencies.stubs import (
 from app.api.dto.shop.request import SHOP_ITEMS
 from app.api.dto.shop.request import ShopItem
 from app.api.dto.shop.response import UrlResponse
+from app.api.exceptions import ClientError
+from app.db.models import CurrenciesEnum
 from app.db.models import TransactionStatusEnum, TransactionTypeEnum
+from app.db.models import WheelPrizeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 from app.services.dto.shop import PaymentCallbackDTO
+from app.utils import struct_log
 
 logger = structlog.stdlib.get_logger()
 
@@ -41,19 +45,27 @@ class ShopService(BaseService):
 
         transaction_id = None
         rocket_id = None
+        item_price = getattr(item, f"{data.currency.value}_price", None)
 
-        if item.amount and item.currency:
-            tx = await self.services.transaction.change_user_balance(
+        if item_price != data.amount:
+            struct_log(
+                event="Payment amount mismatch",
+                item_id=item.id,
+                expected_amount=item_price,
+                received_amount=data.amount,
+            )
+
+            raise ClientError(message="Payment amount mismatch")
+
+        if item.item in (WheelPrizeEnum.token, WheelPrizeEnum.usdt, WheelPrizeEnum.ton, WheelPrizeEnum.wheel):
+            _resp = await self.services.transaction.change_user_balance(
                 telegram_id=data.telegram_id,
-                currency=item.currency,
+                currency=CurrenciesEnum[item.item.value],
                 amount=item.amount,
                 tx_type=TransactionTypeEnum.purchase,
             )
-            transaction_id = tx.transaction.id
-        elif item.rocket_skin and item.rocket_type:
-            raise NotImplementedError("Rocket skin purchases are not implemented yet")
-        else:
-            raise NotImplementedError
+
+            transaction_id = _resp.transaction.id
 
         await self.repo.create_invoice(
             user_id=data.telegram_id,
@@ -61,7 +73,7 @@ class ShopService(BaseService):
             status=TransactionStatusEnum.success,
             currency=data.currency,
             currency_amount=data.amount,
-            currency_fee=0,
+            currency_fee=data.fee,
             usd_amount=data.usd_amount,
             transaction_id=transaction_id,
             rocket_id=rocket_id,

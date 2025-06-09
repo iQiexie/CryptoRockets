@@ -190,7 +190,7 @@ class Invoice(_TimestampMixin, Base):
 
     currency: Mapped[CurrenciesEnum] = mapped_column(String)
     currency_amount: Mapped[float] = mapped_column(Numeric)
-    currency_fee: Mapped[float] = mapped_column(Numeric, default=0, server_default="0")
+    currency_fee: Mapped[float] = mapped_column(Numeric, nullable=True)
     usd_amount: Mapped[float] = mapped_column(Numeric)
 
     transaction_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"), nullable=True)
