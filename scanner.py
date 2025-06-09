@@ -1,12 +1,18 @@
 import sqlite3
 import time
-from datetime import datetime
-
 import requests
 import structlog
 
 from app.config.config import get_config
 from app.init.logs import setup_logs
+from typing import TypedDict
+
+
+class WebhookData(TypedDict):
+    hash: str
+    amount: float
+    payload: str
+
 
 config = get_config()
 setup_logs(config=config.logs)
@@ -22,50 +28,80 @@ conn.commit()
 
 logger.info("Started scanning for transactions...")
 
-while True:
-    response = requests.get(
-        url="https://toncenter.com/api/v2/getTransactions",
-        headers={"accept": "application/json"},
-        params={
-            "address": ADDRESS,
-            "limit": "10",
-            "lt": "0",
-            "to_lt": "0",
-            "archival": "true",
-        },
-    )
 
-    if response.status_code != 200:
-        logger.error(f"Error fetching transactions: {response.status_code=} {response.text=}")
-        time.sleep(5)
-        continue
+def send_webhook(data: WebhookData):
+    max_retries = 60
+    retry_delay = 1  # seconds
 
-    transactions = response.json().get("result", [])
-
-    for tx in transactions:
+    for attempt in range(1, max_retries + 1):
+        logger.info(f"Sending (Attempt {attempt}/{max_retries}) to {WEBHOOK_URL}", hash=data['hash'])
         try:
-            hash_ = tx["transaction_id"]["hash"]
-            amount = round(int(tx["in_msg"]["value"]) / 1_000_000_000, 2)
-            payload = tx["in_msg"]["message"]
+            resp = requests.post(url=WEBHOOK_URL, json=data, timeout=10)
+        except requests.RequestException as e:
+            logger.error(f"Request failed: {e}", hash=data['hash'])
+            time.sleep(retry_delay)
+            continue
 
-            # Check if hash already exists in DB
-            cursor.execute("SELECT 1 FROM transactions WHERE hash = ?", (hash_,))
-            if cursor.fetchone():
-                continue  # Skip if already exists
+        logger.info(f"Status {resp.status_code=}, Response: {resp.text=}", hash=data['hash'])
 
-            # Insert new hash into DB
-            cursor.execute("INSERT INTO transactions (hash) VALUES (?)", (hash_,))
-            conn.commit()
+        if resp.status_code != 502:
+            break  # Success or other error, stop retrying
 
-            logger.info(f"[{datetime.now()}] [{hash_}] Hash: {hash_}, Amount: {amount}, Payload: {payload}")
+        time.sleep(retry_delay)
 
-            new_tx = {"hash": hash_, "amount": amount, "payload": payload}
 
-            logger.info(f"[{datetime.now()}] [{hash_}] Sending {new_tx} to {WEBHOOK_URL}")
-            webhook_resp = requests.post(url=WEBHOOK_URL, json=new_tx)
-            logger.info(f"[{datetime.now()}] [{hash_}] Status {webhook_resp.status_code}, Response: {webhook_resp.text}")
 
-        except (TypeError, KeyError):
-            logger.error("Malformed transaction data:", tx)
 
-    time.sleep(2)  # Add a small delay to avoid hammering the API
+def fetch_transactions():
+    try:
+        response = requests.get(
+            url="https://toncenter.com/api/v2/getTransactions",
+            headers={"accept": "application/json"},
+            params={"address": ADDRESS, "limit": "10", "lt": "0", "to_lt": "0", "archival": "true"},
+            timeout=10,
+        )
+        if response.status_code != 200:
+            logger.error(f"Error fetching transactions: {response.status_code=} {response.text=}")
+            return []
+        return response.json().get("result", [])
+    except requests.RequestException as e:
+        logger.error(f"Request failed: {e}")
+        return []
+
+
+def transaction_exists(hash_: str) -> bool:
+    cursor.execute("SELECT 1 FROM transactions WHERE hash = ?", (hash_,))
+    return cursor.fetchone() is not None
+
+
+def save_transaction_hash(hash_: str):
+    cursor.execute("INSERT INTO transactions (hash) VALUES (?)", (hash_,))
+    conn.commit()
+
+
+def process_transaction(tx: dict):
+    hash_ = tx["transaction_id"]["hash"]
+    if transaction_exists(hash_):
+        return
+
+    amount = round(int(tx["in_msg"]["value"]) / 1_000_000_000, 2)
+    payload = tx["in_msg"]["message"]
+
+    logger.info(f"Hash: {hash_}, Amount: {amount}, Payload: {payload}", hash=hash_)
+
+    save_transaction_hash(hash_)
+    send_webhook(data=WebhookData(hash=hash_, amount=amount, payload=payload))
+
+
+def main():
+    while True:
+        time.sleep(2)
+        for tx in fetch_transactions():
+            try:
+                process_transaction(tx)
+            except Exception as e:
+                logger.error(event=f"Malformed transaction data: {tx=}, {e=}")
+
+
+if __name__ == "__main__":
+    main()
