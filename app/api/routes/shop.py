@@ -16,7 +16,7 @@ from app.services.shop import ShopService
 router = APIRouter(tags=["Shop"])
 
 
-@router.post(
+@router.get(
     path="/shop/invoice",
     status_code=status.HTTP_200_OK,
     response_model=UrlResponse,
