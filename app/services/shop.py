@@ -1,3 +1,4 @@
+from locale import currency
 from typing import Annotated
 
 import structlog
@@ -115,5 +116,7 @@ class ShopService(BaseService):
         item = SHOP_ITEMS[shop_item_id]
         if payment_method == "xtr":
             return await self._get_invoice_url_xtr(item=item, current_user=current_user)
+        if payment_method == "ton":
+            return UrlResponse(url=f"{current_user.telegram_id};{shop_item_id}")
 
         raise NotImplementedError

@@ -47,10 +47,3 @@ async def get_shop_items(
 
     return resp
 
-
-@router.post(path="/shop/item", status_code=status.HTTP_200_OK)
-async def grant_shop_item(
-    service: Annotated[ShopService, Depends()],
-    data: PaymentCallbackDTO,
-) -> None:
-    return await service.handle_payment_callback(data=data)
