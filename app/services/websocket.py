@@ -86,14 +86,14 @@ class WebsocketService(BaseService):
             await websocket.send_text(data=data)
 
     async def subscribe(self, websocket: WebSocket, telegram_id: int) -> None:
-        event = WsEventsEnum.user_notification
+        event = WsEventsEnum.purchase
         await self._add_consumer(event=event, telegram_id=telegram_id, websocket=websocket)
 
         try:
             while True:
                 await websocket.receive()
         except Exception as e:
-            logger.info(f"Failed to mine: {type(e)=}; {e=}. {telegram_id=}")
+            logger.info(f"Failed to socket: {type(e)=}; {e=}. {telegram_id=}")
             await self._delete_consumer(telegram_id=telegram_id, event=event)
 
     @BaseService.log_exception

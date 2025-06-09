@@ -1,5 +1,6 @@
 from typing import Annotated
 
+import structlog
 from fastapi import APIRouter, Depends, Request
 from fastapi import Query
 from sqlalchemy.util import b64decode
@@ -17,6 +18,7 @@ from app.services.user import UserService
 from app.services.websocket import WebsocketService
 
 router = APIRouter(tags=["User"])
+logger = structlog.stdlib.get_logger()
 
 
 @router.get(
@@ -66,8 +68,22 @@ async def connect_websocket(
     websocket: WebSocket,
     token: str = Query(...),
 ) -> None:
-    current_user = await get_current_user(services=user_service.services, webapp_data=b64decode(token).decode("utf-8"))
-    await websocket_service.subscribe(
-        websocket=websocket,
-        telegram_id=current_user.telegram_id,
-    )
+    await websocket.accept()
+
+    try:
+        current_user = await get_current_user(
+            services=user_service.services,
+            webapp_data=b64decode(token).decode("utf-8")
+        )
+        
+        await websocket_service.subscribe(
+            websocket=websocket,
+            telegram_id=current_user.telegram_id,
+        )
+    except Exception as e:
+        try:
+            await websocket.send_text(data=f"Got an error: {e}")
+        except Exception as e_inner:
+            logger.error(f"Failed tp send websocket: {e_inner}")
+
+        raise e
