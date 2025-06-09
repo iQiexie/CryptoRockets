@@ -118,10 +118,8 @@ class ShopService(BaseService):
         if payment_method == "xtr":
             return await self._get_invoice_url_xtr(item=item, current_user=current_user)
         if payment_method == "ton":
-            payload = f"{current_user.telegram_id}:{shop_item_id}"
             cell = Cell()
-            cell.bits.write_bytes(payload.encode('utf-8'))
-            boc = cell.to_boc()
-            return UrlResponse(url=base64.b64encode(boc).decode())
+            cell.bits.write_bytes(f"{current_user.telegram_id}:{shop_item_id}".encode('utf-8'))
+            return UrlResponse(url=base64.b64encode(cell.to_boc()).decode())
 
         raise NotImplementedError
