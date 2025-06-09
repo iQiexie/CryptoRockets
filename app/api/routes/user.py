@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from fastapi import Query
+from sqlalchemy.util import b64decode
 from starlette import status
 from starlette.websockets import WebSocket
 
@@ -65,7 +66,7 @@ async def connect_websocket(
     websocket: WebSocket,
     token: str = Query(...),
 ) -> None:
-    current_user = await get_current_user(services=user_service.services, webapp_data=token)
+    current_user = await get_current_user(services=user_service.services, webapp_data=b64decode(token).decode("utf-8"))
     await websocket_service.subscribe(
         websocket=websocket,
         telegram_id=current_user.telegram_id,
