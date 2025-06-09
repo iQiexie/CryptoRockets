@@ -4,39 +4,31 @@ from datetime import datetime
 
 import requests
 
-ADDRESS = "UQA824RWvHtNCPlMp-mRA1u3geuf98zyt4VZjXdGAZCAwDHC"
-WEBHOOK_URL = "https://back.cryptorockets.net/api/v1/callbacks/ton"
+from app.config.config import get_config
 
-# Initialize SQLite DB
-conn = sqlite3.connect("./transactions.db")
+config = get_config()
+ADDRESS = config.scanner.SCANNER_WALLET
+WEBHOOK_URL = config.scanner.SCANNER_WEBHOOK_URL
+
+conn = sqlite3.connect("./db-data/transactions.db")
 cursor = conn.cursor()
-
-# Create table if not exists
-cursor.execute(
-    """
-CREATE TABLE IF NOT EXISTS transactions (
-    hash TEXT PRIMARY KEY
-)
-"""
-)
+cursor.execute("CREATE TABLE IF NOT EXISTS transactions (hash TEXT PRIMARY KEY)")
 conn.commit()
-
-headers = {
-    "accept": "application/json",
-}
-
-params = {
-    "address": ADDRESS,
-    "limit": "10",
-    "lt": "0",
-    "to_lt": "0",
-    "archival": "true",
-}
 
 print("Started scanning for transactions...")
 
 while True:
-    response = requests.get("https://toncenter.com/api/v2/getTransactions", params=params, headers=headers)
+    response = requests.get(
+        url="https://toncenter.com/api/v2/getTransactions",
+        headers={"accept": "application/json"},
+        params={
+            "address": ADDRESS,
+            "limit": "10",
+            "lt": "0",
+            "to_lt": "0",
+            "archival": "true",
+        },
+    )
 
     if response.status_code != 200:
         print(f"Error fetching transactions: {response.status_code=} {response.text=}")

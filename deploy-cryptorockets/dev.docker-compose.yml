@@ -40,7 +40,7 @@ services:
       - ../.env
     volumes:
       - ../:/usr/app/
-      - scanner-data:/usr/app/transactions.db
+      - scanner-data:/usr/app/db-data/
     networks:
       voiceover-network:
 

@@ -85,6 +85,11 @@ class AlertsConfig(_BaseSettings):
     ALERTS_TELEGRAM_CHAT_ID: int
 
 
+class ScannerConfig(_BaseSettings):
+    SCANNER_WEBHOOK_URL: str
+    SCANNER_WALLET: str
+
+
 class Config(_BaseSettings):
     auth: AuthConfig
     postgres: PostgresConfig
@@ -93,6 +98,7 @@ class Config(_BaseSettings):
     alerts: AlertsConfig
     bot: TelegramBotConfig
     prometheus: PrometheusConfig
+    scanner: ScannerConfig
 
 
 def get_config() -> Config:
@@ -104,4 +110,5 @@ def get_config() -> Config:
         alerts=AlertsConfig(),
         bot=TelegramBotConfig(),
         prometheus=PrometheusConfig(),
+        scanner=ScannerConfig(),
     )
