@@ -3,10 +3,15 @@ import time
 from datetime import datetime
 
 import requests
+import structlog
 
 from app.config.config import get_config
+from app.init.logs import setup_logs
 
 config = get_config()
+setup_logs(config=config.logs)
+logger = structlog.stdlib.get_logger()
+
 ADDRESS = config.scanner.SCANNER_WALLET
 WEBHOOK_URL = config.scanner.SCANNER_WEBHOOK_URL
 
@@ -15,7 +20,7 @@ cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS transactions (hash TEXT PRIMARY KEY)")
 conn.commit()
 
-print("Started scanning for transactions...")
+logger.info("Started scanning for transactions...")
 
 while True:
     response = requests.get(
@@ -31,7 +36,7 @@ while True:
     )
 
     if response.status_code != 200:
-        print(f"Error fetching transactions: {response.status_code=} {response.text=}")
+        logger.error(f"Error fetching transactions: {response.status_code=} {response.text=}")
         time.sleep(5)
         continue
 
@@ -52,15 +57,15 @@ while True:
             cursor.execute("INSERT INTO transactions (hash) VALUES (?)", (hash_,))
             conn.commit()
 
-            print(f"[{datetime.now()}] [{hash_}] Hash: {hash_}, Amount: {amount}, Payload: {payload}")
+            logger.info(f"[{datetime.now()}] [{hash_}] Hash: {hash_}, Amount: {amount}, Payload: {payload}")
 
             new_tx = {"hash": hash_, "amount": amount, "payload": payload}
 
-            print(f"[{datetime.now()}] [{hash_}] Sending {new_tx} to {WEBHOOK_URL}")
+            logger.info(f"[{datetime.now()}] [{hash_}] Sending {new_tx} to {WEBHOOK_URL}")
             webhook_resp = requests.post(url=WEBHOOK_URL, json=new_tx)
-            print(f"[{datetime.now()}] [{hash_}] Status {webhook_resp.status_code}, Response: {webhook_resp.text}")
+            logger.info(f"[{datetime.now()}] [{hash_}] Status {webhook_resp.status_code}, Response: {webhook_resp.text}")
 
         except (TypeError, KeyError):
-            print("Malformed transaction data:", tx)
+            logger.error("Malformed transaction data:", tx)
 
     time.sleep(2)  # Add a small delay to avoid hammering the API
