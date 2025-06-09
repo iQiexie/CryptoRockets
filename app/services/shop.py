@@ -13,6 +13,7 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.dto.shop.request import SHOP_ITEMS
+from app.api.dto.shop.request import ShopItem
 from app.api.dto.shop.response import UrlResponse
 from app.db.models import TransactionStatusEnum, TransactionTypeEnum
 from app.services.base.base import BaseService
@@ -68,9 +69,7 @@ class ShopService(BaseService):
             callback_data=data.callback_data,
         )
 
-    async def get_invoice_url(self, shop_item_id: int, current_user: WebappData) -> UrlResponse:
-        item = SHOP_ITEMS[shop_item_id]
-
+    async def _get_invoice_url_xtr(self, item: ShopItem, current_user: WebappData) -> UrlResponse:
         item_label = self.adapters.i18n.t(message=item.label, lang=current_user.language_code)
         description = self.adapters.i18n.t(message=item.description, lang=current_user.language_code)
 
@@ -84,3 +83,15 @@ class ShopService(BaseService):
 
         resp = await self.adapters.telegram.send_method(method="createInvoiceLink", params=params)
         return UrlResponse(url=resp["result"])
+
+    async def get_invoice_url(
+        self,
+        shop_item_id: int,
+        current_user: WebappData,
+        payment_method: str,
+) -> UrlResponse:
+        item = SHOP_ITEMS[shop_item_id]
+        if payment_method == "xtr":
+            return await self._get_invoice_url_xtr(item=item, current_user=current_user)
+
+        raise NotImplementedError

@@ -1,4 +1,6 @@
+from email.policy import default
 from typing import Annotated
+from typing import Literal
 
 from fastapi import APIRouter, Depends
 from redis.commands.search.query import Query
@@ -23,8 +25,13 @@ async def get_invoice_url(
     current_user: Annotated[WebappData, Depends(get_current_user)],
     service: Annotated[ShopService, Depends()],
     shop_item_id: int = Query(...),
+    payment_method: Literal["ton", "xtr", "token"] = Query(default="xtr"),
 ) -> UrlResponse:
-    return await service.get_invoice_url(shop_item_id=shop_item_id, current_user=current_user)
+    return await service.get_invoice_url(
+        current_user=current_user,
+        shop_item_id=shop_item_id,
+        payment_method=payment_method,
+    )
 
 
 @router.get(
