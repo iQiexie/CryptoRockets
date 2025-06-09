@@ -11,7 +11,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
     builder.row(
         InlineKeyboardButton(
             text="Привет!",
-            web_app=WebAppInfo(url="https://t.me/CryptoRockets_Bot/earn"),
+            web_app=WebAppInfo(url="https://cryptorockets.net/"),
         )
     )
 
