@@ -50,8 +50,6 @@ def send_webhook(data: WebhookData):
         time.sleep(retry_delay)
 
 
-
-
 def fetch_transactions():
     try:
         response = requests.get(

@@ -142,6 +142,7 @@ class ShopService(BaseService):
             return await self._get_invoice_url_xtr(item=item, current_user=current_user)
         if payment_method == "ton":
             cell = Cell()
+            cell.bits.write_uint(0, 32)  # op_code for text comment
             cell.bits.write_bytes(f"{current_user.telegram_id}:{shop_item_id}".encode('utf-8'))
             return UrlResponse(url=base64.b64encode(cell.to_boc()).decode())
 
