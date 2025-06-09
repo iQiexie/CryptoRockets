@@ -1,7 +1,7 @@
 import logging
 
-from pydantic import Field
-from pydantic import computed_field
+from pydantic import Field, computed_field
+
 from app.config.constants import REFERRAL_PREFIX
 from app.init.base_models import BaseModel
 
@@ -19,7 +19,7 @@ class WebappData(BaseModel):
 
     @computed_field
     def broadcast_param(self) -> str | None:
-        if 'broadcast' not in (self.start_param or ""):
+        if "broadcast" not in (self.start_param or ""):
             return None
 
         return self.start_param
@@ -30,7 +30,7 @@ class WebappData(BaseModel):
             return None
 
         try:
-            return int(self.start_param.replace('pilot_', ""))
+            return int(self.start_param.replace("pilot_", ""))
         except Exception as e:
             logging.error(f"Failed to parse referral from start_param: {self.start_param}, error: {e}")
             return None

@@ -3,8 +3,7 @@ from typing import Sequence
 from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Task, TaskUser
-from app.db.models import User
+from app.db.models import Task, TaskUser, User
 from app.db.repos.base.base import BaseRepo
 
 

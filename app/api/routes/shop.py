@@ -1,5 +1,4 @@
-from typing import Annotated
-from typing import Literal
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query
 from starlette import status

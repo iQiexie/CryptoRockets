@@ -1,4 +1,5 @@
 import os
+
 import structlog
 from pydantic_core import from_json
 

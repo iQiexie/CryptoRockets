@@ -82,7 +82,7 @@ class WheelPrizeEnum(str, Enum):
     ultra_rocket = "ultra_rocket"
 
     fuel = "fuel"
-    token = "token"
+    token = "token"  # noqa: S105
     usdt = "usdt"
     ton = "ton"
     wheel = "wheel"

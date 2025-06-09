@@ -11,9 +11,11 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
-from app.config.constants import ROCKET_CAPACITY_DEFAULT
-from app.config.constants import ROCKET_CAPACITY_OFFLINE
-from app.config.constants import ROCKET_CAPACITY_PREMIUM
+from app.config.constants import (
+    ROCKET_CAPACITY_DEFAULT,
+    ROCKET_CAPACITY_OFFLINE,
+    ROCKET_CAPACITY_PREMIUM,
+)
 from app.db.models import RocketTypeEnum
 from app.services.base.base import BaseService
 

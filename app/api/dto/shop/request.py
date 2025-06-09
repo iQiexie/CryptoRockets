@@ -74,4 +74,3 @@ _items = (
 
 
 SHOP_ITEMS = {i.id: i for i in _items}
-

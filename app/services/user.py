@@ -8,15 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from app.adapters.base import Adapters
-from app.api.dependencies.stubs import dependency_adapters
-from app.api.dependencies.stubs import dependency_session_factory
-from app.api.dependencies.stubs import placeholder
-from app.api.dto.base import PaginatedRequest
-from app.api.dto.base import PaginatedResponse
+from app.api.dependencies.stubs import (
+    dependency_adapters,
+    dependency_session_factory,
+    placeholder,
+)
+from app.api.dto.base import PaginatedRequest, PaginatedResponse
 from app.api.dto.user.request import UpdateUserRequest
 from app.api.dto.user.response import PublicUserResponse
-from app.db.models import RocketTypeEnum
-from app.db.models import User
+from app.db.models import RocketTypeEnum, User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -37,7 +37,9 @@ class UserService(BaseService):
 
     @BaseService.single_transaction
     async def get_referrals(
-        self, current_user: WebappData, pagination: PaginatedRequest,
+        self,
+        current_user: WebappData,
+        pagination: PaginatedRequest,
     ) -> PaginatedResponse[PublicUserResponse]:
         items = await self.repo.get_referrals(telegram_id=current_user.telegram_id, pagination=pagination)
         return self.paginate(response_model=PublicUserResponse, result=items, pagination=pagination)
@@ -107,8 +109,7 @@ class UserService(BaseService):
 
     async def handle_referral(self, referral_from: int, data: WebappData) -> None:
         rocket = await self.repos.game.get_rocket_for_update(
-            telegram_id=referral_from,
-            rocket_type=RocketTypeEnum.premium
+            telegram_id=referral_from, rocket_type=RocketTypeEnum.premium
         )
 
         current_fuel = rocket.fuel_capacity

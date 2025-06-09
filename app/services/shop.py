@@ -12,14 +12,16 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
-from app.api.dto.shop.request import SHOP_ITEMS
-from app.api.dto.shop.request import ShopItem
+from app.api.dto.shop.request import SHOP_ITEMS, ShopItem
 from app.api.dto.shop.response import UrlResponse
 from app.api.exceptions import ClientError
-from app.db.models import CurrenciesEnum
-from app.db.models import RocketTypeEnum
-from app.db.models import TransactionStatusEnum, TransactionTypeEnum
-from app.db.models import WheelPrizeEnum
+from app.db.models import (
+    CurrenciesEnum,
+    RocketTypeEnum,
+    TransactionStatusEnum,
+    TransactionTypeEnum,
+    WheelPrizeEnum,
+)
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 from app.services.dto.shop import PaymentCallbackDTO
@@ -69,7 +71,7 @@ class ShopService(BaseService):
         elif item.item in (WheelPrizeEnum.super_rocket, WheelPrizeEnum.mega_rocket, WheelPrizeEnum.ultra_rocket):
             _rocket = await self.repos.user.create_user_rocket(
                 user_id=data.telegram_id,
-                type=RocketTypeEnum[item.item.value.replace('_rocket', '')],
+                type=RocketTypeEnum[item.item.value.replace("_rocket", "")],
                 fuel_capacity=1,
                 current_fuel=1,
             )
@@ -109,7 +111,7 @@ class ShopService(BaseService):
         shop_item_id: int,
         current_user: WebappData,
         payment_method: str,
-) -> UrlResponse:
+    ) -> UrlResponse:
         item = SHOP_ITEMS[shop_item_id]
         if payment_method == "xtr":
             return await self._get_invoice_url_xtr(item=item, current_user=current_user)

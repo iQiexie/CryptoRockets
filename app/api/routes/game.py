@@ -4,15 +4,13 @@ from fastapi import APIRouter, Depends, Path
 from starlette import status
 
 from app.api.dependencies.auth import get_current_user
-from app.api.dto.game.request import UpdateRocketRequest
 from app.api.dto.game.response import (
     WHEEL_PRIZES,
     LatestWheelPrizeResponse,
     LaunchResponse,
     WheelPrizeResponse,
 )
-from app.api.dto.user.response import RocketResponse
-from app.db.models import Rocket, WheelPrize
+from app.db.models import WheelPrize
 from app.services.dto.auth import WebappData
 from app.services.game import GameService
 

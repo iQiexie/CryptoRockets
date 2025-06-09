@@ -12,7 +12,6 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
-from app.api.dto.game.request import UpdateRocketRequest
 from app.api.dto.game.response import (
     WHEEL_PRIZES,
     LaunchResponse,
@@ -20,18 +19,19 @@ from app.api.dto.game.response import (
     WheelPrizeResponse,
 )
 from app.api.exceptions import ClientError
-from app.config.constants import MAX_BALANCE
-from app.config.constants import ROCKET_CAPACITY_DEFAULT
-from app.config.constants import ROCKET_CAPACITY_OFFLINE
-from app.config.constants import ROCKET_CAPACITY_PREMIUM
+from app.config.constants import (
+    MAX_BALANCE,
+    ROCKET_CAPACITY_DEFAULT,
+    ROCKET_CAPACITY_OFFLINE,
+    ROCKET_CAPACITY_PREMIUM,
+)
 from app.db.models import (
     CurrenciesEnum,
-    Rocket,
     RocketTypeEnum,
     TransactionTypeEnum,
+    User,
     WheelPrize,
 )
-from app.db.models import User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -112,17 +112,17 @@ class GameService(BaseService):
     @staticmethod
     def get_balance_diff(user: User, currency: CurrenciesEnum) -> float:
         if user.usdt_balance + user.ton_balance < 1:
-            return round(random.uniform(8, 10), 2)
+            return round(random.uniform(8, 10), 2)  # noqa: S311
 
         current_balance = float(getattr(user, f"{currency.value}_balance"))
         jackpot_chance = 0.015
-        if random.random() < jackpot_chance:
+        if random.random() < jackpot_chance:  # noqa: S311
             if current_balance < MAX_BALANCE - 20:
-                return round(random.uniform(1.5, 3.0), 2)
+                return round(random.uniform(1.5, 3.0), 2)  # noqa: S311
             elif current_balance < MAX_BALANCE - 10:
-                return round(random.uniform(1, 2), 2)
+                return round(random.uniform(1, 2), 2)  # noqa: S311
             elif current_balance < MAX_BALANCE - 5:
-                return round(random.uniform(0.1, 0.5), 2)
+                return round(random.uniform(0.1, 0.5), 2)  # noqa: S311
 
         # Нормализуем баланс от 0 до 1
         progress = min(current_balance / 60, 1.0)
@@ -132,7 +132,7 @@ class GameService(BaseService):
         max_reward = 0.1 + (1 - progress) * 1  # от 0.1 до ~1.1
 
         # 🧮 Ограничиваем диапазон
-        reward = random.uniform(min_reward, max_reward)
+        reward = random.uniform(min_reward, max_reward)  # noqa: S311
         return round(min(reward, 2), 2)
 
     @BaseService.single_transaction

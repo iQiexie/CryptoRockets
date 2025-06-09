@@ -43,7 +43,7 @@ async def check_subscription(
     status_code=status.HTTP_200_OK,
     response_model=UserResponse,
 )
-async def check_subscription(
+async def check_invite(
     current_user: Annotated[WebappData, Depends(get_current_user)],
     service: Annotated[UserTaskService, Depends()],
     task_id: int = Path(...),

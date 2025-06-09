@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dto.base import PaginatedRequest
 from app.config.constants import (
     ROCKET_CAPACITY_DEFAULT,
-    ROCKET_CAPACITY_OFFLINE,
     ROCKET_CAPACITY_PREMIUM,
 )
 from app.db.models import Rocket, RocketTypeEnum, User
