@@ -47,7 +47,7 @@ class ShopService(BaseService):
         rocket_id = None
         item_price = getattr(item, f"{data.currency.value}_price", None)
 
-        if item_price != data.amount:
+        if item_price < data.amount:
             struct_log(
                 event="Payment amount mismatch",
                 item_id=item.id,
