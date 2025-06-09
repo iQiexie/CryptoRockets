@@ -123,6 +123,7 @@ class User(_TimestampMixin, Base):
     tg_photo_url: Mapped[str] = mapped_column(String, nullable=True)
     bot_banned: Mapped[bool] = mapped_column(Boolean, nullable=True)
     country: Mapped[str] = mapped_column(String, nullable=True)
+    address: Mapped[str] = mapped_column(String, nullable=True)
 
     ton_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     usdt_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
