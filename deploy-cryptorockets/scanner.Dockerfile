@@ -15,4 +15,4 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry install --only main
 
 COPY . ./
-ENTRYPOINT run scanner.py
+ENTRYPOINT python scanner.py
