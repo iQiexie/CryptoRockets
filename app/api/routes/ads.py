@@ -16,7 +16,9 @@ from app.api.dto.ads.response import AdsResponse
 from app.api.dto.base import PaginatedRequest, PaginatedResponse
 from app.api.dto.user.request import UpdateUserRequest
 from app.api.dto.user.response import PublicUserResponse, UserResponse
+from app.api.dto.user.response import RocketResponse
 from app.db.models import Advert
+from app.db.models import Rocket
 from app.db.models import User
 from app.services.ads import AdsService
 from app.services.dto.auth import WebappData
@@ -43,11 +45,11 @@ async def ads(
 @router.post(
     path="/offer/verify",
     status_code=status.HTTP_200_OK,
-    response_model=AdsResponse,
+    response_model=RocketResponse,
 )
 async def ads(
     current_user: Annotated[WebappData, Depends(get_current_user)],
     service: Annotated[AdsService, Depends()],
     data: AdCheckRequest
-) -> Advert:
+) -> Rocket:
     return await service.verify_offer(current_user=current_user, data=data)

@@ -16,6 +16,7 @@ from app.api.dto.ads.request import AdRequest
 from app.api.exceptions import ClientError
 from app.db.models import AdStatusEnum
 from app.db.models import Advert
+from app.db.models import Rocket
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -55,7 +56,7 @@ class AdsService(BaseService):
         return ad
 
     @BaseService.single_transaction
-    async def verify_offer(self, current_user: WebappData, data: AdCheckRequest) -> Advert:
+    async def verify_offer(self, current_user: WebappData, data: AdCheckRequest) -> Rocket:
         payload, hash_ = data.token.split("-")
         actual_hash_ = self.xor_encrypt(
             data=payload,
@@ -74,7 +75,8 @@ class AdsService(BaseService):
             rocket_id=ad.rocket_id,
         )
 
-        await self.repos.game.update_rocket(rocket_id=rocket.id, current_fuel=rocket.current_fuel + 40)
+        r = await self.repos.game.update_rocket(rocket_id=rocket.id, current_fuel=rocket.current_fuel + 1)
         await self.repo.update_ad(ad_id=data.id, status=AdStatusEnum.watched)
+        await self.session.refresh(r)
 
-        return ad
+        return r
