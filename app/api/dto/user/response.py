@@ -37,24 +37,20 @@ class UserResponse(BaseResponse):
     premium_rocket_received: datetime = Field(default=..., exclude=True)
 
     @computed_field()
-    def next_wheel_in(self) -> int:
-        at = self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
-        return int((at - datetime.utcnow()).total_seconds())
+    def next_wheel_at(self) -> datetime:
+        return self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
 
     @computed_field()
-    def next_default_rocket_in(self) -> int:
-        at = self.default_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_DEFAULT)
-        return int((at - datetime.utcnow()).total_seconds())
+    def next_default_rocket_at(self) -> datetime:
+        return self.default_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_DEFAULT)
 
     @computed_field()
-    def next_offline_rocket_in(self) -> int:
-        at = self.offline_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_OFFLINE)
-        return int((at - datetime.utcnow()).total_seconds())
+    def next_offline_rocket_at(self) -> datetime:
+        return self.offline_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_OFFLINE)
 
     @computed_field()
-    def next_premium_rocket_in(self) -> int:
-        at = self.premium_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_PREMIUM)
-        return int((at - datetime.utcnow()).total_seconds())
+    def next_premium_rocket_at(self) -> datetime:
+        return self.premium_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_PREMIUM)
 
     rockets: list[RocketResponse]
 
