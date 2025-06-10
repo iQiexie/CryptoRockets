@@ -36,23 +36,32 @@ class UserResponse(BaseResponse):
     offline_rocket_received: datetime = Field(default=..., exclude=True)
     premium_rocket_received: datetime = Field(default=..., exclude=True)
 
+    rockets: list[RocketResponse]
+
     @computed_field()
     def next_wheel_at(self) -> datetime:
         return self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
 
     @computed_field()
-    def next_default_rocket_at(self) -> datetime:
+    def next_default_rocket_at(self) -> datetime | None:
+        if RocketTypeEnum.default in [rocket.type for rocket in self.rockets]:
+            return None
+
         return self.default_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_DEFAULT)
 
     @computed_field()
-    def next_offline_rocket_at(self) -> datetime:
+    def next_offline_rocket_at(self) -> datetime | None:
+        if RocketTypeEnum.offline in [rocket.type for rocket in self.rockets]:
+            return None
+
         return self.offline_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_OFFLINE)
 
     @computed_field()
-    def next_premium_rocket_at(self) -> datetime:
-        return self.premium_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_PREMIUM)
+    def next_premium_rocket_at(self) -> datetime | None:
+        if RocketTypeEnum.premium in [rocket.type for rocket in self.rockets]:
+            return None
 
-    rockets: list[RocketResponse]
+        return self.premium_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_PREMIUM)
 
     @computed_field
     def referral(self) -> str:

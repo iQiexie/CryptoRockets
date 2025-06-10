@@ -57,7 +57,7 @@ class TaskService(BaseService):
             current_fuel=fuel_capacity if fool else 0,
         )
 
-    async def _give_offline_rocket(self, user: User) -> None:
+    async def grant_rocket(self, user: User) -> None:
         rockets_data = [
             dict(
                 type=RocketTypeEnum.default,
@@ -79,7 +79,7 @@ class TaskService(BaseService):
         existing_rockets = {rocket.type for rocket in user.rockets}
 
         if {i['type'].value for i in rockets_data}.issubset(existing_rockets):
-            logger.info(f"User {user.telegram_id} already has an offline rocket.")
+            logger.info(f"User {user.telegram_id} already has rockets.")
             return
 
         given_rockets = list()
@@ -126,7 +126,7 @@ class TaskService(BaseService):
 
         for user in users:
             try:
-                await self._give_offline_rocket(user)
+                await self.grant_rocket(user)
             except Exception as e:
                 logger.error(
                     event=f"Failed to give offline rocket to user {user.telegram_id}: {e}",

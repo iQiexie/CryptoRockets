@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from typing import Annotated
 
 import structlog
@@ -94,6 +95,7 @@ class UserService(BaseService):
             tg_is_premium=data.is_premium,
             tg_language_code=data.language_code,
             tg_photo_url=data.photo_url,
+            bot_banned=False,
         )
 
         if data.country:
@@ -103,7 +105,8 @@ class UserService(BaseService):
             user_data["last_broadcast_key"] = data.broadcast_param
 
         if user:
-            user = await self.repo.update_user(telegram_id=user.telegram_id, bot_banned=False, **user_data)
+            await self.services.task.grant_rocket(user=user)
+            user = await self.repo.update_user(telegram_id=user.telegram_id, **user_data)
             await self.session.commit()
             await self.session.refresh(user)
             return user
