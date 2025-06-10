@@ -148,11 +148,11 @@ class GameService(BaseService):
         if not rocket.enabled:
             raise ClientError(message="Rocket is not enabled")
 
-        currency = random.choice([CurrenciesEnum.usdt, CurrenciesEnum.ton])  # noqa: S311
+        currency = random.choice([CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token])  # noqa: S311
         user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
         balance_diff = self.get_balance_diff(user=user, currency=currency)
 
-        balance_changes = await self.services.transaction.change_user_balance(
+        await self.services.transaction.change_user_balance(
             telegram_id=current_user.telegram_id,
             currency=currency,
             amount=balance_diff,
@@ -161,8 +161,4 @@ class GameService(BaseService):
 
         await self.repo.update_rocket(rocket_id=rocket.id, enabled=False, current_fuel=0)
 
-        return LaunchResponse(
-            **{
-                f"new_balance_{currency.value}": getattr(balance_changes.user, f"{currency.value}_balance"),
-            },
-        )
+        return LaunchResponse(**{currency.value: balance_diff})

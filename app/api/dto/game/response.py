@@ -24,8 +24,9 @@ class LatestWheelPrizeResponse(BaseResponse):
 
 
 class LaunchResponse(BaseResponse):
-    new_balance_usdt: float | None = None
-    new_balance_ton: float | None = None
+    usdt: float | None = None
+    ton: float | None = None
+    token: float | None = None
 
 
 WHEEL_PRIZES = [
