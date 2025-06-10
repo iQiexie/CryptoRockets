@@ -161,6 +161,8 @@ class User(_TimestampMixin, Base):
         server_default=func.now(),
     )
 
+    has_spins: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+
     rockets: Mapped[list["Rocket"]] = relationship(
         "Rocket",
         primaryjoin="and_(User.telegram_id == Rocket.user_id, Rocket.enabled == True)",

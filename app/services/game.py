@@ -56,7 +56,7 @@ class GameService(BaseService):
 
     @BaseService.single_transaction
     async def spin_wheel(self, current_user: WebappData) -> WheelPrizeResponse:
-        await self.services.transaction.change_user_balance(
+        balance_data = await self.services.transaction.change_user_balance(
             telegram_id=current_user.telegram_id,
             currency=CurrenciesEnum.wheel,
             amount=-1,
@@ -69,6 +69,12 @@ class GameService(BaseService):
             k=1,
         )[0]
 
+        try:
+            if not balance_data.user.has_spins:
+                prize = [i for i in WHEEL_PRIZES if i.type == WheelPrizeEnum.ton and i.amount == 1][0]
+        except IndexError:
+            logger.error(f"First spin for 1 ton not found: {WHEEL_PRIZES=}")
+
         if prize.type in (WheelPrizeEnum.token, WheelPrizeEnum.usdt, WheelPrizeEnum.ton, WheelPrizeEnum.wheel):
             await self.services.transaction.change_user_balance(
                 telegram_id=current_user.telegram_id,
@@ -76,29 +82,17 @@ class GameService(BaseService):
                 amount=prize.amount,
                 tx_type=TransactionTypeEnum.wheel_spin,
             )
-        elif prize.type == WheelPrizeEnum.default_rocket:
-            await self.repos.user.create_user_rocket(
+        elif prize.type in (WheelPrizeEnum.default_rocket, WheelPrizeEnum.offline_rocket, WheelPrizeEnum.premium_rocket):
+            _rocket = await self.repos.user.create_user_rocket(
                 user_id=current_user.telegram_id,
-                type=RocketTypeEnum.default,
-                fuel_capacity=ROCKET_CAPACITY_DEFAULT,
-                current_fuel=ROCKET_CAPACITY_DEFAULT,
-            )
-        elif prize.type == WheelPrizeEnum.offline_rocket:
-            await self.repos.user.create_user_rocket(
-                user_id=current_user.telegram_id,
-                type=RocketTypeEnum.offline,
-                fuel_capacity=ROCKET_CAPACITY_OFFLINE,
-                current_fuel=ROCKET_CAPACITY_OFFLINE,
-            )
-        elif prize.type == WheelPrizeEnum.premium_rocket:
-            await self.repos.user.create_user_rocket(
-                user_id=current_user.telegram_id,
-                type=RocketTypeEnum.premium,
-                fuel_capacity=ROCKET_CAPACITY_PREMIUM,
-                current_fuel=ROCKET_CAPACITY_PREMIUM,
+                type=RocketTypeEnum[prize.type.value.replace("_rocket", "")],
+                fuel_capacity=1,
+                current_fuel=1,
             )
         else:
             raise NotImplementedError(f"Prize type {prize.type} is not implemented")
+
+        await self.repos.user.update_user(telegram_id=current_user.telegram_id, has_spins=True)
 
         await self.repo.create_prize(
             user_id=current_user.telegram_id,
