@@ -5,6 +5,9 @@ from pydantic import ConfigDict, Field, computed_field
 
 from app.api.dto.base import BaseResponse
 from app.config.constants import BOT_NAME, REFERRAL_PREFIX, WEBAPP_NAME
+from app.config.constants import ROCKET_TIMEOUT_DEFAULT
+from app.config.constants import ROCKET_TIMEOUT_OFFLINE
+from app.config.constants import ROCKET_TIMEOUT_PREMIUM
 from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import RocketTypeEnum
 
@@ -29,11 +32,29 @@ class UserResponse(BaseResponse):
     wheel_balance: float
     payment_address: str = "UQA824RWvHtNCPlMp-mRA1u3geuf98zyt4VZjXdGAZCAwDHC"
     wheel_received: datetime = Field(default=..., exclude=True)
+    default_rocket_received: datetime = Field(default=..., exclude=True)
+    offline_rocket_received: datetime = Field(default=..., exclude=True)
+    premium_rocket_received: datetime = Field(default=..., exclude=True)
 
     @computed_field()
     def next_wheel_in(self) -> int:
         at = self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
-        return int((at - datetime.now()).total_seconds())
+        return int((at - datetime.utcnow()).total_seconds())
+
+    @computed_field()
+    def next_default_rocket_in(self) -> int:
+        at = self.default_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_DEFAULT)
+        return int((at - datetime.utcnow()).total_seconds())
+
+    @computed_field()
+    def next_offline_rocket_in(self) -> int:
+        at = self.offline_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_OFFLINE)
+        return int((at - datetime.utcnow()).total_seconds())
+
+    @computed_field()
+    def next_premium_rocket_in(self) -> int:
+        at = self.premium_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_PREMIUM)
+        return int((at - datetime.utcnow()).total_seconds())
 
     rockets: list[RocketResponse]
 

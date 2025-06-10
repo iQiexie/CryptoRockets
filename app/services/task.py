@@ -1,5 +1,6 @@
 import traceback
 from datetime import datetime
+from datetime import timedelta
 from typing import Annotated
 
 import structlog
@@ -18,6 +19,9 @@ from app.config.constants import (
     ROCKET_CAPACITY_OFFLINE,
     ROCKET_CAPACITY_PREMIUM,
 )
+from app.config.constants import ROCKET_TIMEOUT_DEFAULT
+from app.config.constants import ROCKET_TIMEOUT_OFFLINE
+from app.config.constants import ROCKET_TIMEOUT_PREMIUM
 from app.db.models import CurrenciesEnum
 from app.db.models import RocketTypeEnum
 from app.db.models import User
@@ -54,30 +58,67 @@ class TaskService(BaseService):
         )
 
     async def _give_offline_rocket(self, user: User) -> None:
-        for rocket in user.rockets:
-            if rocket.type == RocketTypeEnum.offline:
-                logger.info(f"User {user.telegram_id} already has an offline rocket.")
-                return
+        rockets_data = [
+            dict(
+                type=RocketTypeEnum.default,
+                fuel_capacity=ROCKET_CAPACITY_DEFAULT,
+                timeout=ROCKET_TIMEOUT_DEFAULT,
+            ),
+            dict(
+                type=RocketTypeEnum.offline,
+                fuel_capacity=ROCKET_CAPACITY_OFFLINE,
+                timeout=ROCKET_TIMEOUT_OFFLINE,
+            ),
+            dict(
+                type=RocketTypeEnum.premium,
+                fuel_capacity=ROCKET_CAPACITY_PREMIUM,
+                timeout=ROCKET_TIMEOUT_PREMIUM,
+            ),
+        ]
+
+        existing_rockets = {rocket.type for rocket in user.rockets}
+
+        if {i['type'].value for i in rockets_data}.issubset(existing_rockets):
+            logger.info(f"User {user.telegram_id} already has an offline rocket.")
+            return
+
+        given_rockets = list()
 
         async with self.repo.transaction() as t:
-            await self.repos.user.create_user_rocket(
-                type=RocketTypeEnum.offline,
-                user_id=user.telegram_id,
-                fuel_capacity=ROCKET_CAPACITY_OFFLINE,
-                current_fuel=ROCKET_CAPACITY_OFFLINE,
-            )
+            for rocket in rockets_data:
+                if rocket['type'].value in existing_rockets:
+                    continue
 
-            await self.repos.user.update_user(
-                telegram_id=user.telegram_id,
-                offline_rocket_received=datetime.utcnow(),
-            )
+                last_received = getattr(user, f"{rocket['type'].value}_rocket_received")
+                next_receive = last_received + timedelta(minutes=rocket['timeout'])
+                if next_receive > datetime.utcnow():
+                    continue
+
+                logger.info(f"Giving {rocket['type'].value} rocket to user {user.telegram_id}")
+
+                await self.repos.user.create_user_rocket(
+                    type=rocket['type'],
+                    user_id=user.telegram_id,
+                    fuel_capacity=rocket['fuel_capacity'],
+                    current_fuel=0,
+                )
+
+                await self.repos.user.update_user(
+                    **{
+                        'telegram_id': user.telegram_id,
+                        f"{rocket['type'].value}_rocket_received": datetime.utcnow(),
+                    }
+                )
+
+                given_rockets.append(rocket['type'].value)
 
             await t.commit()
 
-        await self.adapters.bot.send_menu(
-            user=user,
-            custom_text=self.adapters.i18n.t("task.offline_rocket_given", user.tg_language_code)
-        )
+        if RocketTypeEnum.premium in given_rockets:
+            await self.adapters.bot.send_menu(
+                user=user,
+                custom_text=self.adapters.i18n.t("task.premium_rocket_given", user.tg_language_code)
+            )
 
     async def give_offline_rocket(self) -> None:
         async with self.repo.transaction():

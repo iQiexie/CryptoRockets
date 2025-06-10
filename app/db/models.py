@@ -137,7 +137,19 @@ class User(_TimestampMixin, Base):
         ForeignKey("users.telegram_id", ondelete="CASCADE"), nullable=True, index=True
     )
 
+    default_rocket_received: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP,
+        default=datetime.datetime.utcnow,
+        server_default=func.now(),
+    )
+
     offline_rocket_received: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP,
+        default=datetime.datetime.utcnow,
+        server_default=func.now(),
+    )
+
+    premium_rocket_received: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP,
         default=datetime.datetime.utcnow,
         server_default=func.now(),
