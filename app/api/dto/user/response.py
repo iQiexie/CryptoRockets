@@ -30,8 +30,9 @@ class UserResponse(BaseResponse):
     wheel_received: datetime = Field(default=..., exclude=True)
 
     @computed_field()
-    def next_wheel_at(self) -> datetime:
-        return self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
+    def next_wheel_in(self) -> int:
+        at = self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
+        return int((at - datetime.now()).total_seconds())
 
     rockets: list[RocketResponse]
 
