@@ -19,12 +19,7 @@ from app.api.dto.game.response import (
     WheelPrizeResponse,
 )
 from app.api.exceptions import ClientError
-from app.config.constants import (
-    MAX_BALANCE,
-    ROCKET_CAPACITY_DEFAULT,
-    ROCKET_CAPACITY_OFFLINE,
-    ROCKET_CAPACITY_PREMIUM,
-)
+from app.config.constants import MAX_BALANCE
 from app.db.models import (
     CurrenciesEnum,
     RocketTypeEnum,
@@ -82,7 +77,11 @@ class GameService(BaseService):
                 amount=prize.amount,
                 tx_type=TransactionTypeEnum.wheel_spin,
             )
-        elif prize.type in (WheelPrizeEnum.default_rocket, WheelPrizeEnum.offline_rocket, WheelPrizeEnum.premium_rocket):
+        elif prize.type in (
+            WheelPrizeEnum.default_rocket,
+            WheelPrizeEnum.offline_rocket,
+            WheelPrizeEnum.premium_rocket,
+        ):
             _rocket = await self.repos.user.create_user_rocket(
                 user_id=current_user.telegram_id,
                 type=RocketTypeEnum[prize.type.value.replace("_rocket", "")],

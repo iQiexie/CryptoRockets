@@ -1,14 +1,17 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from pydantic import ConfigDict, Field, computed_field
 
 from app.api.dto.base import BaseResponse
-from app.config.constants import BOT_NAME, REFERRAL_PREFIX, WEBAPP_NAME
-from app.config.constants import ROCKET_TIMEOUT_DEFAULT
-from app.config.constants import ROCKET_TIMEOUT_OFFLINE
-from app.config.constants import ROCKET_TIMEOUT_PREMIUM
-from app.config.constants import WHEEL_TIMEOUT
+from app.config.constants import (
+    BOT_NAME,
+    REFERRAL_PREFIX,
+    ROCKET_TIMEOUT_DEFAULT,
+    ROCKET_TIMEOUT_OFFLINE,
+    ROCKET_TIMEOUT_PREMIUM,
+    WEBAPP_NAME,
+    WHEEL_TIMEOUT,
+)
 from app.db.models import RocketTypeEnum
 
 

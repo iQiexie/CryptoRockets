@@ -1,8 +1,5 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.types import WebAppInfo
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-from app.telegram.dto import Callback, CallbackActions
 
 
 def main_menu_keyboard(utm_source: str | None = None) -> InlineKeyboardMarkup:

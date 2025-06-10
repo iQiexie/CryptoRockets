@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 from typing import Annotated
 
 import structlog

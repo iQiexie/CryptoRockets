@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from app.adapters.base import Adapters
 
 if TYPE_CHECKING:
+    from app.services.ads import AdsService
     from app.services.auth import AuthService
     from app.services.game import GameService
     from app.services.shop import ShopService
@@ -14,7 +15,6 @@ if TYPE_CHECKING:
     from app.services.user import UserService
     from app.services.user_task import UserTaskService
     from app.services.websocket import WebsocketService
-    from app.services.ads import AdsService
 
 
 class Services:

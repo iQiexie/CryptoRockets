@@ -1,12 +1,8 @@
-from sqlalchemy import select
-from sqlalchemy import update
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dto.base import PaginatedRequest
-from app.config.constants import (
-    ROCKET_CAPACITY_DEFAULT,
-    ROCKET_CAPACITY_PREMIUM,
-)
+from app.config.constants import ROCKET_CAPACITY_DEFAULT, ROCKET_CAPACITY_PREMIUM
 from app.db.models import Rocket, RocketTypeEnum, User
 from app.db.repos.base.base import BaseRepo, PaginatedResult
 

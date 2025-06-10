@@ -23,14 +23,13 @@ from app.db.models import (
     RocketTypeEnum,
     TransactionStatusEnum,
     TransactionTypeEnum,
+    User,
     WheelPrizeEnum,
 )
-from app.db.models import User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 from app.services.dto.shop import PaymentCallbackDTO
-from app.services.dto.websocket import WSMessage
-from app.services.dto.websocket import WsEventsEnum
+from app.services.dto.websocket import WsEventsEnum, WSMessage
 from app.utils import struct_log
 
 logger = structlog.stdlib.get_logger()
@@ -113,7 +112,7 @@ class ShopService(BaseService):
             message=WSMessage(
                 event=WsEventsEnum.purchase,
                 telegram_id=data.telegram_id,
-                message=dict(user=UserResponse.model_validate(user).model_dump(by_alias=True))
+                message=dict(user=UserResponse.model_validate(user).model_dump(by_alias=True)),
             )
         )
 
@@ -143,7 +142,7 @@ class ShopService(BaseService):
         if payment_method == "ton":
             cell = Cell()
             cell.bits.write_uint(0, 32)  # op_code for text comment
-            cell.bits.write_bytes(f"{current_user.telegram_id};{shop_item_id}".encode('utf-8'))
+            cell.bits.write_bytes(f"{current_user.telegram_id};{shop_item_id}".encode("utf-8"))
             return UrlResponse(url=base64.b64encode(cell.to_boc()).decode())
 
         raise NotImplementedError

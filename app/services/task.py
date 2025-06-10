@@ -1,6 +1,5 @@
 import traceback
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Annotated
 
 import structlog
@@ -18,13 +17,11 @@ from app.config.constants import (
     ROCKET_CAPACITY_DEFAULT,
     ROCKET_CAPACITY_OFFLINE,
     ROCKET_CAPACITY_PREMIUM,
+    ROCKET_TIMEOUT_DEFAULT,
+    ROCKET_TIMEOUT_OFFLINE,
+    ROCKET_TIMEOUT_PREMIUM,
 )
-from app.config.constants import ROCKET_TIMEOUT_DEFAULT
-from app.config.constants import ROCKET_TIMEOUT_OFFLINE
-from app.config.constants import ROCKET_TIMEOUT_PREMIUM
-from app.db.models import CurrenciesEnum
-from app.db.models import RocketTypeEnum
-from app.db.models import User
+from app.db.models import CurrenciesEnum, RocketTypeEnum, User
 from app.services.base.base import BaseService
 
 logger = structlog.stdlib.get_logger()
@@ -78,7 +75,7 @@ class TaskService(BaseService):
 
         existing_rockets = {rocket.type for rocket in user.rockets}
 
-        if {i['type'].value for i in rockets_data}.issubset(existing_rockets):
+        if {i["type"].value for i in rockets_data}.issubset(existing_rockets):
             logger.info(f"User {user.telegram_id} already has rockets.")
             return
 
@@ -86,38 +83,37 @@ class TaskService(BaseService):
 
         async with self.repo.transaction() as t:
             for rocket in rockets_data:
-                if rocket['type'].value in existing_rockets:
+                if rocket["type"].value in existing_rockets:
                     continue
 
                 last_received = getattr(user, f"{rocket['type'].value}_rocket_received")
-                next_receive = last_received + timedelta(minutes=rocket['timeout'])
+                next_receive = last_received + timedelta(minutes=rocket["timeout"])
                 if next_receive > datetime.utcnow():
                     continue
 
                 logger.info(f"Giving {rocket['type'].value} rocket to user {user.telegram_id}")
 
                 await self.repos.user.create_user_rocket(
-                    type=rocket['type'],
+                    type=rocket["type"],
                     user_id=user.telegram_id,
-                    fuel_capacity=rocket['fuel_capacity'],
+                    fuel_capacity=rocket["fuel_capacity"],
                     current_fuel=0,
                 )
 
                 await self.repos.user.update_user(
                     **{
-                        'telegram_id': user.telegram_id,
+                        "telegram_id": user.telegram_id,
                         f"{rocket['type'].value}_rocket_received": datetime.utcnow(),
                     }
                 )
 
-                given_rockets.append(rocket['type'].value)
+                given_rockets.append(rocket["type"].value)
 
             await t.commit()
 
         if RocketTypeEnum.premium in given_rockets:
             await self.adapters.bot.send_menu(
-                user=user,
-                custom_text=self.adapters.i18n.t("task.premium_rocket_given", user.tg_language_code)
+                user=user, custom_text=self.adapters.i18n.t("task.premium_rocket_given", user.tg_language_code)
             )
 
     async def give_offline_rocket(self) -> None:
@@ -130,7 +126,7 @@ class TaskService(BaseService):
             except Exception as e:
                 logger.error(
                     event=f"Failed to give offline rocket to user {user.telegram_id}: {e}",
-                    exception=traceback.format_exception(e)
+                    exception=traceback.format_exception(e),
                 )
 
     async def _give_wheel(self, user: User) -> None:
@@ -144,8 +140,7 @@ class TaskService(BaseService):
             await t.commit()
 
         await self.adapters.bot.send_menu(
-            user=user,
-            custom_text=self.adapters.i18n.t("task.wheel_given", user.tg_language_code)
+            user=user, custom_text=self.adapters.i18n.t("task.wheel_given", user.tg_language_code)
         )
 
     async def give_wheel(self) -> None:
@@ -158,5 +153,5 @@ class TaskService(BaseService):
             except Exception as e:
                 logger.error(
                     event=f"Failed to give wheel to user {user.telegram_id}: {e}",
-                    exception=traceback.format_exception(e)
+                    exception=traceback.format_exception(e),
                 )

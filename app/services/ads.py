@@ -1,4 +1,5 @@
 from typing import Annotated
+
 import structlog
 from fastapi.params import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,12 +12,9 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
-from app.api.dto.ads.request import AdCheckRequest
-from app.api.dto.ads.request import AdRequest
+from app.api.dto.ads.request import AdCheckRequest, AdRequest
 from app.api.exceptions import ClientError
-from app.db.models import AdStatusEnum
-from app.db.models import Advert
-from app.db.models import Rocket
+from app.db.models import AdStatusEnum, Advert, Rocket
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -58,10 +56,7 @@ class AdsService(BaseService):
     @BaseService.single_transaction
     async def verify_offer(self, current_user: WebappData, data: AdCheckRequest) -> Rocket:
         payload, hash_ = data.token.split("-")
-        actual_hash_ = self.xor_encrypt(
-            data=payload,
-            key=f'rocket_type_{current_user.telegram_id}_{data.id}'
-        )
+        actual_hash_ = self.xor_encrypt(data=payload, key=f"rocket_type_{current_user.telegram_id}_{data.id}")
 
         if hash_ != actual_hash_:
             raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
