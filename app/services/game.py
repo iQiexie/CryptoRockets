@@ -135,6 +135,34 @@ class GameService(BaseService):
         reward = random.uniform(min_reward, max_reward)  # noqa: S311
         return round(min(reward, 2), 2)
 
+    async def _handle_regular_rocket(self, user: User) -> LaunchResponse:
+        currency = random.choice([CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token])  # noqa: S311
+        balance_diff = self.get_balance_diff(user=user, currency=currency)
+
+        await self.services.transaction.change_user_balance(
+            telegram_id=user.telegram_id,
+            currency=currency,
+            amount=balance_diff,
+            tx_type=TransactionTypeEnum.rocket_launch,
+        )
+
+        return LaunchResponse(**{currency.value: balance_diff})
+
+    async def _handle_premium_rocket(self, user: User) -> LaunchResponse:
+        resp = dict()
+
+        for currency in (CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token):
+            balance_diff = self.get_balance_diff(user=user, currency=currency)
+            await self.services.transaction.change_user_balance(
+                telegram_id=user.telegram_id,
+                currency=currency,
+                amount=balance_diff,
+                tx_type=TransactionTypeEnum.rocket_launch,
+            )
+            resp[currency.value] = balance_diff
+
+        return LaunchResponse(**resp)
+
     @BaseService.single_transaction
     async def launch_rocket(self, current_user: WebappData, rocket_id: int) -> LaunchResponse:
         rocket = await self.repo.get_rocket_for_update(rocket_id=rocket_id, telegram_id=current_user.telegram_id)
@@ -148,17 +176,13 @@ class GameService(BaseService):
         if not rocket.enabled:
             raise ClientError(message="Rocket is not enabled")
 
-        currency = random.choice([CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token])  # noqa: S311
         user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
-        balance_diff = self.get_balance_diff(user=user, currency=currency)
 
-        await self.services.transaction.change_user_balance(
-            telegram_id=current_user.telegram_id,
-            currency=currency,
-            amount=balance_diff,
-            tx_type=TransactionTypeEnum.rocket_launch,
-        )
+        if rocket.type == RocketTypeEnum.premium:
+            resp = await self._handle_premium_rocket(user=user)
+        else:
+            resp = await self._handle_regular_rocket(user=user)
 
         await self.repo.update_rocket(rocket_id=rocket.id, enabled=False, current_fuel=0)
 
-        return LaunchResponse(**{currency.value: balance_diff})
+        return resp
