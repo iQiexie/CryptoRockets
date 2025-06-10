@@ -36,6 +36,10 @@ class UserService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
+    async def set_seen(self, current_user: WebappData) -> None:
+        await self.repo.set_seen(telegram_id=current_user.telegram_id)
+
+    @BaseService.single_transaction
     async def get_referrals(
         self,
         current_user: WebappData,

@@ -17,6 +17,7 @@ class RocketResponse(BaseResponse):
     fuel_capacity: int
     current_fuel: int
     enabled: bool
+    seen: bool
 
 
 class UserResponse(BaseResponse):

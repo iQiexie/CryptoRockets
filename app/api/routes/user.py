@@ -61,6 +61,14 @@ async def get_referrals(
     return await service.get_referrals(current_user=current_user, pagination=pagination)
 
 
+@router.post(path="/user/seen", status_code=status.HTTP_200_OK)
+async def set_seen(
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+    service: Annotated[UserService, Depends()],
+) -> None:
+    return await service.set_seen(current_user=current_user)
+
+
 @router.websocket(path="/user/ws")
 async def connect_websocket(
     user_service: Annotated[UserService, Depends()],

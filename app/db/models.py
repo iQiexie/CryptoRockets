@@ -168,6 +168,7 @@ class Rocket(_TimestampMixin, Base):
     fuel_capacity: Mapped[int] = mapped_column(Integer)
     current_fuel: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    seen: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
 
     user: Mapped[User] = relationship(back_populates="rockets")
 

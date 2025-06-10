@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dto.base import PaginatedRequest
@@ -64,3 +65,7 @@ class UserRepo(BaseRepo):
     async def get_referrals(self, telegram_id: int, pagination: PaginatedRequest) -> PaginatedResult[User]:
         stmt = select(User).where(User.referral_from == telegram_id)
         return await self.paginate(stmt=stmt, pagination=pagination, count=User.id)
+
+    async def set_seen(self, telegram_id: int) -> None:
+        stmt = update(Rocket).where(Rocket.user_id == telegram_id).values(seen=True)
+        await self.session.execute(stmt)
