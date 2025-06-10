@@ -52,12 +52,10 @@ class UserTaskService(BaseService):
         await self.repo.create_user_task(task_id=task.id, telegram_id=telegram_id)
 
         if task.rocket_data:
-            rocket = await self.repos.game.get_rocket(rocket_type=task.rocket_data["type"])
-            fuel = rocket.fuel_capacity if task.rocket_data["full"] else 0
             await self.services.game.give_rocket(
                 telegram_id=telegram_id,
                 rocket_type=task.rocket_data["type"],
-                fuel=fuel,
+                full=task.rocket_data["full"],
             )
         else:
             await self.services.transaction.change_user_balance(

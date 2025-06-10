@@ -43,7 +43,7 @@ class TaskService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
-    async def give_rocket(self, rocket_type: RocketTypeEnum, fool: bool, telegram_id: int) -> None:
+    async def give_rocket(self, rocket_type: RocketTypeEnum, full: bool, telegram_id: int) -> None:
         fuel_capacity = {
             RocketTypeEnum.default: ROCKET_CAPACITY_DEFAULT,
             RocketTypeEnum.offline: ROCKET_CAPACITY_OFFLINE,
@@ -54,7 +54,7 @@ class TaskService(BaseService):
             type=rocket_type,
             user_id=telegram_id,
             fuel_capacity=fuel_capacity,
-            current_fuel=fuel_capacity if fool else 0,
+            current_fuel=fuel_capacity if full else 0,
         )
 
     async def grant_rocket(self, user: User) -> None:

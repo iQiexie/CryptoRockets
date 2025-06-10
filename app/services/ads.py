@@ -36,13 +36,13 @@ class AdsService(BaseService):
         self.adapters = adapters
 
     @staticmethod
-    def xor_encrypt(data: str, key: str) -> bytes:
+    def xor_encrypt(data: str, key: str) -> str:
         # SEE https://chatgpt.com/share/6847287d-8eec-8006-b40b-e96a140bfcc2
 
         data_bytes = data.encode()
         key_bytes = key.encode()
         encrypted = bytes(b ^ key_bytes[i % len(key_bytes)] for i, b in enumerate(data_bytes))
-        return encrypted
+        return encrypted.hex()
 
     @BaseService.single_transaction
     async def create_ad(self, data: AdRequest, current_user: WebappData) -> Advert:
@@ -61,7 +61,7 @@ class AdsService(BaseService):
         actual_hash_ = self.xor_encrypt(
             data=payload,
             key=f'rocket_type_{current_user.telegram_id}_{data.id}'
-        ).hex()
+        )
 
         if hash_ != actual_hash_:
             raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
