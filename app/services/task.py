@@ -1,3 +1,5 @@
+import traceback
+from datetime import datetime
 from typing import Annotated
 
 import structlog
@@ -17,6 +19,7 @@ from app.config.constants import (
     ROCKET_CAPACITY_PREMIUM,
 )
 from app.db.models import RocketTypeEnum
+from app.db.models import User
 from app.services.base.base import BaseService
 
 logger = structlog.stdlib.get_logger()
@@ -31,7 +34,7 @@ class TaskService(BaseService):
     ):
         super().__init__(session_factory=session_factory, adapters=adapters, session=session)
 
-        self.repo = self.repos.user
+        self.repo = self.repos.task
         self.adapters = adapters
 
     @BaseService.single_transaction
@@ -42,9 +45,48 @@ class TaskService(BaseService):
             RocketTypeEnum.premium: ROCKET_CAPACITY_PREMIUM,
         }[rocket_type]
 
-        await self.repo.create_user_rocket(
+        await self.repos.user.create_user_rocket(
             type=rocket_type,
             user_id=telegram_id,
             fuel_capacity=fuel_capacity,
             current_fuel=fuel_capacity if fool else 0,
         )
+
+    async def _give_offline_rocket(self, user: User) -> None:
+        for rocket in user.rockets:
+            if rocket.type == RocketTypeEnum.offline:
+                logger.info(f"User {user.telegram_id} already has an offline rocket.")
+                return
+
+        async with self.repo.transaction() as t:
+            await self.repos.user.create_user_rocket(
+                type=RocketTypeEnum.offline,
+                user_id=user.telegram_id,
+                fuel_capacity=ROCKET_CAPACITY_OFFLINE,
+                current_fuel=ROCKET_CAPACITY_OFFLINE,
+            )
+
+            await self.repos.user.update_user(
+                telegram_id=user.telegram_id,
+                offline_rocket_received=datetime.utcnow(),
+            )
+
+            await t.commit()
+
+        await self.adapters.bot.send_menu(
+            user=user,
+            custom_text=self.adapters.i18n.t("task.offline_rocket_given", user.tg_language_code)
+        )
+
+    async def give_offline_rocket(self) -> None:
+        async with self.repo.transaction():
+            users = await self.repo.get_offline_rocket_users()
+
+        for user in users:
+            try:
+                await self._give_offline_rocket(user)
+            except Exception as e:
+                logger.error(
+                    event=f"Failed to give offline rocket to user {user.telegram_id}: {e}",
+                    exception=traceback.format_exception(e)
+                )

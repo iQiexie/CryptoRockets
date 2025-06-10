@@ -6,6 +6,7 @@ from app.db.repos.transaction import TransactionRepo
 from app.db.repos.user import UserRepo
 from app.db.repos.user_task import UserTaskRepo
 from app.db.repos.ads import AdsRepo
+from app.db.repos.task import TaskRepo
 
 
 class Repos:
@@ -15,6 +16,10 @@ class Repos:
     @property
     def user(self) -> UserRepo:
         return UserRepo(session=self.session)
+
+    @property
+    def task(self) -> TaskRepo:
+        return TaskRepo(session=self.session)
 
     @property
     def game(self) -> GameRepo:

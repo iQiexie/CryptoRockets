@@ -137,6 +137,18 @@ class User(_TimestampMixin, Base):
         ForeignKey("users.telegram_id", ondelete="CASCADE"), nullable=True, index=True
     )
 
+    offline_rocket_received: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP,
+        default=datetime.datetime.utcnow,
+        server_default=func.now(),
+    )
+
+    wheel_received: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP,
+        default=datetime.datetime.utcnow,
+        server_default=func.now(),
+    )
+
     rockets: Mapped[list["Rocket"]] = relationship(
         "Rocket",
         primaryjoin="and_(User.telegram_id == Rocket.user_id, Rocket.enabled == True)",
@@ -252,3 +264,11 @@ class Advert(_TimestampMixin, Base):
     provider: Mapped[str] = mapped_column(String)
     status: Mapped[AdStatusEnum] = mapped_column(String)
     rocket_id: Mapped[int] = mapped_column(ForeignKey("rockets.id"), nullable=True)
+
+
+# class BroadcastLog(_TimestampMixin, Base):
+#     __tablename__ = "broadcast_logs"
+#
+#     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+#     user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"))
+#     broadcast_key: Mapped[str] = mapped_column(String)

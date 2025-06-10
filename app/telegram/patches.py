@@ -66,11 +66,16 @@ class Bot(_Bot):
         await self._setup_webhook()
         yield
 
-    async def send_menu(self, user: User) -> None:
+    async def send_menu(
+        self,
+        user: User,
+        utm_source: str | None = None,
+        custom_text: str | None = None,
+    ) -> None:
         await self.send_message(
             chat_id=user.telegram_id,
-            text="Привет!",
-            reply_markup=main_menu_keyboard(),
+            text=custom_text or "Привет!",
+            reply_markup=main_menu_keyboard(utm_source=utm_source),
         )
 
 

@@ -1,0 +1,23 @@
+from typing import Sequence
+from sqlalchemy import func
+from sqlalchemy import select
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.models import User
+from app.db.repos.base.base import BaseRepo
+
+
+class TaskRepo(BaseRepo):
+    def __init__(self, session: AsyncSession):
+        super().__init__(session=session)
+
+    async def get_offline_rocket_users(self) -> Sequence[User]:
+        stmt = (
+            select(User)
+            .where(
+                User.offline_rocket_received <= func.now() - text("INTERVAL '1 day'"),
+            )
+        )
+
+        query = await self.session.execute(stmt)
+        return query.scalars().all()
