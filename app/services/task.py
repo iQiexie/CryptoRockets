@@ -18,6 +18,7 @@ from app.config.constants import (
     ROCKET_CAPACITY_OFFLINE,
     ROCKET_CAPACITY_PREMIUM,
 )
+from app.db.models import CurrenciesEnum
 from app.db.models import RocketTypeEnum
 from app.db.models import User
 from app.services.base.base import BaseService
@@ -88,5 +89,33 @@ class TaskService(BaseService):
             except Exception as e:
                 logger.error(
                     event=f"Failed to give offline rocket to user {user.telegram_id}: {e}",
+                    exception=traceback.format_exception(e)
+                )
+
+    async def _give_wheel(self, user: User) -> None:
+        async with self.repo.transaction() as t:
+            await self.services.transaction.change_user_balance(
+                telegram_id=user.telegram_id,
+                currency=CurrenciesEnum.wheel,
+                amount=1,
+                user_kwargs=dict(wheel_received=datetime.utcnow()),
+            )
+            await t.commit()
+
+        await self.adapters.bot.send_menu(
+            user=user,
+            custom_text=self.adapters.i18n.t("task.wheel_given", user.tg_language_code)
+        )
+
+    async def give_wheel(self) -> None:
+        async with self.repo.transaction():
+            users = await self.repo.get_wheel_users()
+
+        for user in users:
+            try:
+                await self._give_wheel(user)
+            except Exception as e:
+                logger.error(
+                    event=f"Failed to give wheel to user {user.telegram_id}: {e}",
                     exception=traceback.format_exception(e)
                 )

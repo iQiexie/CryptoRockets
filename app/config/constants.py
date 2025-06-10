@@ -29,3 +29,4 @@ WEBAPP_NAME = "launch"
 
 
 MAX_BALANCE = 60
+WHEEL_TIMEOUT = 60 * 3

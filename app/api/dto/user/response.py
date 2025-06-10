@@ -1,7 +1,11 @@
+from datetime import datetime
+from datetime import timedelta
+
 from pydantic import ConfigDict, Field, computed_field
 
 from app.api.dto.base import BaseResponse
 from app.config.constants import BOT_NAME, REFERRAL_PREFIX, WEBAPP_NAME
+from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import RocketTypeEnum
 
 
@@ -23,6 +27,11 @@ class UserResponse(BaseResponse):
     token_balance: float
     wheel_balance: float
     payment_address: str = "UQA824RWvHtNCPlMp-mRA1u3geuf98zyt4VZjXdGAZCAwDHC"
+    wheel_received: datetime = Field(default=..., exclude=True)
+
+    @computed_field()
+    def next_wheel_at(self) -> datetime:
+        return self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
 
     rockets: list[RocketResponse]
 
