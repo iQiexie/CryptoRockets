@@ -65,7 +65,7 @@ class UserTaskService(BaseService):
     async def _complete_task(self, task: Task, telegram_id: int) -> None:
         await self.repo.create_user_task(
             task_id=task.id,
-            telegram_id=telegram_id,
+            user_id=telegram_id,
             status=TaskStatusEnum.completed,
         )
 
@@ -98,7 +98,7 @@ class UserTaskService(BaseService):
         task = await self.repo.get_task(task_id=task_id)
         task = await self.repo.create_user_task(
             task_id=task.id,
-            telegram_id=current_user.telegram_id,
+            user_id=current_user.telegram_id,
             status=TaskStatusEnum.marked_completed,
         )
 
