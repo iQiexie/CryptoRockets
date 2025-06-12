@@ -3,6 +3,7 @@ from typing import Annotated
 import structlog
 from aiogram.enums import ChatMemberStatus
 from fastapi.params import Depends
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from starlette import status
@@ -96,11 +97,15 @@ class UserTaskService(BaseService):
     @BaseService.single_transaction
     async def mark_complete(self, current_user: WebappData, task_id: int) -> Task:
         task = await self.repo.get_task(task_id=task_id)
-        task = await self.repo.create_user_task(
-            task_id=task.id,
-            user_id=current_user.telegram_id,
-            status=TaskStatusEnum.marked_completed,
-        )
+
+        try:
+            task = await self.repo.create_user_task(
+                task_id=task.id,
+                user_id=current_user.telegram_id,
+                status=TaskStatusEnum.marked_completed,
+            )
+        except IntegrityError:
+            pass
 
         task.status = TaskStatusEnum.marked_completed
         return task
