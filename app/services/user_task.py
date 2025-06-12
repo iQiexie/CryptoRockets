@@ -15,6 +15,7 @@ from app.api.dependencies.stubs import (
 )
 from app.api.exceptions import ClientError
 from app.db.models import CurrenciesEnum, Task, TransactionTypeEnum, User
+from app.db.models import TaskStatusEnum
 from app.db.models import TaskTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
@@ -57,7 +58,11 @@ class UserTaskService(BaseService):
         return False
 
     async def _complete_task(self, task: Task, telegram_id: int) -> None:
-        await self.repo.create_user_task(task_id=task.id, telegram_id=telegram_id)
+        await self.repo.create_user_task(
+            task_id=task.id,
+            telegram_id=telegram_id,
+            status=TaskStatusEnum.completed,
+        )
 
         if task.rocket_data:
             await self.services.game.give_rocket(
@@ -82,6 +87,15 @@ class UserTaskService(BaseService):
             return await self._check_subscription(current_user=current_user, task=task)
         elif task.task_type == TaskTypeEnum.invite:
             return await self._check_invite(current_user=current_user, task=task)
+
+    @BaseService.single_transaction
+    async def mark_complete(self, current_user: WebappData, task_id: int) -> User:
+        task = await self.repo.get_task(task_id=task_id)
+        await self.repo.create_user_task(
+            task_id=task.id,
+            telegram_id=current_user.telegram_id,
+            status=TaskStatusEnum.marked_completed,
+        )
 
     @BaseService.single_transaction
     async def _check_bot(self, current_user: WebappData, task: Task) -> User:

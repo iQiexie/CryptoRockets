@@ -74,6 +74,12 @@ class RocketSkinEnum(str, Enum):
     wood = "wood"
 
 
+class TaskStatusEnum(str, Enum):
+    new = "new"
+    marked_completed = "marked_completed"
+    completed = "completed"
+
+
 class WheelPrizeEnum(str, Enum):
     premium_rocket = "premium_rocket"
     default_rocket = "default_rocket"
@@ -269,6 +275,7 @@ class TaskUser(_TimestampMixin, Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
     task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"), index=True)
+    status: Mapped[TaskStatusEnum] = mapped_column(String)
 
     __table_args__ = (UniqueConstraint("user_id", "task_id"),)
 
