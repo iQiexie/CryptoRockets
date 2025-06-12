@@ -1,11 +1,10 @@
 from typing import Sequence
 
-from sqlalchemy import case, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import coalesce
 
-from app.db.models import Task, TaskUser, User
-from app.db.models import TaskStatusEnum
+from app.db.models import Task, TaskStatusEnum, TaskUser, User
 from app.db.repos.base.base import BaseRepo
 
 
@@ -19,13 +18,10 @@ class UserTaskRepo(BaseRepo):
         return query.scalars().all()
 
     async def get_user_task(self, task_id: int, telegram_id: int) -> TaskUser | None:
-        stmt = (
-            select(TaskUser)
-            .where(
-                TaskUser.task_id == task_id,
-                TaskUser.user_id == telegram_id,
-                TaskUser.status == TaskStatusEnum.completed,
-            )
+        stmt = select(TaskUser).where(
+            TaskUser.task_id == task_id,
+            TaskUser.user_id == telegram_id,
+            TaskUser.status == TaskStatusEnum.completed,
         )
         query = await self.session.execute(stmt)
         return query.scalar_one_or_none()
@@ -46,7 +42,9 @@ class UserTaskRepo(BaseRepo):
             .add_columns(coalesce(TaskUser.status, TaskStatusEnum.new.value).label("status"))
             .outerjoin(
                 TaskUser,
-                (Task.id == TaskUser.task_id) & (TaskUser.user_id == telegram_id) & (TaskUser.status == TaskStatusEnum.completed)
+                (Task.id == TaskUser.task_id)
+                & (TaskUser.user_id == telegram_id)
+                & (TaskUser.status == TaskStatusEnum.completed),
             )
         )
 

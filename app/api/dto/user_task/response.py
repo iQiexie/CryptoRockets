@@ -1,10 +1,7 @@
 from pydantic import Field
-from pydantic import field_validator
-from pydantic_core.core_schema import ValidationInfo
 
 from app.api.dto.base import BaseResponse
-from app.db.models import TaskRewardEnum, TaskTypeEnum
-from app.db.models import TaskStatusEnum
+from app.db.models import TaskRewardEnum, TaskStatusEnum, TaskTypeEnum
 
 
 class TaskResponse(BaseResponse):

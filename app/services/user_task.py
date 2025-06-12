@@ -14,9 +14,14 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.exceptions import ClientError
-from app.db.models import CurrenciesEnum, Task, TransactionTypeEnum, User
-from app.db.models import TaskStatusEnum
-from app.db.models import TaskTypeEnum
+from app.db.models import (
+    CurrenciesEnum,
+    Task,
+    TaskStatusEnum,
+    TaskTypeEnum,
+    TransactionTypeEnum,
+    User,
+)
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
