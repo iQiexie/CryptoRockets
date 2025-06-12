@@ -13,3 +13,4 @@ class TaskResponse(BaseResponse):
     icon: str
     name: str
     rocket_data: dict | None = None
+    description: str | None = None

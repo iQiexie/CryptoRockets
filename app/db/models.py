@@ -252,6 +252,7 @@ class Task(_TimestampMixin, Base):
     amount: Mapped[float] = mapped_column(Numeric, nullable=True)
     icon: Mapped[str] = mapped_column(String)
     name: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(String, nullable=True)
 
     @property
     def rocket_data(self) -> dict | None:

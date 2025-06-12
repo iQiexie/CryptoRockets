@@ -35,7 +35,12 @@ class UserTaskService(BaseService):
 
     @BaseService.single_transaction
     async def get_tasks(self, current_user: WebappData) -> list[Task]:
-        return await self.repo.get_user_tasks(telegram_id=current_user.telegram_id)
+        tasks = await self.repo.get_user_tasks(telegram_id=current_user.telegram_id)
+        for task in tasks:
+            task.name = self.adapters.i18n.t(task.name, current_user.language_code)
+            task.description = self.adapters.i18n.t(task.description, current_user.language_code)
+
+        return tasks
 
     async def _is_subscribed(self, telegram_id: int, task: Task) -> bool:
         resp = await self.adapters.bot.get_chat_member(
