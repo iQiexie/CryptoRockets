@@ -102,7 +102,7 @@ class UserTaskService(BaseService):
             status=TaskStatusEnum.marked_completed,
         )
 
-        await self.session.refresh(task)  # todo optimize
+        task.status = TaskStatusEnum.marked_completed
         return task
 
     @BaseService.single_transaction
