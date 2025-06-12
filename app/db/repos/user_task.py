@@ -1,6 +1,7 @@
 from typing import Sequence
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import coalesce
 
@@ -27,9 +28,15 @@ class UserTaskRepo(BaseRepo):
         return query.scalar_one_or_none()
 
     async def create_user_task(self, **kwargs) -> TaskUser:
-        model = TaskUser(**kwargs)
-        self.session.add(model)
-        return model
+        stmt = insert(TaskUser).values(**kwargs)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=['id'],  # Change this to your conflict target
+            set_=kwargs
+        ).returning(TaskUser)
+
+        result = await self.session.execute(stmt)
+        await self.session.commit()
+        return result.scalar_one()
 
     async def get_task(self, task_id: int) -> Task:
         stmt = select(Task).where(Task.id == task_id)
