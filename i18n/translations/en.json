@@ -3,5 +3,7 @@
   "task.invite": "Invite {amount} friends",
   "task.invite_description": "Building rockets with friends is more fun! Invite your friends to join the adventure and earn rewards together.",
   "task.subscribe": "Subscribe to our newsletter",
-  "task.subscribe_description": "Stay updated with the latest news and exclusive offers"
+  "task.subscribe_description": "Stay updated with the latest news and exclusive offers",
+  "task.bot": "Join our bot",
+  "task.bot_description": "Clone your voice, have fun with your friends, and explore new possibilities with our bot!"
 }
