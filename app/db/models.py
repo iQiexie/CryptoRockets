@@ -66,6 +66,7 @@ class RocketTypeEnum(str, Enum):
     super = "super"
     mega = "mega"
     ultra = "ultra"
+    super_mega_ultra = "super_mega_ultra"
 
 
 class RocketSkinEnum(str, Enum):
@@ -81,6 +82,7 @@ class WheelPrizeEnum(str, Enum):
     super_rocket = "super_rocket"
     mega_rocket = "mega_rocket"
     ultra_rocket = "ultra_rocket"
+    super_mega_ultra_rocket = "super_mega_ultra_rocket"
 
     fuel = "fuel"
     token = "token"  # noqa: S105

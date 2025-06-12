@@ -1,3 +1,4 @@
+from datetime import datetime
 from app.api.dto.base import BaseResponse
 from app.db.models import WheelPrizeEnum
 from app.utils import iota_generator
@@ -13,6 +14,8 @@ class ShopItem(BaseResponse):
     ton_price: float
     xtr_price: float
     token_price: float
+    special: bool = False
+    available_until: datetime | None = None
 
 
 _items = (
@@ -51,24 +54,8 @@ _items = (
         ton_price=10,
         xtr_price=10,
         token_price=10,
-    ),
-    ShopItem(
-        id=iota(),
-        label="wheel_tickets",
-        item=WheelPrizeEnum.mega_rocket,
-        amount=1,
-        ton_price=10,
-        xtr_price=10,
-        token_price=10,
-    ),
-    ShopItem(
-        id=iota(),
-        label="wheel_tickets",
-        item=WheelPrizeEnum.ultra_rocket,
-        amount=1,
-        ton_price=10,
-        xtr_price=10,
-        token_price=10,
+        special=False,
+        available_until=datetime(2025, 6, 14, 0, 0, 0)
     ),
 )
 
