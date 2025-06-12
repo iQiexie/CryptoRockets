@@ -41,11 +41,11 @@ async def check_subscription(
 @router.post(
     path="/user/tasks/mark_complete/{task_id}",
     status_code=status.HTTP_200_OK,
-    response_model=UserResponse,
+    response_model=TaskResponse,
 )
 async def mark_complete(
     current_user: Annotated[WebappData, Depends(get_current_user)],
     service: Annotated[UserTaskService, Depends()],
     task_id: int = Path(...),
-) -> User:
+) -> Task:
     return await service.mark_complete(current_user=current_user, task_id=task_id)

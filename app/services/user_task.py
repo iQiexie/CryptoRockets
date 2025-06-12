@@ -94,13 +94,16 @@ class UserTaskService(BaseService):
             return await self._check_invite(current_user=current_user, task=task)
 
     @BaseService.single_transaction
-    async def mark_complete(self, current_user: WebappData, task_id: int) -> User:
+    async def mark_complete(self, current_user: WebappData, task_id: int) -> Task:
         task = await self.repo.get_task(task_id=task_id)
-        await self.repo.create_user_task(
+        task = await self.repo.create_user_task(
             task_id=task.id,
             telegram_id=current_user.telegram_id,
             status=TaskStatusEnum.marked_completed,
         )
+
+        await self.session.refresh(task)  # todo optimize
+        return task
 
     @BaseService.single_transaction
     async def _check_bot(self, current_user: WebappData, task: Task) -> User:
