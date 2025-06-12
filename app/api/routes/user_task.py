@@ -25,7 +25,7 @@ async def get_all_eligible_tasks(
     return await service.get_tasks(current_user=current_user)
 
 
-@router.get(
+@router.post(
     path="/user/tasks/check/{task_id}",
     status_code=status.HTTP_200_OK,
     response_model=UserResponse,
@@ -38,7 +38,7 @@ async def check_subscription(
     return await service.check_task(current_user=current_user, task_id=task_id)
 
 
-@router.get(
+@router.post(
     path="/user/tasks/mark_complete/{task_id}",
     status_code=status.HTTP_200_OK,
     response_model=UserResponse,
