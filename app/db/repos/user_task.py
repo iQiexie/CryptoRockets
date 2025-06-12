@@ -51,7 +51,6 @@ class UserTaskRepo(BaseRepo):
                 TaskUser,
                 (Task.id == TaskUser.task_id)
                 & (TaskUser.user_id == telegram_id)
-                & (TaskUser.status == TaskStatusEnum.completed),
             )
         )
 
