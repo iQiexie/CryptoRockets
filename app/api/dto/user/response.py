@@ -74,7 +74,7 @@ class UserResponse(BaseResponse):
 class PublicUserResponse(BaseResponse):
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
-    tg_photo_url: str
+    tg_photo_url: str | None = Field(default=None)
     tg_is_premium: bool | None = Field(default=False)
 
     tg_username: str | None = Field(default=None, exclude=True)
