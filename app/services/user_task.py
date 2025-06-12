@@ -38,8 +38,10 @@ class UserTaskService(BaseService):
     async def get_tasks(self, current_user: WebappData) -> list[Task]:
         tasks = await self.repo.get_user_tasks(telegram_id=current_user.telegram_id)
         for task in tasks:
-            task.name = self.adapters.i18n.t(task.name, current_user.language_code)
             task.description = self.adapters.i18n.t(task.description, current_user.language_code)
+            task.name = self.adapters.i18n.t(task.name, current_user.language_code).format(
+                amount=task.amount,
+            )
 
         return tasks
 

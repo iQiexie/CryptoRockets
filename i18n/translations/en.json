@@ -1,3 +1,7 @@
 {
-  "wheel_tickets": "Tickets"
+  "wheel_tickets": "Tickets",
+  "task.invite": "Invite {amount} friends",
+  "task.invite_description": "Building rockets with friends is more fun! Invite your friends to join the adventure and earn rewards together.",
+  "task.subscribe": "Subscribe to our newsletter",
+  "task.subscribe_description": "Stay updated with the latest news and exclusive offers"
 }
