@@ -15,6 +15,7 @@ from app.api.dependencies.stubs import (
 )
 from app.api.exceptions import ClientError
 from app.db.models import CurrenciesEnum, Task, TransactionTypeEnum, User
+from app.db.models import TaskTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -71,15 +72,18 @@ class UserTaskService(BaseService):
             )
 
     @BaseService.single_transaction
-    async def check_subscription(self, current_user: WebappData, task_id: int) -> User:
+    async def check_task(self, current_user: WebappData, task_id: int) -> User:
         task = await self.repo.get_task(task_id=task_id)
-        is_subscribed = await self._is_subscribed(telegram_id=current_user.telegram_id, task=task)
+        if task.task_type == TaskTypeEnum.bot:
+            return await self._check_bot(current_user=current_user, task=task)
+        elif task.task_type == TaskTypeEnum.subscribe:
+            return await self._check_subscription(current_user=current_user, task=task)
+        elif task.task_type == TaskTypeEnum.invite:
+            return await self._check_invite(current_user=current_user, task=task)
 
-        if not is_subscribed:
-            raise ClientError(message="Subscription not found", status_code=status.HTTP_418_IM_A_TEAPOT)
-
-        user_task = await self.repo.get_user_task(task_id=task_id, telegram_id=current_user.telegram_id)
-
+    @BaseService.single_transaction
+    async def _check_bot(self, current_user: WebappData, task: Task) -> User:
+        user_task = await self.repo.get_user_task(task_id=task.id, telegram_id=current_user.telegram_id)
         if user_task:
             raise ClientError(message="Already completed", status_code=status.HTTP_418_IM_A_TEAPOT)
 
@@ -88,10 +92,22 @@ class UserTaskService(BaseService):
         return await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
 
     @BaseService.single_transaction
-    async def check_invite(self, current_user: WebappData, task_id: int) -> User:
-        task = await self.repo.get_task(task_id=task_id)
-        user_task = await self.repo.get_user_task(task_id=task_id, telegram_id=current_user.telegram_id)
+    async def _check_subscription(self, current_user: WebappData, task: Task) -> User:
+        is_subscribed = await self._is_subscribed(telegram_id=current_user.telegram_id, task=task)
+        if not is_subscribed:
+            raise ClientError(message="Subscription not found", status_code=status.HTTP_418_IM_A_TEAPOT)
 
+        user_task = await self.repo.get_user_task(task_id=task.id, telegram_id=current_user.telegram_id)
+        if user_task:
+            raise ClientError(message="Already completed", status_code=status.HTTP_418_IM_A_TEAPOT)
+
+        await self._complete_task(task=task, telegram_id=current_user.telegram_id)
+        await self.session.commit()
+        return await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
+
+    @BaseService.single_transaction
+    async def _check_invite(self, current_user: WebappData, task: Task) -> User:
+        user_task = await self.repo.get_user_task(task_id=task.id, telegram_id=current_user.telegram_id)
         if user_task:
             raise ClientError(message="Already completed", status_code=status.HTTP_418_IM_A_TEAPOT)
 
