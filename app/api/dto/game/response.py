@@ -28,7 +28,7 @@ class LaunchResponse(BaseResponse):
     usdt: float | None = None
     ton: float | None = None
     token: float | None = None
-    user: UserResponse
+    user: UserResponse | None = None
 
 
 WHEEL_PRIZES = [
