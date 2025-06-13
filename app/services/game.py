@@ -91,6 +91,7 @@ class GameService(BaseService):
                 type=RocketTypeEnum[prize.type.value.replace("_rocket", "")],
                 fuel_capacity=1,
                 current_fuel=1,
+                seen=True,
             )
         else:
             raise NotImplementedError(f"Prize type {prize.type} is not implemented")
