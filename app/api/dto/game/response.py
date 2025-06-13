@@ -2,6 +2,7 @@ from pydantic import Field
 
 from app.api.dto.base import BaseResponse
 from app.api.dto.user.response import PublicUserResponse
+from app.api.dto.user.response import UserResponse
 from app.db.models import WheelPrizeEnum
 from app.utils import iota_generator
 
@@ -27,6 +28,7 @@ class LaunchResponse(BaseResponse):
     usdt: float | None = None
     ton: float | None = None
     token: float | None = None
+    user: UserResponse
 
 
 WHEEL_PRIZES = [

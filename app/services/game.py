@@ -18,6 +18,7 @@ from app.api.dto.game.response import (
     WheelPrizeEnum,
     WheelPrizeResponse,
 )
+from app.api.dto.user.response import UserResponse
 from app.api.exceptions import ClientError
 from app.config.constants import MAX_BALANCE
 from app.db.models import (
@@ -177,5 +178,9 @@ class GameService(BaseService):
             resp = await self._handle_regular_rocket(user=user)
 
         await self.repo.update_rocket(rocket_id=rocket.id, enabled=False, current_fuel=0)
+        await self.session.commit()
+        await self.session.refresh(user)
+
+        resp.user = UserResponse.model_validate(user)
 
         return resp
