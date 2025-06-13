@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 from typing import Annotated
 
 import structlog
@@ -18,6 +19,7 @@ from app.api.dto.ads.response import VerifyAdResponse
 from app.api.dto.user.response import RocketResponse
 from app.api.dto.user.response import UserResponse
 from app.api.exceptions import ClientError
+from app.config.constants import WHEEL_AD_TIMEOUT
 from app.db.models import AdStatusEnum, Advert, Rocket
 from app.db.models import CurrenciesEnum
 from app.services.base.base import BaseService
@@ -87,7 +89,7 @@ class AdsService(BaseService):
             user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
             rocket = r
         elif ad.wheel_amount:
-            await self.repos.user.update_user(telegram_id=current_user.telegram_id, wheel_ad_received=datetime.utcnow())
+            await self.repos.user.update_user(telegram_id=current_user.telegram_id, next_wheel_ad_at=datetime.utcnow() + timedelta(minutes=WHEEL_AD_TIMEOUT))
             resp = await self.services.transaction.change_user_balance(
                 telegram_id=current_user.telegram_id,
                 currency=CurrenciesEnum.wheel,
