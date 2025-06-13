@@ -30,7 +30,7 @@ class UserTaskRepo(BaseRepo):
     async def create_user_task(self, **kwargs) -> TaskUser:
         stmt = insert(TaskUser).values(**kwargs)
         stmt = stmt.on_conflict_do_update(
-            index_elements=['id'],  # Change this to your conflict target
+            index_elements=['user_id', 'task_id'],
             set_=kwargs
         ).returning(TaskUser)
 

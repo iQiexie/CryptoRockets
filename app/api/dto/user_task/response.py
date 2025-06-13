@@ -14,6 +14,6 @@ class TaskResponse(BaseResponse):
     amount: int | None = None
     icon: str
     name: str
-    rocket_data: dict | None = None
     description: str | None = None
     completed: bool = Field(default=False, exclude=True)
+    rocket_type: str | None = None

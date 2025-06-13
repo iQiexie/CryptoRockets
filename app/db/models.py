@@ -57,6 +57,7 @@ class TaskTypeEnum(str, Enum):
 class TaskRewardEnum(str, Enum):
     fuel = CurrenciesEnum.fuel.value
     token = CurrenciesEnum.token.value
+    rocket = "rocket"
 
 
 class RocketTypeEnum(str, Enum):
@@ -259,14 +260,7 @@ class Task(_TimestampMixin, Base):
     icon: Mapped[str] = mapped_column(String)
     name: Mapped[str] = mapped_column(String)
     description: Mapped[str] = mapped_column(String, nullable=True)
-
-    @property
-    def rocket_data(self) -> dict | None:
-        if "rocket" not in self.reward:
-            return
-
-        reward = SafeList(self.reward.split("_"))
-        return {"type": reward.get(0), "full": "full" in (reward.get(2, ""))}
+    rocket_type: Mapped[RocketTypeEnum] = mapped_column(String, nullable=True)
 
 
 class TaskUser(_TimestampMixin, Base):

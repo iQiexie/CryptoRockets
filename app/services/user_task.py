@@ -75,18 +75,18 @@ class UserTaskService(BaseService):
             status=TaskStatusEnum.completed,
         )
 
-        if task.rocket_data:
+        if task.rocket_type:
             fuel_capacity = {
                 RocketTypeEnum.default: ROCKET_CAPACITY_DEFAULT,
                 RocketTypeEnum.offline: ROCKET_CAPACITY_OFFLINE,
                 RocketTypeEnum.premium: ROCKET_CAPACITY_PREMIUM,
-            }[RocketTypeEnum[task.rocket_data["type"]]]
+            }[task.rocket_type]
 
             return await self.repos.user.create_user_rocket(
                 user_id=telegram_id,
-                type=task.rocket_data["type"],
+                type=task.rocket_type,
                 fuel_capacity=fuel_capacity,
-                current_fuel=fuel_capacity if task.rocket_data.get("full", False) else 0,
+                current_fuel=fuel_capacity,
             )
         else:
             await self.services.transaction.change_user_balance(
@@ -111,7 +111,7 @@ class UserTaskService(BaseService):
         task = await self.repo.get_task(task_id=task_id)
 
         try:
-            task = await self.repo.create_user_task(
+            await self.repo.create_user_task(
                 task_id=task.id,
                 user_id=current_user.telegram_id,
                 status=TaskStatusEnum.marked_completed,
@@ -123,7 +123,7 @@ class UserTaskService(BaseService):
         return task
 
     @BaseService.single_transaction
-    async def _check_bot(self, current_user: WebappData, task: Task) -> Rocket | Rocket:
+    async def _check_bot(self, current_user: WebappData, task: Task) -> Rocket | User:
         user_task = await self.repo.get_user_task(task_id=task.id, telegram_id=current_user.telegram_id)
         if user_task:
             raise ClientError(message="Already completed", status_code=status.HTTP_418_IM_A_TEAPOT)
@@ -134,7 +134,7 @@ class UserTaskService(BaseService):
         return rocket
 
     @BaseService.single_transaction
-    async def _check_subscription(self, current_user: WebappData, task: Task) -> Rocket:
+    async def _check_subscription(self, current_user: WebappData, task: Task) -> Rocket | User:
         is_subscribed = await self._is_subscribed(telegram_id=current_user.telegram_id, task=task)
         if not is_subscribed:
             raise ClientError(message="Subscription not found", status_code=status.HTTP_418_IM_A_TEAPOT)
@@ -149,7 +149,7 @@ class UserTaskService(BaseService):
         return rocket
 
     @BaseService.single_transaction
-    async def _check_invite(self, current_user: WebappData, task: Task) -> User | Rocket:
+    async def _check_invite(self, current_user: WebappData, task: Task) -> Rocket | User:
         user_task = await self.repo.get_user_task(task_id=task.id, telegram_id=current_user.telegram_id)
         if user_task:
             raise ClientError(message="Already completed", status_code=status.HTTP_418_IM_A_TEAPOT)
