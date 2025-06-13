@@ -19,11 +19,9 @@ from app.config.constants import ROCKET_CAPACITY_DEFAULT
 from app.config.constants import ROCKET_CAPACITY_OFFLINE
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
 from app.db.models import (
-    CurrenciesEnum,
     Task,
     TaskStatusEnum,
     TaskTypeEnum,
-    TransactionTypeEnum,
     User,
 )
 from app.db.models import Rocket

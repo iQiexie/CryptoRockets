@@ -66,7 +66,6 @@ class UserService(BaseService):
         return await self.repo.get_user_by_telegram_id(telegram_id=telegram_id)
 
     async def _create_user(self, user_data: dict, data: WebappData) -> User:
-        await asyncio.sleep(5)
         user = await self.repo.create_user(telegram_id=data.telegram_id, **user_data)
 
         try:
