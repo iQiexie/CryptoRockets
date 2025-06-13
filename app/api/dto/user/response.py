@@ -8,11 +8,7 @@ from app.api.dto.base import BaseResponse
 from app.config.constants import (
     BOT_NAME,
     REFERRAL_PREFIX,
-    ROCKET_TIMEOUT_DEFAULT,
-    ROCKET_TIMEOUT_OFFLINE,
-    ROCKET_TIMEOUT_PREMIUM,
     WEBAPP_NAME,
-    WHEEL_TIMEOUT,
 )
 from app.db.models import RocketTypeEnum
 
@@ -38,9 +34,9 @@ class UserResponse(BaseResponse):
     payment_address: str = "UQA824RWvHtNCPlMp-mRA1u3geuf98zyt4VZjXdGAZCAwDHC"
     next_wheel_at: datetime | None = Field(default=None)
     next_wheel_ad_at: datetime | None = Field(default=None)
-    next_default_rocket_at: datetime | None = Field(default=None)
-    next_offline_rocket_at: datetime | None = Field(default=None)
-    next_premium_rocket_at: datetime | None = Field(default=None)
+    next_default_rocket_at: datetime | None = Field(default=None, exclude=True)
+    next_offline_rocket_at: datetime | None = Field(default=None, exclude=True)
+    next_premium_rocket_at: datetime | None = Field(default=None, exclude=True)
 
     rockets: list[RocketResponse]
 
@@ -56,38 +52,35 @@ class UserResponse(BaseResponse):
 
         return v
 
-    @field_validator("next_default_rocket_at", mode="before")
-    @classmethod
-    def validate_next_default_rocket_at(cls, v: datetime, info: ValidationInfo) -> datetime | None:
-        if RocketTypeEnum.default in [rocket.type for rocket in info.data.get("rockets", [])]:
+    @computed_field
+    def next_default_rocket_in(self) -> timedelta | None:
+        if RocketTypeEnum.default in [rocket.type for rocket in self.rockets]:
             return None
 
-        if v <= datetime.utcnow():
+        if self.next_default_rocket_at <= datetime.utcnow():
             return None
 
-        return v
+        return self.next_default_rocket_at
 
-    @field_validator("next_offline_rocket_at", mode="before")
-    @classmethod
-    def validate_next_offline_rocket_at(cls, v: datetime, info: ValidationInfo) -> datetime | None:
-        if RocketTypeEnum.offline in [rocket.type for rocket in info.data.get("rockets", [])]:
+    @computed_field
+    def next_offline_rocket_in(self) -> timedelta | None:
+        if RocketTypeEnum.offline in [rocket.type for rocket in self.rockets]:
             return None
 
-        if v <= datetime.utcnow():
+        if self.next_offline_rocket_at <= datetime.utcnow():
             return None
 
-        return v
+        return self.next_offline_rocket_at
 
-    @field_validator("next_premium_rocket_at", mode="before")
-    @classmethod
-    def validate_next_premium_rocket_at(cls, v: datetime, info: ValidationInfo) -> datetime | None:
-        if RocketTypeEnum.premium in [rocket.type for rocket in info.data.get("rockets", [])]:
+    @computed_field
+    def next_premium_rocket_in(self) -> timedelta | None:
+        if RocketTypeEnum.premium in [rocket.type for rocket in self.rockets]:
             return None
 
-        if v <= datetime.utcnow():
+        if self.next_premium_rocket_at <= datetime.utcnow():
             return None
 
-        return v
+        return self.next_premium_rocket_at
 
 
 class PublicUserResponse(BaseResponse):
