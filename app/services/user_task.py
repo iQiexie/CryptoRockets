@@ -75,26 +75,18 @@ class UserTaskService(BaseService):
             status=TaskStatusEnum.completed,
         )
 
-        if task.rocket_type:
-            fuel_capacity = {
-                RocketTypeEnum.default: ROCKET_CAPACITY_DEFAULT,
-                RocketTypeEnum.offline: ROCKET_CAPACITY_OFFLINE,
-                RocketTypeEnum.premium: ROCKET_CAPACITY_PREMIUM,
-            }[task.rocket_type]
+        fuel_capacity = {
+            RocketTypeEnum.default: ROCKET_CAPACITY_DEFAULT,
+            RocketTypeEnum.offline: ROCKET_CAPACITY_OFFLINE,
+            RocketTypeEnum.premium: ROCKET_CAPACITY_PREMIUM,
+        }[task.rocket_type]
 
-            return await self.repos.user.create_user_rocket(
-                user_id=telegram_id,
-                type=task.rocket_type,
-                fuel_capacity=fuel_capacity,
-                current_fuel=fuel_capacity,
-            )
-        else:
-            await self.services.transaction.change_user_balance(
-                telegram_id=telegram_id,
-                currency=CurrenciesEnum[task.reward],
-                amount=task.reward_amount,
-                tx_type=TransactionTypeEnum.task_completion,
-            )
+        return await self.repos.user.create_user_rocket(
+            user_id=telegram_id,
+            type=task.rocket_type,
+            fuel_capacity=fuel_capacity,
+            current_fuel=fuel_capacity,
+        )
 
     @BaseService.single_transaction
     async def check_task(self, current_user: WebappData, task_id: int) -> User | Rocket:
