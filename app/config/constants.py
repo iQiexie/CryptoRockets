@@ -24,7 +24,7 @@ ROCKET_CAPACITY_OFFLINE = 6
 ROCKET_CAPACITY_PREMIUM = 4
 
 REFERRAL_PREFIX = "pilot_"
-BOT_NAME = "CryptoRocketsBot"
+BOT_NAME = "CryptoRockets_Bot"
 WEBAPP_NAME = "launch"
 
 
