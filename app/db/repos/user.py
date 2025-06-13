@@ -1,8 +1,12 @@
+from datetime import datetime
+from datetime import timedelta
+
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dto.base import PaginatedRequest
 from app.config.constants import ROCKET_CAPACITY_DEFAULT, ROCKET_CAPACITY_PREMIUM
+from app.config.constants import ROCKET_CAPACITY_OFFLINE
 from app.db.models import Rocket, RocketTypeEnum, User
 from app.db.repos.base.base import BaseRepo, PaginatedResult
 
@@ -26,9 +30,14 @@ class UserRepo(BaseRepo):
                 current_fuel=ROCKET_CAPACITY_PREMIUM,
             ),
             Rocket(
-                type=RocketTypeEnum.default,
-                fuel_capacity=ROCKET_CAPACITY_DEFAULT,
-                current_fuel=ROCKET_CAPACITY_DEFAULT,
+                type=RocketTypeEnum.premium,
+                fuel_capacity=ROCKET_CAPACITY_PREMIUM,
+                current_fuel=0,
+            ),
+            Rocket(
+                type=RocketTypeEnum.offline,
+                fuel_capacity=ROCKET_CAPACITY_OFFLINE,
+                current_fuel=0,
             ),
             Rocket(
                 type=RocketTypeEnum.default,
