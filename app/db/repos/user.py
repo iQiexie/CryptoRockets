@@ -21,6 +21,8 @@ class UserRepo(BaseRepo):
         return query.scalar_one_or_none()
 
     async def create_user(self, **kwargs) -> User:
+        kwargs['wheel_balance'] = kwargs.get('wheel_balance', 3)
+
         user = User(**kwargs)
 
         user.rockets = [
