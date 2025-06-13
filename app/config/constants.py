@@ -3,14 +3,6 @@ POSTGRES_TIMEOUT = 60
 DEFAULT_HTTP_TIMEOUT = 20
 
 LOGGING_SENSITIVE_FIELDS = (
-    "password",
-    "token",
-    "Authorization",
-    "Authentication",
-    "authorization",
-    "authentication",
-    "x-api-key",
-    "x-cmc_pro_api_key",
 )
 
 LOGGING_SENSITIVE_REPLACEMENT = "******"
