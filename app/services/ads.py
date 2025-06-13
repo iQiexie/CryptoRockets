@@ -14,6 +14,9 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.dto.ads.request import AdCheckRequest, AdRequest
+from app.api.dto.ads.response import VerifyAdResponse
+from app.api.dto.user.response import RocketResponse
+from app.api.dto.user.response import UserResponse
 from app.api.exceptions import ClientError
 from app.db.models import AdStatusEnum, Advert, Rocket
 from app.db.models import CurrenciesEnum
@@ -57,7 +60,7 @@ class AdsService(BaseService):
         return ad
 
     @BaseService.single_transaction
-    async def verify_offer(self, current_user: WebappData, data: AdCheckRequest) -> Rocket:
+    async def verify_offer(self, current_user: WebappData, data: AdCheckRequest) -> VerifyAdResponse:
         payload, hash_ = data.token.split("-")
         actual_hash_ = self.xor_encrypt(data=payload, key=f"rocket_type_{current_user.telegram_id}_{data.id}")
 
@@ -68,6 +71,9 @@ class AdsService(BaseService):
         if not ad:
             raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
 
+        user = None
+        rocket = None
+
         if ad.rocket_id:
             rocket = await self.repos.game.get_rocket_for_update(
                 telegram_id=current_user.telegram_id,
@@ -77,6 +83,9 @@ class AdsService(BaseService):
             r = await self.repos.game.update_rocket(rocket_id=rocket.id, current_fuel=rocket.current_fuel + 1)
             await self.repo.update_ad(ad_id=data.id, status=AdStatusEnum.watched)
             await self.session.refresh(r)
+            await self.session.commit()
+            user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
+            rocket = r
         elif ad.wheel_amount:
             await self.repos.user.update_user(telegram_id=current_user.telegram_id, wheel_ad_received=datetime.utcnow())
             resp = await self.services.transaction.change_user_balance(
@@ -85,6 +94,9 @@ class AdsService(BaseService):
                 amount=ad.wheel_amount,
             )
 
-            r = resp.user
+            user = resp.user
 
-        return r
+        return VerifyAdResponse(
+            user=UserResponse.model_validate(user),
+            rocket=RocketResponse.model_validate(rocket),
+        )

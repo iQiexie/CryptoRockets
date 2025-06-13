@@ -42,11 +42,4 @@ async def verify(
     service: Annotated[AdsService, Depends()],
     data: AdCheckRequest,
 ) -> VerifyAdResponse:
-    resp = await service.verify_offer(current_user=current_user, data=data)
-    if isinstance(resp, User):
-        return VerifyAdResponse(user=UserResponse.model_validate(resp))
-
-    elif isinstance(resp, Rocket):
-        return VerifyAdResponse(rocket=RocketResponse.model_validate(resp))
-
-    raise NotImplementedError
+    return await service.verify_offer(current_user=current_user, data=data)
