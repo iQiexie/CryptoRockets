@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from pydantic import ConfigDict, Field, computed_field
 from pydantic import field_validator
+from pydantic_core.core_schema import ValidationInfo
 
 from app.api.dto.base import BaseResponse
 from app.config.constants import (
@@ -47,9 +48,42 @@ class UserResponse(BaseResponse):
     def referral(self) -> str:
         return f"https://t.me/{BOT_NAME}/{WEBAPP_NAME}?startapp={REFERRAL_PREFIX}{self.telegram_id}"
 
-    @field_validator("next_wheel_at", "next_wheel_ad_at",  "next_default_rocket_at", "next_offline_rocket_at", "next_premium_rocket_at", mode="before",)
+    @field_validator("next_wheel_at", "next_wheel_ad_at", mode="before")
     @classmethod
     def validate_next(cls, v: datetime) -> datetime | None:
+        if v <= datetime.utcnow():
+            return None
+
+        return v
+
+    @field_validator("next_default_rocket_at", mode="before")
+    @classmethod
+    def validate_next_default_rocket_at(cls, v: datetime, info: ValidationInfo) -> datetime | None:
+        if RocketTypeEnum.default in [rocket.type for rocket in info.data.get("rockets", [])]:
+            return None
+
+        if v <= datetime.utcnow():
+            return None
+
+        return v
+
+    @field_validator("next_offline_rocket_at", mode="before")
+    @classmethod
+    def validate_next_offline_rocket_at(cls, v: datetime, info: ValidationInfo) -> datetime | None:
+        if RocketTypeEnum.offline in [rocket.type for rocket in info.data.get("rockets", [])]:
+            return None
+
+        if v <= datetime.utcnow():
+            return None
+
+        return v
+
+    @field_validator("next_premium_rocket_at", mode="before")
+    @classmethod
+    def validate_next_premium_rocket_at(cls, v: datetime, info: ValidationInfo) -> datetime | None:
+        if RocketTypeEnum.premium in [rocket.type for rocket in info.data.get("rockets", [])]:
+            return None
+
         if v <= datetime.utcnow():
             return None
 
