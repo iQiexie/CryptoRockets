@@ -24,6 +24,6 @@ async def success_payment_handler(message: Message, services: Services) -> None:
             usd_amount=message.successful_payment.total_amount * 0.013,
             currency=CurrenciesEnum.xtr,
             external_id=message.successful_payment.provider_payment_charge_id,
-            callback_data=message.successful_payment,
+            callback_data=message.successful_payment.model_dump(),
         )
     )
