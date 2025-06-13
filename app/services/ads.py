@@ -22,6 +22,7 @@ from app.api.exceptions import ClientError
 from app.config.constants import WHEEL_AD_TIMEOUT
 from app.db.models import AdStatusEnum, Advert, Rocket
 from app.db.models import CurrenciesEnum
+from app.db.models import TransactionTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -89,11 +90,15 @@ class AdsService(BaseService):
             user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
             rocket = r
         elif ad.wheel_amount:
-            await self.repos.user.update_user(telegram_id=current_user.telegram_id, next_wheel_ad_at=datetime.utcnow() + timedelta(minutes=WHEEL_AD_TIMEOUT))
+            await self.repos.user.update_user(
+                telegram_id=current_user.telegram_id,
+                next_wheel_ad_at=datetime.utcnow() + timedelta(minutes=WHEEL_AD_TIMEOUT),
+            )
             resp = await self.services.transaction.change_user_balance(
                 telegram_id=current_user.telegram_id,
                 currency=CurrenciesEnum.wheel,
                 amount=ad.wheel_amount,
+                tx_type=TransactionTypeEnum.ads
             )
 
             user = resp.user

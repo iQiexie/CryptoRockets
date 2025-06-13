@@ -25,6 +25,7 @@ class TransactionTypeEnum(str, Enum):
     rocket_launch = "rocket_launch"
     purchase = "purchase"
     task_completion = "task_completion"
+    ads = "ads"
 
 
 class TransactionStatusEnum(str, Enum):
