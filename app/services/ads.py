@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 import structlog
@@ -77,6 +78,7 @@ class AdsService(BaseService):
             await self.repo.update_ad(ad_id=data.id, status=AdStatusEnum.watched)
             await self.session.refresh(r)
         elif ad.wheel_amount:
+            await self.repos.user.update_user(telegram_id=current_user.telegram_id, wheel_ad_received=datetime.utcnow())
             resp = await self.services.transaction.change_user_balance(
                 telegram_id=current_user.telegram_id,
                 currency=CurrenciesEnum.wheel,
