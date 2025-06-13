@@ -43,12 +43,20 @@ class UserResponse(BaseResponse):
     rockets: list[RocketResponse]
 
     @computed_field()
-    def next_wheel_at(self) -> datetime:
-        return self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
+    def next_wheel_at(self) -> datetime | None:
+        available = self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
+        if available <= datetime.utcnow():
+            return None
+
+        return available
 
     @computed_field()
-    def next_wheel_ad_at(self) -> datetime:
-        return self.wheel_ad_received + timedelta(minutes=WHEEL_TIMEOUT)
+    def next_wheel_ad_at(self) -> datetime | None:
+        available = self.wheel_ad_received + timedelta(minutes=WHEEL_TIMEOUT)
+        if available <= datetime.utcnow():
+            return None
+
+        return available
 
     @computed_field()
     def next_default_rocket_at(self) -> datetime | None:
