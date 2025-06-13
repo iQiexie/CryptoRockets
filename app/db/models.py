@@ -170,6 +170,12 @@ class User(_TimestampMixin, Base):
         server_default=func.now(),
     )
 
+    wheel_ad_received: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP,
+        default=datetime.datetime.utcnow,
+        server_default=func.now(),
+    )
+
     has_spins: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
 
     rockets: Mapped[list["Rocket"]] = relationship(

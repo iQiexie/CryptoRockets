@@ -35,6 +35,7 @@ class UserResponse(BaseResponse):
     wheel_balance: float
     payment_address: str = "UQA824RWvHtNCPlMp-mRA1u3geuf98zyt4VZjXdGAZCAwDHC"
     wheel_received: datetime = Field(default=..., exclude=True)
+    wheel_ad_received: datetime = Field(default=..., exclude=True)
     default_rocket_received: datetime = Field(default=..., exclude=True)
     offline_rocket_received: datetime = Field(default=..., exclude=True)
     premium_rocket_received: datetime = Field(default=..., exclude=True)
@@ -44,6 +45,10 @@ class UserResponse(BaseResponse):
     @computed_field()
     def next_wheel_at(self) -> datetime:
         return self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
+
+    @computed_field()
+    def next_wheel_ad_at(self) -> datetime:
+        return self.wheel_ad_received + timedelta(minutes=WHEEL_TIMEOUT)
 
     @computed_field()
     def next_default_rocket_at(self) -> datetime | None:
