@@ -79,7 +79,7 @@ class UserTaskService(BaseService):
             RocketTypeEnum.default: ROCKET_CAPACITY_DEFAULT,
             RocketTypeEnum.offline: ROCKET_CAPACITY_OFFLINE,
             RocketTypeEnum.premium: ROCKET_CAPACITY_PREMIUM,
-        }[task.rocket_type]
+        }.get(task.rocket_type, 1)
 
         return await self.repos.user.create_user_rocket(
             user_id=telegram_id,
