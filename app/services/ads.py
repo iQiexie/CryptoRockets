@@ -15,6 +15,7 @@ from app.api.dependencies.stubs import (
 from app.api.dto.ads.request import AdCheckRequest, AdRequest
 from app.api.exceptions import ClientError
 from app.db.models import AdStatusEnum, Advert, Rocket
+from app.db.models import CurrenciesEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -49,6 +50,7 @@ class AdsService(BaseService):
             provider=data.provider,
             status=AdStatusEnum.created,
             rocket_id=data.rocket_id,
+            wheel_amount=1 if data.for_wheel else 0,
         )
 
         return ad
@@ -65,13 +67,22 @@ class AdsService(BaseService):
         if not ad:
             raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
 
-        rocket = await self.repos.game.get_rocket_for_update(
-            telegram_id=current_user.telegram_id,
-            rocket_id=ad.rocket_id,
-        )
+        if ad.rocket_id:
+            rocket = await self.repos.game.get_rocket_for_update(
+                telegram_id=current_user.telegram_id,
+                rocket_id=ad.rocket_id,
+            )
 
-        r = await self.repos.game.update_rocket(rocket_id=rocket.id, current_fuel=rocket.current_fuel + 1)
-        await self.repo.update_ad(ad_id=data.id, status=AdStatusEnum.watched)
-        await self.session.refresh(r)
+            r = await self.repos.game.update_rocket(rocket_id=rocket.id, current_fuel=rocket.current_fuel + 1)
+            await self.repo.update_ad(ad_id=data.id, status=AdStatusEnum.watched)
+            await self.session.refresh(r)
+        elif ad.wheel_amount:
+            resp = await self.services.transaction.change_user_balance(
+                telegram_id=current_user.telegram_id,
+                currency=CurrenciesEnum.wheel,
+                amount=ad.wheel_amount,
+            )
+
+            r = resp.user
 
         return r

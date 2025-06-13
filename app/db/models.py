@@ -283,6 +283,7 @@ class Advert(_TimestampMixin, Base):
     provider: Mapped[str] = mapped_column(String)
     status: Mapped[AdStatusEnum] = mapped_column(String)
     rocket_id: Mapped[int] = mapped_column(ForeignKey("rockets.id"), nullable=True)
+    wheel_amount: Mapped[int] = mapped_column(Integer, nullable=True)
 
 
 # class BroadcastLog(_TimestampMixin, Base):
