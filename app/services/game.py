@@ -59,6 +59,8 @@ class GameService(BaseService):
             tx_type=TransactionTypeEnum.wheel_spin,
         )
 
+        user = balance_data.user
+
         prize = random.choices(  # noqa: S311
             population=WHEEL_PRIZES,
             weights=[prize.chance for prize in WHEEL_PRIZES],
@@ -72,12 +74,13 @@ class GameService(BaseService):
             logger.error(f"First spin for 1 ton not found: {WHEEL_PRIZES=}")
 
         if prize.type in (WheelPrizeEnum.token, WheelPrizeEnum.usdt, WheelPrizeEnum.ton, WheelPrizeEnum.wheel):
-            await self.services.transaction.change_user_balance(
+            _resp = await self.services.transaction.change_user_balance(
                 telegram_id=current_user.telegram_id,
                 currency=CurrenciesEnum[prize.type.value],
                 amount=prize.amount,
                 tx_type=TransactionTypeEnum.wheel_spin,
             )
+            user = _resp.user
         elif prize.type in (
             WheelPrizeEnum.default_rocket,
             WheelPrizeEnum.offline_rocket,
@@ -101,6 +104,7 @@ class GameService(BaseService):
             icon=prize.icon,
         )
 
+        prize.user = user
         return prize
 
     @staticmethod

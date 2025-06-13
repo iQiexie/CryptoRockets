@@ -15,6 +15,7 @@ class WheelPrizeResponse(BaseResponse):
     amount: float
     icon: str
     chance: float = Field(exclude=True)
+    user: UserResponse | None = None
 
 
 class LatestWheelPrizeResponse(BaseResponse):
