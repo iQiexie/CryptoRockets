@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from pydantic import ConfigDict, Field, computed_field
+from pydantic import field_validator
 
 from app.api.dto.base import BaseResponse
 from app.config.constants import (
@@ -34,54 +35,25 @@ class UserResponse(BaseResponse):
     token_balance: float
     wheel_balance: float
     payment_address: str = "UQA824RWvHtNCPlMp-mRA1u3geuf98zyt4VZjXdGAZCAwDHC"
-    wheel_received: datetime = Field(default=..., exclude=True)
-    wheel_ad_received: datetime = Field(default=..., exclude=True)
-    default_rocket_received: datetime = Field(default=..., exclude=True)
-    offline_rocket_received: datetime = Field(default=..., exclude=True)
-    premium_rocket_received: datetime = Field(default=..., exclude=True)
+    next_wheel_at: datetime | None = Field(default=None)
+    next_wheel_ad_at: datetime | None = Field(default=None)
+    next_default_rocket_at: datetime | None = Field(default=None)
+    next_offline_rocket_at: datetime | None = Field(default=None)
+    next_premium_rocket_at: datetime | None = Field(default=None)
 
     rockets: list[RocketResponse]
-
-    @computed_field()
-    def next_wheel_at(self) -> datetime | None:
-        available = self.wheel_received + timedelta(minutes=WHEEL_TIMEOUT)
-        if available <= datetime.utcnow():
-            return None
-
-        return available
-
-    @computed_field()
-    def next_wheel_ad_at(self) -> datetime | None:
-        available = self.wheel_ad_received + timedelta(minutes=WHEEL_TIMEOUT)
-        if available <= datetime.utcnow():
-            return None
-
-        return available
-
-    @computed_field()
-    def next_default_rocket_at(self) -> datetime | None:
-        if RocketTypeEnum.default in [rocket.type for rocket in self.rockets]:
-            return None
-
-        return self.default_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_DEFAULT)
-
-    @computed_field()
-    def next_offline_rocket_at(self) -> datetime | None:
-        if RocketTypeEnum.offline in [rocket.type for rocket in self.rockets]:
-            return None
-
-        return self.offline_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_OFFLINE)
-
-    @computed_field()
-    def next_premium_rocket_at(self) -> datetime | None:
-        if RocketTypeEnum.premium in [rocket.type for rocket in self.rockets]:
-            return None
-
-        return self.premium_rocket_received + timedelta(minutes=ROCKET_TIMEOUT_PREMIUM)
 
     @computed_field
     def referral(self) -> str:
         return f"https://t.me/{BOT_NAME}/{WEBAPP_NAME}?startapp={REFERRAL_PREFIX}{self.telegram_id}"
+
+    @field_validator("next_wheel_at", "next_wheel_ad_at",  "next_default_rocket_at", "next_offline_rocket_at", "next_premium_rocket_at", mode="before",)
+    @classmethod
+    def validate_next(cls, v: datetime) -> datetime | None:
+        if v <= datetime.utcnow():
+            return None
+
+        return v
 
 
 class PublicUserResponse(BaseResponse):

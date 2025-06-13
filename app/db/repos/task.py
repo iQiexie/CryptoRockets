@@ -18,14 +18,11 @@ class TaskRepo(BaseRepo):
         super().__init__(session=session)
 
     async def get_offline_rocket_users(self) -> Sequence[User]:
-        min_timeout = min(ROCKET_TIMEOUT_DEFAULT, ROCKET_TIMEOUT_OFFLINE, ROCKET_TIMEOUT_PREMIUM)
-        interval_str = f"INTERVAL '{min_timeout} minutes'"
-
         stmt = select(User).where(
             or_(
-                User.default_rocket_received <= func.now() - text(interval_str),
-                User.offline_rocket_received <= func.now() - text(interval_str),
-                User.premium_rocket_received <= func.now() - text(interval_str),
+                User.next_default_rocket_at <= func.now(),
+                User.next_offline_rocket_at <= func.now(),
+                User.next_premium_rocket_at <= func.now(),
             )
         )
 
@@ -33,9 +30,12 @@ class TaskRepo(BaseRepo):
         return query.scalars().all()
 
     async def get_wheel_users(self) -> Sequence[User]:
-        stmt = select(User).where(
-            User.wheel_received <= func.now() - text(f"INTERVAL '{WHEEL_TIMEOUT} minutes'"),
-            User.updated_at >= func.now() - text("INTERVAL '1 day'"),
+        stmt = (
+            select(User)
+            .where(
+                User.next_wheel_at <= func.now(),
+                User.updated_at >= func.now() - text("INTERVAL '1 day'"),
+            )
         )
 
         query = await self.session.execute(stmt)

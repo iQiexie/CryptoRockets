@@ -7,6 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dto.base import PaginatedRequest
 from app.config.constants import ROCKET_CAPACITY_DEFAULT, ROCKET_CAPACITY_PREMIUM
 from app.config.constants import ROCKET_CAPACITY_OFFLINE
+from app.config.constants import ROCKET_TIMEOUT_DEFAULT
+from app.config.constants import ROCKET_TIMEOUT_OFFLINE
+from app.config.constants import ROCKET_TIMEOUT_PREMIUM
+from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import Rocket, RocketTypeEnum, User
 from app.db.repos.base.base import BaseRepo, PaginatedResult
 
@@ -22,6 +26,11 @@ class UserRepo(BaseRepo):
 
     async def create_user(self, **kwargs) -> User:
         kwargs['wheel_balance'] = kwargs.get('wheel_balance', 3)
+        kwargs['next_default_rocket_at'] = datetime.utcnow() + timedelta(minutes=ROCKET_TIMEOUT_DEFAULT)
+        kwargs['next_offline_rocket_at'] = datetime.utcnow() + timedelta(minutes=ROCKET_TIMEOUT_OFFLINE)
+        kwargs['next_premium_rocket_at'] = datetime.utcnow() + timedelta(minutes=ROCKET_TIMEOUT_PREMIUM)
+        kwargs['next_wheel_at'] = datetime.utcnow() + timedelta(minutes=WHEEL_TIMEOUT)
+        kwargs['next_wheel_ad_at'] = datetime.utcnow()
 
         user = User(**kwargs)
 

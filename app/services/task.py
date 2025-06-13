@@ -21,6 +21,7 @@ from app.config.constants import (
     ROCKET_TIMEOUT_OFFLINE,
     ROCKET_TIMEOUT_PREMIUM,
 )
+from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import CurrenciesEnum, RocketTypeEnum, User
 from app.services.base.base import BaseService
 
@@ -86,8 +87,7 @@ class TaskService(BaseService):
                 if rocket["type"].value in existing_rockets:
                     continue
 
-                last_received = getattr(user, f"{rocket['type'].value}_rocket_received")
-                next_receive = last_received + timedelta(minutes=rocket["timeout"])
+                next_receive = getattr(user, f"next_{rocket['type'].value}_rocket_at")
                 if next_receive > datetime.utcnow():
                     continue
 
@@ -103,7 +103,7 @@ class TaskService(BaseService):
                 await self.repos.user.update_user(
                     **{
                         "telegram_id": user.telegram_id,
-                        f"{rocket['type'].value}_rocket_received": datetime.utcnow(),
+                        f"next_{rocket['type'].value}_rocket_at": datetime.utcnow() + timedelta(minutes=rocket["timeout"]),
                     }
                 )
 
@@ -135,7 +135,7 @@ class TaskService(BaseService):
                 telegram_id=user.telegram_id,
                 currency=CurrenciesEnum.wheel,
                 amount=1,
-                user_kwargs=dict(wheel_received=datetime.utcnow()),
+                user_kwargs=dict(next_wheel_at=datetime.utcnow() + timedelta(minutes=WHEEL_TIMEOUT)),
             )
             await t.commit()
 

@@ -146,31 +146,31 @@ class User(_TimestampMixin, Base):
         ForeignKey("users.telegram_id", ondelete="CASCADE"), nullable=True, index=True
     )
 
-    default_rocket_received: Mapped[datetime.datetime] = mapped_column(
+    next_default_rocket_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP,
         default=datetime.datetime.utcnow,
         server_default=func.now(),
     )
 
-    offline_rocket_received: Mapped[datetime.datetime] = mapped_column(
+    next_offline_rocket_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP,
         default=datetime.datetime.utcnow,
         server_default=func.now(),
     )
 
-    premium_rocket_received: Mapped[datetime.datetime] = mapped_column(
+    next_premium_rocket_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP,
         default=datetime.datetime.utcnow,
         server_default=func.now(),
     )
 
-    wheel_received: Mapped[datetime.datetime] = mapped_column(
+    next_wheel_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP,
         default=datetime.datetime.utcnow,
         server_default=func.now(),
     )
 
-    wheel_ad_received: Mapped[datetime.datetime] = mapped_column(
+    next_wheel_ad_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP,
         default=datetime.datetime.utcnow,
         server_default=func.now(),
