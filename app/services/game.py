@@ -104,7 +104,7 @@ class GameService(BaseService):
             icon=prize.icon,
         )
 
-        prize.user = user
+        prize.user = UserResponse.model_validate(user)
         return prize
 
     @staticmethod
