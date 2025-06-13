@@ -104,6 +104,6 @@ class AdsService(BaseService):
             user = resp.user
 
         return VerifyAdResponse(
-            user=UserResponse.model_validate(user),
-            rocket=RocketResponse.model_validate(rocket),
+            user=UserResponse.model_validate(user) if user else None,
+            rocket=RocketResponse.model_validate(rocket) if rocket else None,
         )
