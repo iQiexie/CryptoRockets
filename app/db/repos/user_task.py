@@ -1,5 +1,6 @@
 from typing import Sequence
 
+from sqlalchemy import desc
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -56,6 +57,7 @@ class UserTaskRepo(BaseRepo):
                 (Task.id == TaskUser.task_id)
                 & (TaskUser.user_id == telegram_id)
             )
+            .order_by(desc(Task.priority))
         )
 
         query = await self.session.execute(stmt)
