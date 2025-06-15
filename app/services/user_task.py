@@ -80,6 +80,7 @@ class UserTaskService(BaseService):
             type=task.rocket_type,
             fuel_capacity=fuel_capacity,
             current_fuel=fuel_capacity,
+            seen=True,
         )
 
     @BaseService.single_transaction
