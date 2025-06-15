@@ -149,12 +149,12 @@ class GameService(BaseService):
         reward = random.uniform(min_reward, max_reward)  # noqa: S311
         return round(min(reward, 2), 2)
 
-    async def _handle_regular_rocket(self, user: User) -> LaunchResponse:
+    async def _handle_regular_rocket(self, user: User, rocket_type: RocketTypeEnum) -> LaunchResponse:
         currency = random.choices(
             population=[CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token],
             weights=[50, 20, 30]
         )[0]
-        balance_diff = self.get_balance_diff(user=user, currency=currency)
+        balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket_type)
 
         await self.services.transaction.change_user_balance(
             telegram_id=user.telegram_id,
@@ -198,7 +198,7 @@ class GameService(BaseService):
         if rocket.type in (RocketTypeEnum.premium, RocketTypeEnum.super):
             resp = await self._handle_premium_rocket(user=user, rocket_type=rocket.type)
         else:
-            resp = await self._handle_regular_rocket(user=user)
+            resp = await self._handle_regular_rocket(user=user, rocket_type=rocket.type)
 
         await self.repo.update_rocket(rocket_id=rocket.id, enabled=False, current_fuel=0)
         await self.session.commit()
