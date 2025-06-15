@@ -15,6 +15,7 @@ from app.api.dependencies.stubs import (
     placeholder,
 )
 from app.api.exceptions import ClientError
+from app.config.constants import FUEL_CAPACITY_MAP
 from app.config.constants import ROCKET_CAPACITY_DEFAULT
 from app.config.constants import ROCKET_CAPACITY_OFFLINE
 from app.config.constants import ROCKET_CAPACITY_PREMIUM
@@ -72,11 +73,7 @@ class UserTaskService(BaseService):
             status=TaskStatusEnum.completed,
         )
 
-        fuel_capacity = {
-            RocketTypeEnum.default: ROCKET_CAPACITY_DEFAULT,
-            RocketTypeEnum.offline: ROCKET_CAPACITY_OFFLINE,
-            RocketTypeEnum.premium: ROCKET_CAPACITY_PREMIUM,
-        }.get(task.rocket_type, 1)
+        fuel_capacity = FUEL_CAPACITY_MAP.get(task.rocket_type, 1)
 
         return await self.repos.user.create_user_rocket(
             user_id=telegram_id,

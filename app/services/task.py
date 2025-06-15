@@ -13,6 +13,7 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
+from app.config.constants import FUEL_CAPACITY_MAP
 from app.config.constants import (
     ROCKET_CAPACITY_DEFAULT,
     ROCKET_CAPACITY_OFFLINE,
@@ -42,11 +43,7 @@ class TaskService(BaseService):
 
     @BaseService.single_transaction
     async def give_rocket(self, rocket_type: RocketTypeEnum, full: bool, telegram_id: int) -> None:
-        fuel_capacity = {
-            RocketTypeEnum.default: ROCKET_CAPACITY_DEFAULT,
-            RocketTypeEnum.offline: ROCKET_CAPACITY_OFFLINE,
-            RocketTypeEnum.premium: ROCKET_CAPACITY_PREMIUM,
-        }.get(rocket_type, 1)
+        fuel_capacity = FUEL_CAPACITY_MAP.get(rocket_type, 1)
 
         await self.repos.user.create_user_rocket(
             type=rocket_type,

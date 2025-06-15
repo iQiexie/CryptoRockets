@@ -20,6 +20,7 @@ from app.api.dto.game.response import (
 )
 from app.api.dto.user.response import UserResponse
 from app.api.exceptions import ClientError
+from app.config.constants import FUEL_CAPACITY_MAP
 from app.config.constants import MAX_BALANCE
 from app.db.models import (
     CurrenciesEnum,
@@ -86,11 +87,12 @@ class GameService(BaseService):
             WheelPrizeEnum.offline_rocket,
             WheelPrizeEnum.premium_rocket,
         ):
+            rocket_type = RocketTypeEnum[prize.type.value.replace("_rocket", "")]
             _rocket = await self.repos.user.create_user_rocket(
                 user_id=current_user.telegram_id,
-                type=RocketTypeEnum[prize.type.value.replace("_rocket", "")],
-                fuel_capacity=1,
-                current_fuel=1,
+                type=rocket_type,
+                fuel_capacity=FUEL_CAPACITY_MAP.get(rocket_type, 1),
+                current_fuel=0,
                 seen=True,
             )
         else:
