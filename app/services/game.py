@@ -95,6 +95,7 @@ class GameService(BaseService):
                 current_fuel=0,
                 seen=True,
             )
+            user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
         else:
             raise NotImplementedError(f"Prize type {prize.type} is not implemented")
 
