@@ -16,6 +16,7 @@ from app.api.dependencies.stubs import (
 from app.api.dto.base import PaginatedRequest, PaginatedResponse
 from app.api.dto.user.request import UpdateUserRequest
 from app.api.dto.user.response import PublicUserResponse
+from app.config.constants import FUEL_CAPACITY_MAP
 from app.db.models import RocketTypeEnum, User
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
@@ -113,12 +114,10 @@ class UserService(BaseService):
         return await self._create_user(user_data=user_data, data=data)
 
     async def handle_referral(self, referral_from: int, data: WebappData) -> None:
-        rocket = await self.repos.game.get_rocket_for_update(
-            telegram_id=referral_from, rocket_type=RocketTypeEnum.premium
+        fuel_capacity = FUEL_CAPACITY_MAP.get(RocketTypeEnum.premium, 1)
+        await self.repo.create_user_rocket(
+            user_id=referral_from,
+            type=RocketTypeEnum.premium,
+            fuel_capacity=fuel_capacity,
+            current_fuel=fuel_capacity if data.is_premium else 0,
         )
-
-        current_fuel = rocket.fuel_capacity
-        if data.is_premium:
-            current_fuel += rocket.fuel_capacity
-
-        await self.repos.game.update_rocket(rocket_id=rocket.id, current_fuel=current_fuel, count=rocket.count + 1)
