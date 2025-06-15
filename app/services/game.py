@@ -115,7 +115,7 @@ class GameService(BaseService):
         return prize
 
     @staticmethod
-    def get_balance_diff(user: User, currency: CurrenciesEnum) -> float:
+    def get_balance_diff(user: User, currency: CurrenciesEnum, rocket_type: RocketTypeEnum) -> float:
         if currency == CurrenciesEnum.token:
             return random.randint(50, 300)
 
@@ -123,6 +123,10 @@ class GameService(BaseService):
             return round(random.uniform(8, 10), 2)  # noqa: S311
 
         current_balance = float(getattr(user, f"{currency.value}_balance"))
+
+        if rocket_type == RocketTypeEnum.super and current_balance < MAX_BALANCE - 10:
+            return round(random.uniform(2.5, 5.0), 2)  # noqa: S311
+
         jackpot_chance = 0.015
         if random.random() < jackpot_chance:  # noqa: S311
             if current_balance < MAX_BALANCE - 20:
@@ -163,10 +167,7 @@ class GameService(BaseService):
         resp = dict()
 
         for currency in (CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token):
-            balance_diff = self.get_balance_diff(user=user, currency=currency)
-            if rocket_type == RocketTypeEnum.super:
-                balance_diff *= 2
-
+            balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket_type)
             await self.services.transaction.change_user_balance(
                 telegram_id=user.telegram_id,
                 currency=currency,

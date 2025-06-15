@@ -4,7 +4,7 @@
   "task.invite_description": "Building rockets with friends is more fun! Invite your friends to join the adventure and earn rewards together.",
   "task.subscribe": "Subscribe to our newsletter",
   "task.subscribe_description": "Stay updated with the latest news and exclusive offers",
-  "task.bot": "Join our bot",
+  "task.bot": "Join {name}",
   "task.bot_description": "Clone your voice, have fun with your friends, and explore new possibilities with our bot!",
   "bot.start_button": "Launch 🚀",
   "bot.start": "🚀 Welcome to Crypto Rockets!\n\nHere, every launch is a <strong>chance to win</strong>!\n\nLaunch rockets and <strong>earn USDT, TON</strong> and awesome Telegram <strong>GIFTS</strong>.\n\nReady for takeoff? Buckle up — the journey starts right now! 🎁💸"

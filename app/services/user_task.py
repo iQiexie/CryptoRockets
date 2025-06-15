@@ -49,9 +49,10 @@ class UserTaskService(BaseService):
         async with self.repo.transaction():
             tasks = await self.repo.get_user_tasks(telegram_id=current_user.telegram_id)
         for task in tasks:
-            kwargs = dict(amount=task.amount)
-            task.description = self.adapters.i18n.t(task.description, current_user.language_code).format(**kwargs)
-            task.name = self.adapters.i18n.t(task.name, current_user.language_code).format(**kwargs)
+            task.description = self.adapters.i18n.t(task.description, current_user.language_code).format(
+                amount=task.amount,
+                name=task.name,
+            )
 
         return tasks
 
