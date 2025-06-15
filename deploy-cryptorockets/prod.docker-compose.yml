@@ -14,8 +14,8 @@ services:
       - |
         service cron start
         alembic upgrade head && gunicorn \
-          --config deploy-3rio/gunicorn_config.py \
-          --worker-class deploy-3rio.gunicorn_config.CustomUvicornWorker app.main:get_app \
+          --config deploy-cryptorockets/gunicorn_config.py \
+          --worker-class deploy-cryptorockets.gunicorn_config.CustomUvicornWorker app.main:get_app \
           --bind 0.0.0.0:8000
     restart: unless-stopped
     env_file:
