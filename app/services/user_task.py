@@ -1,3 +1,4 @@
+import traceback
 from typing import Annotated
 
 import structlog
@@ -57,10 +58,16 @@ class UserTaskService(BaseService):
         return tasks
 
     async def _is_subscribed(self, telegram_id: int, task: Task) -> bool:
-        resp = await self.adapters.bot.get_chat_member(
-            chat_id=task.telegram_id,
-            user_id=telegram_id,
-        )
+        try:
+            resp = await self.adapters.bot.get_chat_member(
+                chat_id=task.telegram_id,
+                user_id=telegram_id,
+            )
+        except Exception as e:
+            logger.error(
+                f"Error checking subscription for task {task.id}: {e}", exception=traceback.print_exception(e)
+                )
+            return False
 
         if resp.status in (ChatMemberStatus.MEMBER, ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
             return True
