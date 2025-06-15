@@ -15,12 +15,14 @@ from aiogram.exceptions import (
     TelegramForbiddenError,
     TelegramRetryAfter,
 )
+from aiogram.types import InlineKeyboardButton
 from aiogram.types import InputFile, Message, TelegramObject
+from aiogram.types import WebAppInfo
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from fastapi import FastAPI
 
 from app.config.config import TelegramBotConfig
 from app.db.models import User
-from app.telegram.keyboards.start import main_menu_keyboard
 from i18n.service import I18n
 
 logger = structlog.stdlib.get_logger()
@@ -72,10 +74,25 @@ class Bot(_Bot):
         utm_source: str | None = None,
         custom_text: str | None = None,
     ) -> None:
-        await self.send_message(
+        builder = InlineKeyboardBuilder()
+
+        url = "https://cryptorockets.net/"
+        if utm_source:
+            url += f"?utm_source={utm_source}"
+
+        builder.row(
+            InlineKeyboardButton(
+                text=self.i18n.t(message="bot.start_button", lang=user.tg_language_code),
+                web_app=WebAppInfo(url=url),
+            )
+        )
+
+        await self.send_photo(
             chat_id=user.telegram_id,
-            text=custom_text or "Привет!",
-            reply_markup=main_menu_keyboard(utm_source=utm_source),
+            caption=custom_text or self.i18n.t(message="bot.start", lang=user.tg_language_code),
+            reply_markup=builder.as_markup(),
+            photo="https://3rioteam.fra1.cdn.digitaloceanspaces.com/creative1.jpg",
+            parse_mode="HTML",
         )
 
 
