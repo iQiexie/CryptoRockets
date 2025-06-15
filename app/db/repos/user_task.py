@@ -28,11 +28,15 @@ class UserTaskRepo(BaseRepo):
         return query.scalar_one_or_none()
 
     async def create_user_task(self, **kwargs) -> TaskUser:
-        stmt = insert(TaskUser).values(**kwargs)
-        stmt = stmt.on_conflict_do_update(
-            index_elements=['user_id', 'task_id'],
-            set_=kwargs
-        ).returning(TaskUser)
+        stmt = (
+            insert(TaskUser)
+            .values(**kwargs)
+            .on_conflict_do_update(
+                index_elements=['user_id', 'task_id'],
+                set_=kwargs
+            )
+            .returning(TaskUser)
+        )
 
         result = await self.session.execute(stmt)
         await self.session.commit()
