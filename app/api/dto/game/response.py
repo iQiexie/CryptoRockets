@@ -2,6 +2,7 @@ from pydantic import Field
 
 from app.api.dto.base import BaseResponse
 from app.api.dto.user.response import PublicUserResponse
+from app.api.dto.user.response import RocketResponse
 from app.api.dto.user.response import UserResponse
 from app.db.models import WheelPrizeEnum
 from app.utils import iota_generator
@@ -16,6 +17,7 @@ class WheelPrizeResponse(BaseResponse):
     icon: str
     chance: float = Field(exclude=True)
     user: UserResponse | None = None
+    rocket: RocketResponse | None = None
 
 
 class LatestWheelPrizeResponse(BaseResponse):

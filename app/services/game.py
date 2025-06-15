@@ -18,6 +18,7 @@ from app.api.dto.game.response import (
     WheelPrizeEnum,
     WheelPrizeResponse,
 )
+from app.api.dto.user.response import RocketResponse
 from app.api.dto.user.response import UserResponse
 from app.api.exceptions import ClientError
 from app.config.constants import FUEL_CAPACITY_MAP
@@ -61,6 +62,7 @@ class GameService(BaseService):
         )
 
         user = balance_data.user
+        rocket = None
 
         prize = random.choices(  # noqa: S311
             population=WHEEL_PRIZES,
@@ -88,14 +90,14 @@ class GameService(BaseService):
             WheelPrizeEnum.premium_rocket,
         ):
             rocket_type = RocketTypeEnum[prize.type.value.replace("_rocket", "")]
-            _rocket = await self.repos.user.create_user_rocket(
+            rocket = await self.repos.user.create_user_rocket(
                 user_id=current_user.telegram_id,
                 type=rocket_type,
                 fuel_capacity=FUEL_CAPACITY_MAP.get(rocket_type, 1),
                 current_fuel=0,
                 seen=True,
             )
-            user.rockets.append(_rocket)
+            user.rockets.append(rocket)
         else:
             raise NotImplementedError(f"Prize type {prize.type} is not implemented")
 
@@ -109,6 +111,7 @@ class GameService(BaseService):
         )
 
         prize.user = UserResponse.model_validate(user)
+        prize.rocket = RocketResponse.model_validate(rocket) if rocket else None
         return prize
 
     @staticmethod
