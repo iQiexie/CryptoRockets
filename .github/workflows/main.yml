@@ -1,0 +1,38 @@
+name: 3nity-deploy-dev
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SSH_KEY: ${{ secrets.SSH_KEY_PROD }}
+      SSH_URL: ${{ vars.SSH_URL_PROD }}  # root@ip
+      ENV: ${{ vars.ENV_PROD }}
+      PROJECT_PATH: "/opt/cryptorockets"
+      COMPOSE_PATH: "deploy-cryptorockets/prod.docker-compose.yml"
+    steps:
+    - uses: actions/checkout@v3
+    - name: Preparing deploy
+      run: |
+        echo "Preparing before deploy"
+        echo $(dig +short myip.opendns.com @resolver4.opendns.com)
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+        touch ~/.ssh/id_rsa
+        echo "$SSH_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+    - name: Deploying
+      run: |
+        ssh -o ConnectTimeout=10 ${SSH_URL} -i ~/.ssh/id_rsa "docker network ls | grep -q 'voiceover-network' || docker network create voiceover-network"
+        ssh ${SSH_URL} -i ~/.ssh/id_rsa "mkdir -p $PROJECT_PATH"
+        echo "$ENV" > .env
+        ssh ${SSH_URL} -i ~/.ssh/id_rsa "sudo rm -rf $PROJECT_PATH"
+        rsync -za -e "ssh -i ~/.ssh/id_rsa" . $(echo $SSH_URL):$PROJECT_PATH
+        ssh ${SSH_URL} -i ~/.ssh/id_rsa "cd $PROJECT_PATH ; docker compose -f $COMPOSE_PATH down && docker compose -f $COMPOSE_PATH up -d --build"

@@ -1,0 +1,99 @@
+version: '3'
+
+services:
+  3rio-backend:
+    container_name: 3rio-backend
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+    build:
+      context: ../
+      dockerfile: /Dockerfile
+    entrypoint: ["/bin/sh","-c"]
+    command:
+      - |
+        service cron start
+        alembic upgrade head && gunicorn \
+          --config deploy-3rio/gunicorn_config.py \
+          --worker-class deploy-3rio.gunicorn_config.CustomUvicornWorker app.main:get_app \
+          --bind 0.0.0.0:8000
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      - "8000"
+    volumes:
+      - ../:/usr/app/
+    networks:
+      3rio-network:
+
+  redis:
+    container_name: redis
+    image: redis:6.2.11-alpine
+    command: --port 6379
+    volumes:
+      - redis-data-3rio:/data
+    ports:
+      - "6379"
+    networks:
+      3rio-network:
+
+  loki:
+    image: grafana/loki:main-5929b05
+    volumes:
+      - loki-data-3rio:/loki
+      - ./grafana/logs/loki-config.yaml:/etc/loki/local-config.yaml  # Changed path
+    networks:
+      - 3rio-network
+
+  promtail:
+    image: grafana/promtail:latest
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    volumes:
+      - ./grafana/logs/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - loki
+    networks:
+      - 3rio-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../.env
+    volumes:
+      - grafana-data-3rio:/var/lib/grafana
+      - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./grafana/dashboards.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - loki
+    networks:
+      - 3rio-network
+
+  prometheus:
+    image: prom/prometheus:v2.46.0
+    ports:
+      - "9090"  # без этого не работают метрики сервисов
+    volumes:
+      - ./grafana/metrics/prometheus.yaml:/etc/prometheus/prometheus.yml
+    networks:
+      - 3rio-network
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    networks:
+      - 3rio-network
+
+volumes:
+  postgres-data-3rio:
+  redis-data-3rio:
+  loki-data-3rio:
+  grafana-data-3rio:
+
+networks:
+  3rio-network:
+    external: true
