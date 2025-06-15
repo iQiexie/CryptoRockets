@@ -56,7 +56,7 @@ _items = (
         xtr_price=10,
         token_price=10,
         special=False,
-        available_until=datetime(2025, 6, 14, 0, 0, 0),
+        available_until=datetime(2025, 6, 21, 0, 0, 0),
     ),
 )
 
