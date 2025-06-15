@@ -64,11 +64,13 @@ class AdsService(BaseService):
 
     @BaseService.single_transaction
     async def verify_offer(self, current_user: WebappData, data: AdCheckRequest) -> VerifyAdResponse:
-        payload, hash_ = data.token.split("-")
-        actual_hash_ = self.xor_encrypt(data=payload, key=f"rocket_type_{current_user.telegram_id}_{data.id}")
-
-        if hash_ != actual_hash_:
-            raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
+        try:
+            payload, hash_ = data.token.split("-")
+            actual_hash_ = self.xor_encrypt(data=payload, key=f"rocket_type_{current_user.telegram_id}_{data.id}")
+            if hash_ != actual_hash_:
+                raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
+        except ValueError:
+            pass
 
         ad = await self.repo.get_ad(ad_id=data.id)
         if not ad:
