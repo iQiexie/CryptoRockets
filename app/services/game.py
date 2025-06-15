@@ -193,7 +193,7 @@ class GameService(BaseService):
         user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
 
         if rocket.type in (RocketTypeEnum.premium, RocketTypeEnum.super):
-            resp = await self._handle_premium_rocket(user=user)
+            resp = await self._handle_premium_rocket(user=user, rocket_type=rocket.type)
         else:
             resp = await self._handle_regular_rocket(user=user)
 
