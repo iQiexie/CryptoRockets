@@ -159,11 +159,14 @@ class GameService(BaseService):
 
         return LaunchResponse(**{currency.value: balance_diff})
 
-    async def _handle_premium_rocket(self, user: User) -> LaunchResponse:
+    async def _handle_premium_rocket(self, user: User, rocket_type: RocketTypeEnum) -> LaunchResponse:
         resp = dict()
 
         for currency in (CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token):
             balance_diff = self.get_balance_diff(user=user, currency=currency)
+            if rocket_type.super:
+                balance_diff *= 2
+
             await self.services.transaction.change_user_balance(
                 telegram_id=user.telegram_id,
                 currency=currency,
@@ -189,7 +192,7 @@ class GameService(BaseService):
 
         user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
 
-        if rocket.type == RocketTypeEnum.premium:
+        if rocket.type in (RocketTypeEnum.premium, RocketTypeEnum.super):
             resp = await self._handle_premium_rocket(user=user)
         else:
             resp = await self._handle_regular_rocket(user=user)
