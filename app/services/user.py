@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 from typing import Annotated
 
 import structlog
@@ -78,7 +79,10 @@ class UserService(BaseService):
 
         if user.referral_from:
             referral_from = int(data.referral)  # noqa
-            await self.handle_referral(referral_from=referral_from, data=data)  # noqa
+            try:
+                await self.handle_referral(referral_from=referral_from, data=data)  # noqa
+            except Exception as e:
+                logger.info(f"Failed to handle referral: {e}", exception=traceback.format_exception(e))
 
         await self.session.commit()
         await self.session.refresh(user)
