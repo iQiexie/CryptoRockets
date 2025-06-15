@@ -1,3 +1,4 @@
+import asyncio
 import base64
 from typing import Annotated
 
@@ -103,6 +104,14 @@ class ShopService(BaseService):
         if not user:
             await self.session.flush()
             user = await self.repos.user.get_user_by_telegram_id(telegram_id=data.telegram_id)
+
+        asyncio.create_task(self.adapters.alerts.send_alert(
+            message=(
+                f"Покупочка!!\n\n"
+                f"Пользователь: {user.telegram_id}\n"
+                f"Сумма: {data.usd_amount} USD\n"
+            )
+        ))
 
         return user
 
