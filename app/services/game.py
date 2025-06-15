@@ -164,7 +164,7 @@ class GameService(BaseService):
 
         for currency in (CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token):
             balance_diff = self.get_balance_diff(user=user, currency=currency)
-            if rocket_type.super:
+            if rocket_type == RocketTypeEnum.super:
                 balance_diff *= 2
 
             await self.services.transaction.change_user_balance(
