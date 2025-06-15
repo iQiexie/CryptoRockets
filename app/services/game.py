@@ -138,7 +138,10 @@ class GameService(BaseService):
         return round(min(reward, 2), 2)
 
     async def _handle_regular_rocket(self, user: User) -> LaunchResponse:
-        currency = random.choice([CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token])  # noqa: S311
+        currency = random.choices(
+            population=[CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token],
+            weights=[50, 20, 30]
+        )[0]
         balance_diff = self.get_balance_diff(user=user, currency=currency)
 
         await self.services.transaction.change_user_balance(
