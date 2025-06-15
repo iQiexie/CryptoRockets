@@ -286,7 +286,7 @@ class Advert(_TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
 
-    user_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
     provider: Mapped[str] = mapped_column(String)
     status: Mapped[AdStatusEnum] = mapped_column(String)
     rocket_id: Mapped[int] = mapped_column(ForeignKey("rockets.id"), nullable=True)
