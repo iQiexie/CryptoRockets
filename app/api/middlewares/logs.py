@@ -130,12 +130,13 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         }
 
     def _protect_body(self, body: str) -> str:
-        try:
-            return re.sub(
-                self.regex_pattern,
-                repl=self.substitution,
-                string=body,
-            )
-        except Exception as e:
-            struct_log(event="Failed to protect string", exception=traceback.format_exception(e))
-            return body
+        return body
+        # try:
+        #     return re.sub(
+        #         self.regex_pattern,
+        #         repl=self.substitution,
+        #         string=body,
+        #     )
+        # except Exception as e:
+        #     struct_log(event="Failed to protect string", exception=traceback.format_exception(e))
+        #     return body
