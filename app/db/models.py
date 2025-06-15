@@ -177,7 +177,7 @@ class User(_TimestampMixin, Base):
         server_default=func.now(),
     )
 
-    has_spins: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    spin_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
     rockets: Mapped[list["Rocket"]] = relationship(
         "Rocket",

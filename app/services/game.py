@@ -71,8 +71,10 @@ class GameService(BaseService):
         )[0]
 
         try:
-            if not balance_data.user.has_spins:
+            if balance_data.user.spin_count == 0:
                 prize = [i for i in WHEEL_PRIZES if i.type == WheelPrizeEnum.ton and i.amount == 1][0]
+            elif balance_data.user.spin_count == 2:
+                prize = [i for i in WHEEL_PRIZES if i.type == WheelPrizeEnum.usdt and i.amount == 1][0]
         except IndexError:
             logger.error(f"First spin for 1 ton not found: {WHEEL_PRIZES=}")
 
@@ -101,7 +103,7 @@ class GameService(BaseService):
         else:
             raise NotImplementedError(f"Prize type {prize.type} is not implemented")
 
-        await self.repos.user.update_user(telegram_id=current_user.telegram_id, has_spins=True)
+        await self.repos.user.update_user(telegram_id=current_user.telegram_id, spin_count=user.spin_count + 1)
 
         await self.repo.create_prize(
             user_id=current_user.telegram_id,
