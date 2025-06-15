@@ -113,6 +113,9 @@ class GameService(BaseService):
 
     @staticmethod
     def get_balance_diff(user: User, currency: CurrenciesEnum) -> float:
+        if currency == CurrenciesEnum.token:
+            return random.randint(50, 300)
+
         if user.usdt_balance + user.ton_balance < 1:
             return round(random.uniform(8, 10), 2)  # noqa: S311
 

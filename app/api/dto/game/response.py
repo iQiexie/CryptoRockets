@@ -85,14 +85,14 @@ WHEEL_PRIZES = [
     WheelPrizeResponse(
         id=iota(),
         type=WheelPrizeEnum.token,
-        amount=5,
+        amount=500,
         icon="NotImplemented",
         chance=20,
     ),
     WheelPrizeResponse(
         id=iota(),
         type=WheelPrizeEnum.token,
-        amount=10,
+        amount=1_500,
         icon="NotImplemented",
         chance=20,
     ),
