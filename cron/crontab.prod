@@ -1,2 +1,2 @@
 * * * * * URL=/api/v1/task/give_offline_rocket /usr/local/bin/python /usr/app/cron/cron.py > /var/log/crontab.log 2>&1
-0 * * * * URL=/api/v1/task/give_wheel /usr/local/bin/python /usr/app/cron/cron.py > /var/log/crontab.log 2>&1
+* * * * * URL=/api/v1/task/give_wheel /usr/local/bin/python /usr/app/cron/cron.py > /var/log/crontab.log 2>&1
