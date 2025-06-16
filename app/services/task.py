@@ -116,6 +116,12 @@ class TaskService(BaseService):
                 custom_image="https://3rioteam.fra1.cdn.digitaloceanspaces.com/ret2.jpg",
             )
 
+    async def check_user_exists(self, telegram_id: int) -> bool:
+        if await self.repos.user.get_user_by_telegram_id(telegram_id=telegram_id):
+            return True
+
+        return False
+
     async def give_offline_rocket(self) -> None:
         async with self.repo.transaction():
             users = await self.repo.get_offline_rocket_users()

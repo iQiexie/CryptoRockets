@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from fastapi import Path
 from starlette import status
 
 from app.db.models import RocketTypeEnum
@@ -27,3 +28,12 @@ async def give_wheel(service: Annotated[TaskService, Depends()]) -> None:
 @router.get(path="/task/give_offline_rocket", status_code=status.HTTP_200_OK)
 async def give_offline_rocket(service: Annotated[TaskService, Depends()]) -> None:
     return await service.give_offline_rocket()
+
+
+@router.get(path="/task/check_user/{telegram_id}", status_code=status.HTTP_200_OK)
+async def give_offline_rocket(
+    service: Annotated[TaskService, Depends()],
+    telegram_id: int = Path(...),
+) -> dict:
+    resp = await service.check_user_exists(telegram_id=telegram_id)
+    return {"exists": resp}
