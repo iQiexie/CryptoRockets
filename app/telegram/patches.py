@@ -73,6 +73,7 @@ class Bot(_Bot):
         user: User,
         utm_source: str | None = None,
         custom_text: str | None = None,
+        custom_image: str | None = None,
     ) -> None:
         builder = InlineKeyboardBuilder()
 
@@ -91,7 +92,7 @@ class Bot(_Bot):
             chat_id=user.telegram_id,
             caption=custom_text or self.i18n.t(message="bot.start", lang=user.tg_language_code),
             reply_markup=builder.as_markup(),
-            photo="https://3rioteam.fra1.cdn.digitaloceanspaces.com/creative1.jpg",
+            photo=custom_image or "https://3rioteam.fra1.cdn.digitaloceanspaces.com/creative1.jpg",
             parse_mode="HTML",
         )
 

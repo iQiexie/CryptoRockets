@@ -110,7 +110,9 @@ class TaskService(BaseService):
 
         if RocketTypeEnum.premium in given_rockets:
             await self.adapters.bot.send_menu(
-                user=user, custom_text=self.adapters.i18n.t("task.premium_rocket_given", user.tg_language_code)
+                user=user,
+                custom_text=self.adapters.i18n.t("task.premium_rocket_given", user.tg_language_code),
+                custom_image="https://3rioteam.fra1.cdn.digitaloceanspaces.com/ret.png",
             )
 
     async def give_offline_rocket(self) -> None:
