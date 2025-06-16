@@ -55,6 +55,11 @@ class UserRepo(BaseRepo):
                 fuel_capacity=ROCKET_CAPACITY_DEFAULT,
                 current_fuel=0,
             ),
+            Rocket(
+                type=RocketTypeEnum.default,
+                fuel_capacity=ROCKET_CAPACITY_DEFAULT,
+                current_fuel=0,
+            ),
         ]
         self.session.add(user)
         return user

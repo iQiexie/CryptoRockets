@@ -18,7 +18,6 @@ async def ton(
 ) -> None:
     try:
         telegram_id, item_id = body["payload"].split(";")
-        usd_amount = 0
     except ValueError:
         await service.adapters.alerts.send_alert(
             message=f"Invalid payload format in TON callback: {body=}",
@@ -30,7 +29,7 @@ async def ton(
             telegram_id=int(telegram_id),
             item_id=int(item_id),
             amount=body["amount"],
-            usd_amount=usd_amount,
+            usd_amount=body["amount"] * 3,
             currency=CurrenciesEnum.ton,
             external_id=body["hash"],
             callback_data=body,
