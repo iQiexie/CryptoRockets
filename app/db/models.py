@@ -178,6 +178,7 @@ class User(_TimestampMixin, Base):
     )
 
     spin_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    promo: Mapped[str] = mapped_column(String, nullable=True)
 
     rockets: Mapped[list["Rocket"]] = relationship(
         "Rocket",

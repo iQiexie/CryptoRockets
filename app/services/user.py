@@ -115,6 +115,7 @@ class UserService(BaseService):
             return user
 
         user_data["referral_from"] = data.referral
+        user_data["promo"] = data.start_param
         return await self._create_user(user_data=user_data, data=data)
 
     async def handle_referral(self, referral_from: int, data: WebappData) -> None:
