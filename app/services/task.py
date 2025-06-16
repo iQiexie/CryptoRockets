@@ -75,7 +75,6 @@ class TaskService(BaseService):
         existing_rockets = {rocket.type for rocket in user.rockets}
 
         if {i["type"].value for i in rockets_data}.issubset(existing_rockets):
-            logger.info(f"User {user.telegram_id} already has rockets.")
             return
 
         given_rockets = list()
