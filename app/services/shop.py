@@ -110,6 +110,7 @@ class ShopService(BaseService):
                 f"Покупочка!!\n\n"
                 f"Пользователь: {user.telegram_id}\n"
                 f"Сумма: {data.usd_amount} USD\n"
+                f"Сумма: {data.amount} {data.currency.upper()}\n"
             ),
             chat_id=-4920858130,
         ))

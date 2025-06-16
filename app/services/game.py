@@ -139,7 +139,7 @@ class GameService(BaseService):
                 return round(random.uniform(0.1, 0.5), 2)  # noqa: S311
 
         # Нормализуем баланс от 0 до 1
-        progress = min(current_balance / 60, 1.0)
+        progress = min(current_balance / MAX_BALANCE, 1.0)
 
         # 🔀 Рандомный диапазон награды в зависимости от баланса
         min_reward = 0.05 + (1 - progress) * 0.50  # от 0.05 до ~0.55
