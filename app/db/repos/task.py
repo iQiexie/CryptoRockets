@@ -34,7 +34,7 @@ class TaskRepo(BaseRepo):
             select(User)
             .where(
                 User.next_wheel_at <= func.now(),
-                User.updated_at >= func.now() - text("INTERVAL '1 day'"),
+                User.updated_at >= func.now() - text(f"INTERVAL '{WHEEL_TIMEOUT} minutes'"),
             )
         )
 
