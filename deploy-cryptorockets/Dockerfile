@@ -15,4 +15,4 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry install --only main
 
 COPY . ./
-RUN echo "$(cat cron/crontab)" | crontab -
+RUN echo "$(cat "cron/$(grep '^CRONTAB_FILE=' .env | cut -d '=' -f2- | tr -d '\r')")" | crontab -
