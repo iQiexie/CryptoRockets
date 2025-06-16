@@ -17,8 +17,6 @@ from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import current_timestamp
 
-from app.utils import SafeList
-
 
 class TransactionTypeEnum(str, Enum):
     wheel_spin = "wheel_spin"
@@ -26,6 +24,7 @@ class TransactionTypeEnum(str, Enum):
     purchase = "purchase"
     task_completion = "task_completion"
     ads = "ads"
+    retention = "retention"
 
 
 class TransactionStatusEnum(str, Enum):

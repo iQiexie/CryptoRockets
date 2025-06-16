@@ -24,6 +24,7 @@ from app.config.constants import (
 )
 from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import CurrenciesEnum, RocketTypeEnum, User
+from app.db.models import TransactionTypeEnum
 from app.services.base.base import BaseService
 
 logger = structlog.stdlib.get_logger()
@@ -135,6 +136,7 @@ class TaskService(BaseService):
                 currency=CurrenciesEnum.wheel,
                 amount=1,
                 user_kwargs=dict(next_wheel_at=datetime.utcnow() + timedelta(minutes=WHEEL_TIMEOUT)),
+                tx_type=TransactionTypeEnum.retention
             )
             await t.commit()
 
