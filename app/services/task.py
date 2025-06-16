@@ -140,10 +140,6 @@ class TaskService(BaseService):
             )
             await t.commit()
 
-        await self.adapters.bot.send_menu(
-            user=user, custom_text=self.adapters.i18n.t("task.wheel_given", user.tg_language_code)
-        )
-
     async def give_wheel(self) -> None:
         async with self.repo.transaction():
             users = await self.repo.get_wheel_users()
