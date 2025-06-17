@@ -23,7 +23,8 @@ class TaskRepo(BaseRepo):
                 User.next_default_rocket_at <= func.now(),
                 User.next_offline_rocket_at <= func.now(),
                 User.next_premium_rocket_at <= func.now(),
-            )
+            ),
+            User.last_online >= func.now() - text(f"INTERVAL '1 day'"),
         )
 
         query = await self.session.execute(stmt)
@@ -34,7 +35,7 @@ class TaskRepo(BaseRepo):
             select(User)
             .where(
                 User.next_wheel_at <= func.now(),
-                User.updated_at >= func.now() - text(f"INTERVAL '{WHEEL_TIMEOUT} minutes'"),
+                User.last_online >= func.now() - text(f"INTERVAL '{WHEEL_TIMEOUT} minutes'"),
             )
         )
 

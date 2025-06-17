@@ -176,6 +176,12 @@ class User(_TimestampMixin, Base):
         server_default=func.now(),
     )
 
+    last_online: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP,
+        default=datetime.datetime.utcnow,
+        server_default=func.now(),
+    )
+
     spin_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     promo: Mapped[str] = mapped_column(String, nullable=True)
 

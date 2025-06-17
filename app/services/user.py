@@ -1,5 +1,6 @@
 import asyncio
 import traceback
+from datetime import datetime
 from typing import Annotated
 
 import structlog
@@ -99,6 +100,7 @@ class UserService(BaseService):
             tg_language_code=data.language_code,
             tg_photo_url=data.photo_url,
             bot_banned=False,
+            last_online=datetime.utcnow(),
         )
 
         if data.country:
