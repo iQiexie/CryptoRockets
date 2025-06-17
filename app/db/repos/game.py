@@ -1,9 +1,11 @@
+from collections import defaultdict
 from typing import Sequence
-
 from sqlalchemy import func, literal_column, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-
+from app.db.models import BetConfig
+from app.db.models import GiftUser
+from app.db.models import GiftUserStatusEnum
 from app.db.models import Rocket, RocketTypeEnum, WheelPrize
 from app.db.repos.base.base import BaseRepo
 
@@ -11,6 +13,41 @@ from app.db.repos.base.base import BaseRepo
 class GameRepo(BaseRepo):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session)
+
+    async def create_gift_user(self, **kwargs) -> GiftUser:
+        model = GiftUser(**kwargs)
+        self.session.add(model)
+        return model
+
+    async def get_user_gifts(self, user_id: int) -> Sequence[GiftUser]:
+        stmt = (
+            select(GiftUser)
+            .where(
+                GiftUser.status == GiftUserStatusEnum.created,
+                GiftUser.user_id == user_id,
+            )
+            .options(joinedload(GiftUser.gift))
+        )
+
+        query = await self.session.execute(stmt)
+        return query.scalars().all()
+
+    async def get_bets_config_amount(self, amount: float) -> Sequence[BetConfig]:
+        stmt = select(BetConfig).options(joinedload(BetConfig.gift)).where(BetConfig.bet_from == amount)
+        query = await self.session.execute(stmt)
+        return query.scalars().all()
+
+    async def get_bets_config(self) -> dict[list[BetConfig]]:
+        stmt = select(BetConfig).options(joinedload(BetConfig.gift))
+        query = await self.session.execute(stmt)
+        configs = query.scalars().all()
+
+        resp = defaultdict(list)
+
+        for config in configs:
+            resp[config.bet_from].append(config)
+
+        return resp
 
     async def get_rocket(self, rocket_type: RocketTypeEnum) -> Rocket:
         stmt = select(Rocket).where(Rocket.type == rocket_type)

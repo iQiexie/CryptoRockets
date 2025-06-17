@@ -25,6 +25,7 @@ class TransactionTypeEnum(str, Enum):
     task_completion = "task_completion"
     ads = "ads"
     retention = "retention"
+    bet = "bet"
 
 
 class TransactionStatusEnum(str, Enum):
@@ -79,6 +80,11 @@ class TaskStatusEnum(str, Enum):
     new = "new"
     marked_completed = "marked_completed"
     completed = "completed"
+
+
+class GiftUserStatusEnum(str, Enum):
+    created = "created"
+    withdrawn = "withdrawn"
 
 
 class WheelPrizeEnum(str, Enum):
@@ -205,6 +211,7 @@ class Rocket(_TimestampMixin, Base):
     current_fuel: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
     seen: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    transaction_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="rockets")
 
@@ -298,6 +305,42 @@ class Advert(_TimestampMixin, Base):
     status: Mapped[AdStatusEnum] = mapped_column(String)
     rocket_id: Mapped[int] = mapped_column(ForeignKey("rockets.id"), nullable=True)
     wheel_amount: Mapped[int] = mapped_column(Integer, nullable=True)
+
+
+class Gift(_TimestampMixin, Base):
+    __tablename__ = "gifts"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    fragment: Mapped[str] = mapped_column(String, unique=True)
+    name: Mapped[str] = mapped_column(String)
+    image: Mapped[str] = mapped_column(String)
+    avg_price: Mapped[float] = mapped_column(Numeric)
+
+
+class BetConfig(_TimestampMixin, Base):
+    __tablename__ = "bets_config"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    gift_id = mapped_column(ForeignKey("gifts.id"), index=True, nullable=True)
+    bet_from: Mapped[float] = mapped_column(Numeric)
+    probability: Mapped[float] = mapped_column(Numeric)
+    actual_probability: Mapped[float] = mapped_column(Numeric)
+
+    gift = relationship("Gift", foreign_keys=[gift_id], viewonly=True)
+
+
+class GiftUser(_TimestampMixin, Base):
+    __tablename__ = "gifts_users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
+    gift_id: Mapped[int] = mapped_column(ForeignKey("gifts.id"), index=True, nullable=True)
+    transaction_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"), nullable=True)
+    status: Mapped[GiftUserStatusEnum] = mapped_column(String)
+
+    gift = relationship("Gift", foreign_keys=[gift_id], viewonly=True)
 
 
 # class BroadcastLog(_TimestampMixin, Base):

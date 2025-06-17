@@ -1,4 +1,5 @@
 from pydantic import Field
+from pydantic import RootModel
 
 from app.api.dto.base import BaseResponse
 from app.api.dto.user.response import PublicUserResponse
@@ -8,6 +9,31 @@ from app.db.models import WheelPrizeEnum
 from app.utils import iota_generator
 
 iota = iota_generator()
+
+
+class GiftResponse(BaseResponse):
+    id: int
+    name: str
+    image: str
+
+
+class GiftBetResponse(BaseResponse):
+    probability: float
+    gift: GiftResponse | None = None
+
+
+class BetConfigResponse(BaseResponse, RootModel[dict[float, list[GiftBetResponse]]]):
+    pass
+
+
+class MakeBetResponse(BaseResponse):
+    gift: GiftResponse | None = None
+    user: UserResponse
+
+
+class GiftUserResponse(BaseResponse):
+    id: int
+    gift: GiftResponse
 
 
 class WheelPrizeResponse(BaseResponse):

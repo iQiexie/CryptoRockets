@@ -12,6 +12,8 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
+from app.api.dto.game.request import MakeBetRequest
+from app.api.dto.game.response import MakeBetResponse
 from app.api.dto.game.response import (
     WHEEL_PRIZES,
     LaunchResponse,
@@ -23,6 +25,9 @@ from app.api.dto.user.response import UserResponse
 from app.api.exceptions import ClientError
 from app.config.constants import FUEL_CAPACITY_MAP
 from app.config.constants import MAX_BALANCE
+from app.db.models import BetConfig
+from app.db.models import GiftUser
+from app.db.models import GiftUserStatusEnum
 from app.db.models import (
     CurrenciesEnum,
     RocketTypeEnum,
@@ -30,6 +35,7 @@ from app.db.models import (
     User,
     WheelPrize,
 )
+from app.db.models import Rocket
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 
@@ -47,6 +53,38 @@ class GameService(BaseService):
 
         self.repo = self.repos.game
         self.adapters = adapters
+
+    @BaseService.single_transaction
+    async def get_bets_config(self) -> dict[list[BetConfig]]:
+        return await self.repo.get_bets_config()
+
+    @BaseService.single_transaction
+    async def get_gifts(self, current_user: WebappData) -> list[GiftUser]:
+        return await self.repo.get_user_gifts(user_id=current_user.telegram_id)
+
+    @BaseService.single_transaction
+    async def make_bet(self, data: MakeBetRequest, current_user: WebappData) -> MakeBetResponse:
+        tx_data = await self.services.transaction.change_user_balance(
+            telegram_id=current_user.telegram_id,
+            currency=CurrenciesEnum.ton,
+            amount=-data.amount,
+            tx_type=TransactionTypeEnum.bet,
+        )
+
+        gifts_options = await self.repo.get_bets_config_amount(amount=data.amount)
+        gift_option = random.choices(
+            population=gifts_options,
+            weights=[float(gift.actual_probability) for gift in gifts_options],
+        )[0]
+
+        await self.repo.create_gift_user(
+            user_id=current_user.telegram_id,
+            gift_id=gift_option.gift.id if gift_option.gift else None,
+            transaction_id=tx_data.transaction.id,
+            status=GiftUserStatusEnum.created,
+        )
+
+        return MakeBetResponse(user=tx_data.user, gift=gift_option.gift)
 
     @BaseService.single_transaction
     async def get_latest_wheel_winners(self) -> list[WheelPrize]:
@@ -149,33 +187,35 @@ class GameService(BaseService):
         reward = random.uniform(min_reward, max_reward)  # noqa: S311
         return round(min(reward, 2), 2)
 
-    async def _handle_regular_rocket(self, user: User, rocket_type: RocketTypeEnum) -> LaunchResponse:
+    async def _handle_regular_rocket(self, user: User, rocket: Rocket) -> LaunchResponse:
         currency = random.choices(
             population=[CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token],
             weights=[50, 20, 30]
         )[0]
-        balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket_type)
+        balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket.type)
 
-        await self.services.transaction.change_user_balance(
+        tx_data = await self.services.transaction.change_user_balance(
             telegram_id=user.telegram_id,
             currency=currency,
             amount=balance_diff,
             tx_type=TransactionTypeEnum.rocket_launch,
         )
 
+        await self.repo.update_rocket(rocket_id=rocket.id, transaction_id=tx_data.transaction.id)
         return LaunchResponse(**{currency.value: balance_diff})
 
-    async def _handle_premium_rocket(self, user: User, rocket_type: RocketTypeEnum) -> LaunchResponse:
+    async def _handle_premium_rocket(self, user: User, rocket: Rocket) -> LaunchResponse:
         resp = dict()
 
         for currency in (CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token):
-            balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket_type)
-            await self.services.transaction.change_user_balance(
+            balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket.type)
+            tx_data = await self.services.transaction.change_user_balance(
                 telegram_id=user.telegram_id,
                 currency=currency,
                 amount=balance_diff,
                 tx_type=TransactionTypeEnum.rocket_launch,
             )
+            await self.repo.update_rocket(rocket_id=rocket.id, transaction_id=tx_data.transaction.id)
             resp[currency.value] = balance_diff
 
         return LaunchResponse(**resp)
@@ -196,9 +236,9 @@ class GameService(BaseService):
         user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
 
         if rocket.type in (RocketTypeEnum.premium, RocketTypeEnum.super):
-            resp = await self._handle_premium_rocket(user=user, rocket_type=rocket.type)
+            resp = await self._handle_premium_rocket(user=user, rocket=rocket)
         else:
-            resp = await self._handle_regular_rocket(user=user, rocket_type=rocket.type)
+            resp = await self._handle_regular_rocket(user=user, rocket=rocket)
 
         await self.repo.update_rocket(rocket_id=rocket.id, enabled=False, current_fuel=0)
         await self.session.commit()
