@@ -23,7 +23,6 @@ from app.config.constants import (
 )
 from app.services.auth import AuthService
 from app.services.dto.auth import WebappData
-from app.utils import struct_log
 
 logger = structlog.stdlib.get_logger()
 
@@ -127,6 +126,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             "client_ip": client_ip,
             "user_id": auth_data.telegram_id if auth_data else None,
             "key": key,
+            "token": request.headers.get("token", ""),
         }
 
     def _protect_body(self, body: str) -> str:
