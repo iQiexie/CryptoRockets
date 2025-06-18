@@ -209,7 +209,7 @@ class GameService(BaseService):
 
         return resp
 
-    async def _handle_regular_rocket(self, user: User, rocket_type: RocketTypeEnum) -> LaunchResponse:
+    async def _handle_regular_rocket(self, user: User, rocket: Rocket) -> LaunchResponse:
         currency = random.choices(
             population=[CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token],
             weights=[30, 30, 40]
