@@ -101,12 +101,23 @@ class GameService(BaseService):
 
         user = balance_data.user
         rocket = None
+        currencies = (WheelPrizeEnum.token, WheelPrizeEnum.usdt, WheelPrizeEnum.ton, WheelPrizeEnum.wheel)
+        balance_currencies = (WheelPrizeEnum.usdt, WheelPrizeEnum.ton)
 
-        prize = random.choices(  # noqa: S311
+        prize = random.choices(
             population=WHEEL_PRIZES,
             weights=[prize.chance for prize in WHEEL_PRIZES],
             k=1,
         )[0]
+
+        if prize.type in balance_currencies:
+            if getattr(user, f"{prize.type.value}_balance") > (MAX_BALANCE - 10):
+                logger.info("Scamming user!")
+                prize = random.choices(  # noqa: S311
+                    population=[i for i in WHEEL_PRIZES if i.type not in balance_currencies],
+                    weights=[prize.chance for prize in WHEEL_PRIZES if prize.type not in balance_currencies],
+                    k=1,
+                )[0]
 
         try:
             if balance_data.user.spin_count == 0:
@@ -116,7 +127,7 @@ class GameService(BaseService):
         except IndexError:
             logger.error(f"First spin for 1 ton not found: {WHEEL_PRIZES=}")
 
-        if prize.type in (WheelPrizeEnum.token, WheelPrizeEnum.usdt, WheelPrizeEnum.ton, WheelPrizeEnum.wheel):
+        if prize.type in currencies:
             _resp = await self.services.transaction.change_user_balance(
                 telegram_id=current_user.telegram_id,
                 currency=CurrenciesEnum[prize.type.value],
@@ -164,24 +175,24 @@ class GameService(BaseService):
 
         current_balance = float(getattr(user, f"{currency.value}_balance"))
 
-        if rocket_type == RocketTypeEnum.super and current_balance < MAX_BALANCE - 10:
+        if (rocket_type == RocketTypeEnum.super) and (current_balance < MAX_BALANCE - 20):
             return round(random.uniform(2.5, 5.0), 2)  # noqa: S311
 
         jackpot_chance = 0.015
         if random.random() < jackpot_chance:  # noqa: S311
-            if current_balance < MAX_BALANCE - 20:
+            if current_balance < (MAX_BALANCE - 20):
                 return round(random.uniform(1.5, 3.0), 2)  # noqa: S311
             elif current_balance < MAX_BALANCE - 10:
-                return round(random.uniform(1, 2), 2)  # noqa: S311
+                return round(random.uniform(0.5, 1), 2)  # noqa: S311
             elif current_balance < MAX_BALANCE - 5:
-                return round(random.uniform(0.1, 0.5), 2)  # noqa: S311
+                return round(random.uniform(0.05, 0.1), 2)  # noqa: S311
 
         # Нормализуем баланс от 0 до 1
         progress = min(current_balance / MAX_BALANCE, 1.0)
 
         # 🔀 Рандомный диапазон награды в зависимости от баланса
-        min_reward = 0.05 + (1 - progress) * 0.50  # от 0.05 до ~0.55
-        max_reward = 0.1 + (1 - progress) * 1  # от 0.1 до ~1.1
+        min_reward = 0.01 + (1 - progress) * 0.20  # от 0.01 до ~0.21
+        max_reward = 0.05 + (1 - progress) * 0.5  # от 0.05 до ~0.55
 
         # 🧮 Ограничиваем диапазон
         reward = random.uniform(min_reward, max_reward)  # noqa: S311
@@ -190,7 +201,7 @@ class GameService(BaseService):
     async def _handle_regular_rocket(self, user: User, rocket: Rocket) -> LaunchResponse:
         currency = random.choices(
             population=[CurrenciesEnum.usdt, CurrenciesEnum.ton, CurrenciesEnum.token],
-            weights=[50, 20, 30]
+            weights=[30, 30, 40]
         )[0]
         balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket.type)
 
