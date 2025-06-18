@@ -359,8 +359,9 @@ class GiftUser(_TimestampMixin, Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
+    collection_id = mapped_column(ForeignKey("collections.id"), index=True)
     gift_id: Mapped[int] = mapped_column(ForeignKey("gifts.id"), index=True, nullable=True)
-    transaction_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"), nullable=True)
+    transaction_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"))
     status: Mapped[GiftUserStatusEnum] = mapped_column(String)
 
     gift = relationship("Gift", foreign_keys=[gift_id], viewonly=True)

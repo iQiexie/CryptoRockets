@@ -49,12 +49,12 @@ class GameRepo(BaseRepo):
         return query.scalars().all()
 
     async def get_bets_config_amount(self, amount: float) -> Sequence[BetConfig]:
-        stmt = select(BetConfig).options(joinedload(BetConfig.gift)).where(BetConfig.bet_from == amount)
+        stmt = select(BetConfig).options(joinedload(BetConfig.collection)).where(BetConfig.bet_from == amount)
         query = await self.session.execute(stmt)
         return query.scalars().all()
 
     async def get_bets_config(self) -> dict[list[BetConfig]]:
-        stmt = select(BetConfig).options(joinedload(BetConfig.gift))
+        stmt = select(BetConfig).options(joinedload(BetConfig.collection))
         query = await self.session.execute(stmt)
         configs = query.scalars().all()
 

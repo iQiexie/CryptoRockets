@@ -21,7 +21,7 @@ class CollectionResponse(BaseResponse):
 
 class GiftBetResponse(BaseResponse):
     probability: float
-    gift: CollectionResponse | None = None
+    collection: CollectionResponse | None = None
 
 
 class BetConfigResponse(BaseResponse, RootModel[dict[float, list[GiftBetResponse]]]):

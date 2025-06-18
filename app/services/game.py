@@ -89,7 +89,7 @@ class GameService(BaseService):
             status=GiftUserStatusEnum.created,
         )
 
-        return MakeBetResponse(user=tx_data.user, gift=gift_option.collection)
+        return MakeBetResponse(user=tx_data.user, collection=gift_option.collection)
 
     @BaseService.single_transaction
     async def get_latest_wheel_winners(self) -> list[WheelPrize]:
