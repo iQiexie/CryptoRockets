@@ -1,4 +1,5 @@
 import random
+from decimal import Decimal
 from typing import Annotated
 
 import structlog
@@ -128,7 +129,7 @@ class GameService(BaseService):
         return prize
 
     @staticmethod
-    def get_balance_diff(user: User, currency: CurrenciesEnum, rocket_type: RocketTypeEnum) -> float:
+    def _get_balance_diff(user: User, currency: CurrenciesEnum, rocket_type: RocketTypeEnum) -> float:
         if currency == CurrenciesEnum.token:
             return random.randint(50, 300)
 
@@ -159,6 +160,16 @@ class GameService(BaseService):
         # 🧮 Ограничиваем диапазон
         reward = random.uniform(min_reward, max_reward)  # noqa: S311
         return round(min(reward, 2), 2)
+
+    def get_balance_diff(self, user: User, currency: CurrenciesEnum, rocket_type: RocketTypeEnum) -> float:
+        resp = self._get_balance_diff(user=user, currency=currency, rocket_type=rocket_type)
+        if getattr(user, f"{currency.value}_balance") + Decimal(resp) >= MAX_BALANCE:
+            resp = random.uniform(0.001, 0.01)
+
+        if getattr(user, f"{currency.value}_balance") + Decimal(resp) >= MAX_BALANCE:
+            resp = 0.00001
+
+        return resp
 
     async def _handle_regular_rocket(self, user: User, rocket_type: RocketTypeEnum) -> LaunchResponse:
         currency = random.choices(
