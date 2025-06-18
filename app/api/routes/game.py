@@ -111,3 +111,14 @@ async def get_gifts(
 ) -> list[GiftUser]:
     resp = await service.get_gifts(current_user=current_user)
     return resp
+
+
+@router.get(
+    path="/gifts/latest",
+    status_code=status.HTTP_200_OK,
+    response_model=list[GiftUserResponse],
+    tags=["Gifts"],
+)
+async def get_gifts(service: Annotated[GameService, Depends()]) -> list[GiftUser]:
+    resp = await service.get_latest_gifts()
+    return resp

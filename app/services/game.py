@@ -64,6 +64,10 @@ class GameService(BaseService):
         return await self.repo.get_user_gifts(user_id=current_user.telegram_id)
 
     @BaseService.single_transaction
+    async def get_latest_gifts(self) -> list[GiftUser]:
+        return await self.repo.get_latest_gifts()
+
+    @BaseService.single_transaction
     async def make_bet(self, data: MakeBetRequest, current_user: WebappData) -> MakeBetResponse:
         tx_data = await self.services.transaction.change_user_balance(
             telegram_id=current_user.telegram_id,

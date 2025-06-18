@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import Field
 from pydantic import RootModel
 
@@ -33,6 +35,7 @@ class MakeBetResponse(BaseResponse):
 
 class GiftUserResponse(BaseResponse):
     id: int
+    created_at: datetime
     gift: GiftResponse
 
 

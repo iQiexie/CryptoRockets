@@ -3,6 +3,8 @@ from typing import Sequence
 from sqlalchemy import func, literal_column, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
+from sqlalchemy.sql.functions import now
+
 from app.db.models import BetConfig
 from app.db.models import GiftUser
 from app.db.models import GiftUserStatusEnum
@@ -27,6 +29,20 @@ class GameRepo(BaseRepo):
                 GiftUser.user_id == user_id,
             )
             .options(joinedload(GiftUser.gift))
+        )
+
+        query = await self.session.execute(stmt)
+        return query.scalars().all()
+
+    async def get_latest_gifts(self) -> Sequence[GiftUser]:
+        stmt = (
+            select(GiftUser)
+            .where(
+                GiftUser.status == GiftUserStatusEnum.created,
+                GiftUser.created_at <= now(),
+            )
+            .options(joinedload(GiftUser.gift))
+            .limit(50)
         )
 
         query = await self.session.execute(stmt)
