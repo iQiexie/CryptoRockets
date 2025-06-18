@@ -13,7 +13,7 @@ from app.utils import iota_generator
 iota = iota_generator()
 
 
-class GiftResponse(BaseResponse):
+class CollectionResponse(BaseResponse):
     id: int
     name: str
     image: str
@@ -21,7 +21,7 @@ class GiftResponse(BaseResponse):
 
 class GiftBetResponse(BaseResponse):
     probability: float
-    gift: GiftResponse | None = None
+    gift: CollectionResponse | None = None
 
 
 class BetConfigResponse(BaseResponse, RootModel[dict[float, list[GiftBetResponse]]]):
@@ -29,14 +29,14 @@ class BetConfigResponse(BaseResponse, RootModel[dict[float, list[GiftBetResponse
 
 
 class MakeBetResponse(BaseResponse):
-    gift: GiftResponse | None = None
+    collection: CollectionResponse | None = None
     user: UserResponse
 
 
 class GiftUserResponse(BaseResponse):
     id: int
     created_at: datetime
-    gift: GiftResponse
+    collection: CollectionResponse
 
 
 class WheelPrizeResponse(BaseResponse):

@@ -84,12 +84,12 @@ class GameService(BaseService):
 
         await self.repo.create_gift_user(
             user_id=current_user.telegram_id,
-            gift_id=gift_option.gift.id if gift_option.gift else None,
+            collection_id=gift_option.collection.id if gift_option.collection else None,
             transaction_id=tx_data.transaction.id,
             status=GiftUserStatusEnum.created,
         )
 
-        return MakeBetResponse(user=tx_data.user, gift=gift_option.gift)
+        return MakeBetResponse(user=tx_data.user, gift=gift_option.collection)
 
     @BaseService.single_transaction
     async def get_latest_wheel_winners(self) -> list[WheelPrize]:

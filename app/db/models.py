@@ -87,6 +87,12 @@ class GiftUserStatusEnum(str, Enum):
     withdrawn = "withdrawn"
 
 
+class GiftStatusEnum(str, Enum):
+    available = "available"
+    inventory = "inventory"
+    sent = "sent"
+
+
 class WheelPrizeEnum(str, Enum):
     premium_rocket = "premium_rocket"
     default_rocket = "default_rocket"
@@ -307,14 +313,15 @@ class Advert(_TimestampMixin, Base):
     wheel_amount: Mapped[int] = mapped_column(Integer, nullable=True)
 
 
-class Gift(_TimestampMixin, Base):
-    __tablename__ = "gifts"
+class Collection(_TimestampMixin, Base):
+    __tablename__ = "collections"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    fragment: Mapped[str] = mapped_column(String, unique=True)
     name: Mapped[str] = mapped_column(String)
+    slug: Mapped[str] = mapped_column(String, unique=True)
     image: Mapped[str] = mapped_column(String)
-    avg_price: Mapped[float] = mapped_column(Numeric)
+    avg_price: Mapped[float] = mapped_column(Numeric, nullable=True)
+    meta: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
 
 
 class BetConfig(_TimestampMixin, Base):
@@ -322,12 +329,28 @@ class BetConfig(_TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    gift_id = mapped_column(ForeignKey("gifts.id"), index=True, nullable=True)
+    collection_id = mapped_column(ForeignKey("collections.id"), index=True, nullable=True)
     bet_from: Mapped[float] = mapped_column(Numeric)
     probability: Mapped[float] = mapped_column(Numeric)
     actual_probability: Mapped[float] = mapped_column(Numeric)
 
-    gift = relationship("Gift", foreign_keys=[gift_id], viewonly=True)
+    collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
+
+
+class Gift(_TimestampMixin, Base):
+    __tablename__ = "gifts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    collection_id: Mapped[int] = mapped_column(ForeignKey("collections.slug"))
+    transfer_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP)
+    address: Mapped[str] = mapped_column(String, unique=True)
+    gift_id: Mapped[str] = mapped_column(String, unique=True)
+    status: Mapped[GiftUserStatusEnum] = mapped_column(String)
+    price_purchase: Mapped[float] = mapped_column(Numeric, nullable=True)
+    price_release: Mapped[float] = mapped_column(Numeric, nullable=True)
+
+    collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
 
 
 class GiftUser(_TimestampMixin, Base):

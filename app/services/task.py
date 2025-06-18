@@ -1,11 +1,16 @@
 import traceback
+from datetime import UTC
 from datetime import datetime, timedelta
 from typing import Annotated
 
 import structlog
 from fastapi.params import Depends
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+from telethon import TelegramClient
+from telethon.tl import functions
+from telethon.tl.types.payments import SavedStarGifts
 
 from app.adapters.base import Adapters
 from app.api.dependencies.stubs import (
@@ -24,6 +29,7 @@ from app.config.constants import (
 )
 from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import CurrenciesEnum, RocketTypeEnum, User
+from app.db.models import GiftStatusEnum
 from app.db.models import TransactionTypeEnum
 from app.services.base.base import BaseService
 
@@ -41,6 +47,61 @@ class TaskService(BaseService):
 
         self.repo = self.repos.task
         self.adapters = adapters
+
+    @BaseService.single_transaction
+    async def _insert_gift(self, gift: dict) -> None:
+        date = gift['date']
+        slug = gift['gift']['slug'].split('-')[0].lower()
+
+        if not await self.repo.get_collection(slug=slug):
+            await self.repo.create_collection(
+                name=gift['gift']['title'],
+                slug=slug,
+                image=f"https://fragment.com/file/gifts/{slug}/thumb.webp",
+                avg_price=None,
+                meta={},
+            )
+
+        await self.repo.create_gift(
+            collection_id=slug,
+            transfer_date=date.astimezone(None).replace(tzinfo=None),
+            address=gift['gift']['gift_address'],
+            gift_id=str(gift['gift']['id']),
+            status=GiftStatusEnum.available,
+        )
+
+    async def populate_gifts(self) -> None:
+        async with self.repo.transaction():
+            last_gift = await self.repo.get_last_gift()
+
+        async with TelegramClient(
+            session='anon',
+            api_id=5945038,
+            api_hash='d9e26a347056c95b167ab097c73ec1f0',
+        ) as client:
+            result: SavedStarGifts = await client(
+                functions.payments.GetSavedStarGiftsRequest(
+                    peer='rockets_holder',  # noqa
+                    offset='some_string',
+                    limit=100000,
+                    sort_by_value=False,
+                )
+            )
+
+        gifts = result.to_dict()['gifts']
+
+        if last_gift:
+            last_date = last_gift.transfer_date
+        else:
+            last_date = datetime.now(tz=UTC) - timedelta(days=365)
+
+        for gift in gifts:
+            gift_date = gift['date'].astimezone(None).replace(tzinfo=None)
+            last_date = last_date.astimezone(None).replace(tzinfo=None)
+            if gift_date <= last_date:
+                continue
+
+            await self._insert_gift(gift=gift)
 
     @BaseService.single_transaction
     async def give_rocket(self, rocket_type: RocketTypeEnum, full: bool, telegram_id: int) -> None:
