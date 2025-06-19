@@ -22,6 +22,7 @@ class CollectionResponse(BaseResponse):
 
 class GiftBetResponse(BaseResponse):
     probability: float
+    is_boost: bool
     collection: CollectionResponse | None = None
 
 

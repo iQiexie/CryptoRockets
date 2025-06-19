@@ -341,6 +341,7 @@ class BetConfig(_TimestampMixin, Base):
     bet_from: Mapped[float] = mapped_column(Numeric)
     probability: Mapped[float] = mapped_column(Numeric)
     actual_probability: Mapped[float] = mapped_column(Numeric)
+    is_boost: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
 
     collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
 
