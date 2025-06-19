@@ -84,6 +84,8 @@ class TaskStatusEnum(str, Enum):
 
 class GiftUserStatusEnum(str, Enum):
     created = "created"
+    paid = "paid"
+    pending_withdraw = "pending_withdraw"
     withdrawn = "withdrawn"
 
 

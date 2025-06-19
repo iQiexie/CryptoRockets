@@ -17,6 +17,14 @@ class GameRepo(BaseRepo):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session)
 
+    async def get_gift_for_update(self, gift_user_id: int) -> GiftUser | None:
+        stmt = select(GiftUser).where(GiftUser.id == gift_user_id).with_for_update()
+        query = await self.session.execute(stmt)
+        return query.scalar_one_or_none()
+
+    async def update_gift_user(self, gift_user_id: int, **kwargs) -> GiftUser:
+        return await self.update(GiftUser, GiftUser.id == gift_user_id, **kwargs)
+
     async def create_gift_user(self, **kwargs) -> GiftUser:
         model = GiftUser(**kwargs)
         self.session.add(model)

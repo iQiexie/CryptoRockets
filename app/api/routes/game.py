@@ -7,6 +7,7 @@ from app.api.dependencies.auth import get_current_user
 from app.api.dto.game.request import MakeBetRequest
 from app.api.dto.game.response import BetConfigResponse
 from app.api.dto.game.response import GiftUserResponse
+from app.api.dto.game.response import GiftUserWithdrawResponse
 from app.api.dto.game.response import MakeBetResponse
 from app.api.dto.game.response import (
     WHEEL_PRIZES,
@@ -121,3 +122,17 @@ async def get_gifts(
 async def get_gifts(service: Annotated[GameService, Depends()]) -> list[GiftUser]:
     resp = await service.get_latest_gifts()
     return resp
+
+
+@router.post(
+    path="/gifts/withdraw/{gift_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=GiftUserWithdrawResponse,
+    tags=["Gifts"],
+)
+async def withdraw_gift(
+    service: Annotated[GameService, Depends()],
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+    gift_id: int = Path(...),
+) -> GiftUser:
+    return await service.withdraw_gift(gift_id=gift_id, current_user=current_user)

@@ -56,6 +56,26 @@ class GameService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
+    async def withdraw_gift(self, gift_id: int, current_user: WebappData) -> GiftUser:
+        gift = await self.repo.get_gift_for_update(gift_user_id=gift_id)
+
+        if not gift:
+            raise ClientError(message="Gift not found")
+
+        if gift.user_id != current_user.telegram_id:
+            raise ClientError(message="You are not the owner of this gift")
+
+        if gift.status != GiftUserStatusEnum.paid:
+            raise ClientError(message="Gift statuss is invalid")
+
+        gift = await self.repo.update_gift_user(gift_user_id=gift.id, status=GiftUserStatusEnum.pending_withdraw)
+        await self.adapters.alerts.send_alert(
+            message=f"Юзер выводит подарок: {current_user.telegram_id=}, {gift=}"
+        )
+        await self.session.refresh(gift)
+        return gift
+
+    @BaseService.single_transaction
     async def get_bets_config(self) -> dict[list[BetConfig]]:
         return await self.repo.get_bets_config()
 

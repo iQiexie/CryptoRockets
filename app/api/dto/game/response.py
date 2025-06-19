@@ -7,6 +7,7 @@ from app.api.dto.base import BaseResponse
 from app.api.dto.user.response import PublicUserResponse
 from app.api.dto.user.response import RocketResponse
 from app.api.dto.user.response import UserResponse
+from app.db.models import GiftUserStatusEnum
 from app.db.models import WheelPrizeEnum
 from app.utils import iota_generator
 
@@ -33,9 +34,13 @@ class MakeBetResponse(BaseResponse):
     user: UserResponse
 
 
-class GiftUserResponse(BaseResponse):
+class GiftUserWithdrawResponse(BaseResponse):
     id: int
     created_at: datetime
+    status: GiftUserStatusEnum
+
+
+class GiftUserResponse(GiftUserWithdrawResponse):
     collection: CollectionResponse
 
 
