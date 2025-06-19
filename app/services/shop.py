@@ -57,7 +57,7 @@ class ShopService(BaseService):
         user = None
         item_price = getattr(item, f"{data.currency.value}_price", None)
 
-        if item_price < data.amount:
+        if data.amount < (item_price * data.item_amount):
             struct_log(
                 event="Payment amount mismatch",
                 item_id=item.id,
@@ -88,7 +88,7 @@ class ShopService(BaseService):
         elif item.item == WheelPrizeEnum.rolls:
             user = await self.repos.user.get_user_for_update(telegram_id=data.telegram_id)
             new_rolls = user.rolls
-            new_rolls[item.ton_price] = new_rolls.get(str(item.ton_price), 0) + item.amount
+            new_rolls[item.ton_price] = new_rolls.get(str(item.ton_price), 0) + item.amount * data.item_amount
 
             await self.repos.user.update_user(telegram_id=data.telegram_id, rolls=new_rolls)
         else:
@@ -152,6 +152,7 @@ class ShopService(BaseService):
         shop_item_id: int,
         current_user: WebappData,
         payment_method: str,
+        amount: int,
     ) -> UrlResponse:
         item = SHOP_ITEMS[shop_item_id]
         if payment_method == "xtr":
@@ -159,7 +160,7 @@ class ShopService(BaseService):
         if payment_method == "ton":
             cell = Cell()
             cell.bits.write_uint(0, 32)  # op_code for text comment
-            cell.bits.write_bytes(f"{current_user.telegram_id};{shop_item_id}".encode("utf-8"))
+            cell.bits.write_bytes(f"{current_user.telegram_id};{shop_item_id};{amount}".encode("utf-8"))
             return UrlResponse(url=base64.b64encode(cell.to_boc()).decode())
 
         raise NotImplementedError

@@ -21,12 +21,14 @@ async def get_invoice_url(
     current_user: Annotated[WebappData, Depends(get_current_user)],
     service: Annotated[ShopService, Depends()],
     shop_item_id: int = Query(...),
+    amount: int = Query(default=1),
     payment_method: Literal["ton", "xtr", "token"] = Query(default="xtr"),
 ) -> UrlResponse:
     return await service.get_invoice_url(
         current_user=current_user,
         shop_item_id=shop_item_id,
         payment_method=payment_method,
+        amount=amount,
     )
 
 
