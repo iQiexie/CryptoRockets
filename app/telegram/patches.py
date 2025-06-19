@@ -88,13 +88,20 @@ class Bot(_Bot):
             )
         )
 
-        await self.send_photo(
-            chat_id=user.telegram_id,
-            caption=custom_text or self.i18n.t(message="bot.start", lang=user.tg_language_code),
-            reply_markup=builder.as_markup(),
-            photo=custom_image or "https://3rioteam.fra1.cdn.digitaloceanspaces.com/creative1.jpg",
-            parse_mode="HTML",
-        )
+        try:
+            await self.send_photo(
+                chat_id=user.telegram_id,
+                caption=custom_text or self.i18n.t(message="bot.start", lang=user.tg_language_code),
+                reply_markup=builder.as_markup(),
+                photo=custom_image or "https://3rioteam.fra1.cdn.digitaloceanspaces.com/creative1.jpg",
+                parse_mode="HTML",
+            )
+        except TelegramForbiddenError as e:
+            logger.warning(
+                event="Failed to send menu to user",
+                user_id=user.telegram_id,
+                error=str(e),
+            )
 
 
 def prepare_value(
