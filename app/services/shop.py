@@ -85,6 +85,12 @@ class ShopService(BaseService):
                 current_fuel=1,
             )
             rocket_id = _rocket.id
+        elif item.item == WheelPrizeEnum.rolls:
+            user = await self.repos.user.get_user_for_update(telegram_id=data.telegram_id)
+            new_rolls = user.rolls
+            new_rolls[item.ton_price] = new_rolls.get(str(item.ton_price), 0) + item.amount
+
+            await self.repos.user.update_user(telegram_id=data.telegram_id, rolls=new_rolls)
         else:
             raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")
 

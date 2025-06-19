@@ -55,8 +55,97 @@ _items = (
         ton_price=2,
         xtr_price=500,
         token_price=10000000,
-        special=False,
         available_until=datetime(2025, 6, 20, 0, 0, 0),
+    ),
+    ShopItem(
+        id=iota(),
+        label="rolls",
+        item=WheelPrizeEnum.rolls,
+        amount=1,
+        ton_price=0.5,
+        xtr_price=10000000,
+        token_price=10000000,
+        
+    ),
+    ShopItem(
+        id=iota(),
+        label="rolls",
+        item=WheelPrizeEnum.rolls,
+        amount=1,
+        ton_price=1,
+        xtr_price=10000000,
+        token_price=10000000,
+        
+    ),
+    ShopItem(
+        id=iota(),
+        label="rolls",
+        item=WheelPrizeEnum.rolls,
+        amount=1,
+        ton_price=2,
+        xtr_price=10000000,
+        token_price=10000000,
+        
+    ),
+    ShopItem(
+        id=iota(),
+        label="rolls",
+        item=WheelPrizeEnum.rolls,
+        amount=1,
+        ton_price=3,
+        xtr_price=10000000,
+        token_price=10000000,
+        
+    ),
+    ShopItem(
+        id=iota(),
+        label="rolls",
+        item=WheelPrizeEnum.rolls,
+        amount=1,
+        ton_price=4,
+        xtr_price=10000000,
+        token_price=10000000,
+        
+    ),
+    ShopItem(
+        id=iota(),
+        label="rolls",
+        item=WheelPrizeEnum.rolls,
+        amount=1,
+        ton_price=5,
+        xtr_price=10000000,
+        token_price=10000000,
+        
+    ),
+    ShopItem(
+        id=iota(),
+        label="rolls",
+        item=WheelPrizeEnum.rolls,
+        amount=1,
+        ton_price=10,
+        xtr_price=10000000,
+        token_price=10000000,
+        
+    ),
+    ShopItem(
+        id=iota(),
+        label="rolls",
+        item=WheelPrizeEnum.rolls,
+        amount=1,
+        ton_price=20,
+        xtr_price=10000000,
+        token_price=10000000,
+        
+    ),
+    ShopItem(
+        id=iota(),
+        label="rolls",
+        item=WheelPrizeEnum.rolls,
+        amount=1,
+        ton_price=50,
+        xtr_price=10000000,
+        token_price=10000000,
+        
     ),
 )
 

@@ -109,6 +109,8 @@ class WheelPrizeEnum(str, Enum):
     ton = "ton"
     wheel = "wheel"
 
+    rolls = "rolls"
+
 
 class Base(DeclarativeBase):
     def object_as_dict(self) -> Dict[str, Any]:
@@ -196,6 +198,7 @@ class User(_TimestampMixin, Base):
 
     spin_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     promo: Mapped[str] = mapped_column(String, nullable=True)
+    rolls: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
 
     rockets: Mapped[list["Rocket"]] = relationship(
         "Rocket",
