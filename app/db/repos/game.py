@@ -56,7 +56,7 @@ class GameRepo(BaseRepo):
             .options(
                 joinedload(GiftUser.gift).options(joinedload(Gift.collection)),
             )
-            .limit(50)
+            .limit(6)
         )
 
         query = await self.session.execute(stmt)
