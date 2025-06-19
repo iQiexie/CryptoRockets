@@ -69,12 +69,17 @@ class GameService(BaseService):
 
     @BaseService.single_transaction
     async def make_bet(self, data: MakeBetRequest, current_user: WebappData) -> MakeBetResponse:
-        tx_data = await self.services.transaction.change_user_balance(
-            telegram_id=current_user.telegram_id,
-            currency=CurrenciesEnum.ton,
-            amount=-data.amount,
-            tx_type=TransactionTypeEnum.bet,
-        )
+        user = await self.repos.user.get_user_for_update(telegram_id=current_user.telegram_id)
+        new_rolls = user.rolls
+        new_rolls[str(data.amount)] = new_rolls.get(str(data.amount), 0) - 1
+
+        if new_rolls[str(data.amount)] < 0:
+            raise ClientError(message="Not enough rolls for this bet")
+
+        roll = await self.repos.transaction.create_roll(user_id=user.telegram_id, ton_amount=data.amount)
+        await self.repos.user.update_user(telegram_id=user.telegram_id, rolls=new_rolls)
+        await self.session.flush()
+        await self.session.refresh(user)
 
         gifts_options = await self.repo.get_bets_config_amount(amount=data.amount)
         gift_option = random.choices(
@@ -85,11 +90,11 @@ class GameService(BaseService):
         await self.repo.create_gift_user(
             user_id=current_user.telegram_id,
             collection_id=gift_option.collection.id if gift_option.collection else None,
-            transaction_id=tx_data.transaction.id,
+            roll_id=roll.id,
             status=GiftUserStatusEnum.created,
         )
 
-        return MakeBetResponse(user=tx_data.user, collection=gift_option.collection)
+        return MakeBetResponse(user=user, collection=gift_option.collection)
 
     @BaseService.single_transaction
     async def get_latest_wheel_winners(self) -> list[WheelPrize]:

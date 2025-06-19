@@ -47,7 +47,7 @@ class UserResponse(BaseResponse):
         rolls = [0.5, 1, 2, 3, 4, 5, 10, 20, 50]
         new_rolls = {}
         for roll in rolls:
-            new_rolls[roll] = self.rolls.get(roll, 0)
+            new_rolls[str(roll)] = self.rolls.get(str(roll), 0)
 
         return new_rolls
 

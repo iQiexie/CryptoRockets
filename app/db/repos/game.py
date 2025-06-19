@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.functions import now
 
 from app.db.models import BetConfig
+from app.db.models import Gift
 from app.db.models import GiftUser
 from app.db.models import GiftUserStatusEnum
 from app.db.models import Rocket, RocketTypeEnum, WheelPrize
@@ -28,7 +29,7 @@ class GameRepo(BaseRepo):
                 GiftUser.status == GiftUserStatusEnum.created,
                 GiftUser.user_id == user_id,
             )
-            .options(joinedload(GiftUser.gift))
+            .options(joinedload(GiftUser.collection))
         )
 
         query = await self.session.execute(stmt)

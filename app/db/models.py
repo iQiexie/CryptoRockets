@@ -366,10 +366,20 @@ class GiftUser(_TimestampMixin, Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
     collection_id = mapped_column(ForeignKey("collections.id"), index=True)
     gift_id: Mapped[int] = mapped_column(ForeignKey("gifts.id"), index=True, nullable=True)
-    transaction_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"))
+    roll_id: Mapped[int] = mapped_column(ForeignKey("rolls.id"))
     status: Mapped[GiftUserStatusEnum] = mapped_column(String)
 
     gift = relationship("Gift", foreign_keys=[gift_id], viewonly=True)
+    collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
+
+
+class Roll(_TimestampMixin, Base):
+    __tablename__ = "rolls"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
+    ton_amount: Mapped[float] = mapped_column(Numeric)
 
 
 # class BroadcastLog(_TimestampMixin, Base):
