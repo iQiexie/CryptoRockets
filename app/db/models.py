@@ -321,6 +321,7 @@ class Collection(_TimestampMixin, Base):
     slug: Mapped[str] = mapped_column(String, unique=True)
     image: Mapped[str] = mapped_column(String)
     avg_price: Mapped[float] = mapped_column(Numeric, nullable=True)
+    is_nft: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
     meta: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
 
 

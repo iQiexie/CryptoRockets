@@ -4,6 +4,7 @@ from fastapi import APIRouter, Body, Depends
 from starlette import status
 
 from app.api.exceptions import ClientError
+from app.config.constants import TON_PRICE
 from app.db.models import CurrenciesEnum
 from app.services.dto.shop import PaymentCallbackDTO
 from app.services.shop import ShopService
@@ -29,7 +30,7 @@ async def ton(
             telegram_id=int(telegram_id),
             item_id=int(item_id),
             amount=body["amount"],
-            usd_amount=body["amount"] * 3,
+            usd_amount=body["amount"] * TON_PRICE,
             currency=CurrenciesEnum.ton,
             external_id=body["hash"],
             callback_data=body,

@@ -27,6 +27,7 @@ from app.config.constants import (
     ROCKET_TIMEOUT_OFFLINE,
     ROCKET_TIMEOUT_PREMIUM,
 )
+from app.config.constants import TON_PRICE
 from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import CurrenciesEnum, RocketTypeEnum, User
 from app.db.models import GiftStatusEnum
@@ -70,7 +71,7 @@ class TaskService(BaseService):
             status=GiftStatusEnum.available,
         )
 
-    async def populate_gifts(self) -> None:
+    async def _populate_account_gifts(self) -> None:
         async with self.repo.transaction():
             last_gift = await self.repo.get_last_gift()
 
@@ -102,6 +103,29 @@ class TaskService(BaseService):
                 continue
 
             await self._insert_gift(gift=gift)
+
+    async def _populate_shitty_gifts(self) -> None:
+        gifts = await self.adapters.bot.get_available_gifts()
+        for gift in gifts.gifts:
+            gift_id = gift.id
+
+            try:
+                async with self.repo.transaction() as t:
+                    await self.repo.create_collection(
+                        name=gift.sticker.emoji,
+                        slug=gift.sticker.emoji,
+                        image=f"https://emojiapi.dev/api/v1/{ord(gift.sticker.emoji):X}.svg",
+                        avg_price=(gift.star_count * 0.013) / TON_PRICE,
+                        meta={"gift_id": gift_id},
+                        is_nft=False,
+                    )
+                    await t.commit()
+            except IntegrityError:
+                pass
+
+    async def populate_gifts(self) -> None:
+        await self._populate_shitty_gifts()
+        await self._populate_account_gifts()
 
     @BaseService.single_transaction
     async def give_rocket(self, rocket_type: RocketTypeEnum, full: bool, telegram_id: int) -> None:
