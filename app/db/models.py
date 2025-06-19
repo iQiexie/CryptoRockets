@@ -112,6 +112,7 @@ class WheelPrizeEnum(str, Enum):
     wheel = "wheel"
 
     rolls = "rolls"
+    gift_withdrawal = "gift_withdrawal"
 
 
 class Base(DeclarativeBase):

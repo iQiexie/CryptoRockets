@@ -69,6 +69,15 @@ _items = (
     ),
     ShopItem(
         id=iota(),
+        label="gift_withdrawal",
+        item=WheelPrizeEnum.gift_withdrawal,
+        amount=1,
+        ton_price=0.1,
+        xtr_price=25,
+        token_price=10000000,
+    ),
+    ShopItem(
+        id=iota(),
         label="rolls",
         item=WheelPrizeEnum.rolls,
         amount=1,

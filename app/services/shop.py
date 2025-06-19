@@ -27,6 +27,7 @@ from app.db.models import (
     User,
     WheelPrizeEnum,
 )
+from app.db.models import GiftUserStatusEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 from app.services.dto.shop import PaymentCallbackDTO
@@ -91,6 +92,9 @@ class ShopService(BaseService):
             new_rolls[item.ton_price] = new_rolls.get(str(item.ton_price), 0) + item.amount * data.item_amount
 
             await self.repos.user.update_user(telegram_id=data.telegram_id, rolls=new_rolls)
+        elif item.item == WheelPrizeEnum.gift_withdrawal:
+            gift = await self.repos.game.get_gift_for_update(gift_user_id=data.gift_id)
+            await self.repos.game.update_gift_user(gift_user_id=gift.id, status=GiftUserStatusEnum.paid)
         else:
             raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")
 
@@ -133,34 +137,46 @@ class ShopService(BaseService):
             )
         )
 
-    async def _get_invoice_url_xtr(self, item: ShopItem, current_user: WebappData) -> UrlResponse:
-        item_label = self.adapters.i18n.t(message=item.label, lang=current_user.language_code)
-
-        params = {
-            "currency": "XTR",
-            "description": item_label,
-            "payload": f"{item.id}",
-            "prices": to_json([{"label": item_label, "amount": int(item.xtr_price)}]).decode("utf-8"),
-            "title": item_label,
-        }
-
-        resp = await self.adapters.telegram.send_method(method="createInvoiceLink", params=params)
-        return UrlResponse(url=resp["result"])
-
     async def get_invoice_url(
         self,
         shop_item_id: int,
         current_user: WebappData,
         payment_method: str,
         amount: int,
+        gift_id: int | None = None,
     ) -> UrlResponse:
         item = SHOP_ITEMS[shop_item_id]
+        if item.item == WheelPrizeEnum.gift_withdrawal and not gift_id:
+            raise ClientError(message="Gift ID is required for gift withdrawal")
+
         if payment_method == "xtr":
-            return await self._get_invoice_url_xtr(item=item, current_user=current_user)
-        if payment_method == "ton":
+            item_label = self.adapters.i18n.t(message=item.label, lang=current_user.language_code)
+
+            if item.item == WheelPrizeEnum.gift_withdrawal:
+                payload = f"{item.id};{gift_id}"
+            else:
+                payload = str(item.id)
+
+            params = {
+                "currency": "XTR",
+                "description": item_label,
+                "payload": payload,
+                "prices": to_json([{"label": item_label, "amount": int(item.xtr_price)}]).decode("utf-8"),
+                "title": item_label,
+            }
+
+            resp = await self.adapters.telegram.send_method(method="createInvoiceLink", params=params)
+            return UrlResponse(url=resp["result"])
+        elif payment_method == "ton":
             cell = Cell()
             cell.bits.write_uint(0, 32)  # op_code for text comment
-            cell.bits.write_bytes(f"{current_user.telegram_id};{shop_item_id};{amount}".encode("utf-8"))
+
+            if item.item == WheelPrizeEnum.gift_withdrawal:
+                payload = f"{current_user.telegram_id};{item.id};{gift_id}"
+            else:
+                payload = f"{current_user.telegram_id};{item.id};{amount}"
+
+            cell.bits.write_bytes(payload.encode("utf-8"))
             return UrlResponse(url=base64.b64encode(cell.to_boc()).decode())
 
         raise NotImplementedError
