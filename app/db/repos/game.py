@@ -36,6 +36,7 @@ class GameRepo(BaseRepo):
             .where(
                 GiftUser.status == GiftUserStatusEnum.created,
                 GiftUser.user_id == user_id,
+                GiftUser.collection_id.isnot(None),
             )
             .options(joinedload(GiftUser.collection))
         )
@@ -51,7 +52,7 @@ class GameRepo(BaseRepo):
                 GiftUser.created_at <= now(),
                 GiftUser.collection_id.isnot(None),
             )
-            .options(joinedload(GiftUser.gift))
+            .options(joinedload(GiftUser.collection))
             .limit(50)
         )
 
