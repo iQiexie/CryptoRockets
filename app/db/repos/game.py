@@ -47,8 +47,9 @@ class GameRepo(BaseRepo):
         stmt = (
             select(GiftUser)
             .where(
-                GiftUser.status == GiftUserStatusEnum.created,
+                GiftUser.status != GiftUserStatusEnum.withdrawn,
                 GiftUser.created_at <= now(),
+                GiftUser.collection_id.isnot(None),
             )
             .options(joinedload(GiftUser.gift))
             .limit(50)
