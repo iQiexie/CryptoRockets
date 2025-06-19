@@ -77,7 +77,7 @@ class Bot(_Bot):
     ) -> None:
         builder = InlineKeyboardBuilder()
 
-        url = "https://cryptorockets.net/"
+        url = self.config.TELEGRAM_BOT_WEBAPP_URL
         if utm_source:
             url += f"?utm_source={utm_source}"
 
