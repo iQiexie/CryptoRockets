@@ -14,7 +14,6 @@ from app.api.dto.game.response import (
     LaunchResponse,
     WheelPrizeResponse,
 )
-from app.api.dto.user.response import UserResponse
 from app.db.models import BetConfig
 from app.db.models import GiftUser
 from app.db.models import WheelPrize

@@ -38,17 +38,22 @@ class UserResponse(BaseResponse):
     next_offline_rocket_at: datetime | None = Field(default=None, exclude=True)
     next_premium_rocket_at: datetime | None = Field(default=None, exclude=True)
     rolls: dict = Field(default=..., exclude=True)
+    boost_balance: int = Field(default=..., exclude=True)
 
     rockets: list[RocketResponse]
 
     @computed_field
     def available_rolls(self) -> dict:
+        rolls = [0.5, 1, 2, 3, 4, 5, 10, 20, 50]
         new_rolls = {}
-        for key, value in self.rolls.items():
-            if value:
-                new_rolls[key] = value
+        for roll in rolls:
+            new_rolls[roll] = self.rolls.get(roll, 0)
 
         return new_rolls
+
+    @computed_field
+    def has_boost(self) -> bool:
+        return self.boost_balance > 0
 
     @computed_field
     def referral(self) -> str:

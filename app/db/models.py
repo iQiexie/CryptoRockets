@@ -154,6 +154,7 @@ class User(_TimestampMixin, Base):
     token_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     fuel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     wheel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
+    boost_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     last_broadcast_key: Mapped[str] = mapped_column(String, nullable=True)
 
     referral_from: Mapped[int] = mapped_column(
