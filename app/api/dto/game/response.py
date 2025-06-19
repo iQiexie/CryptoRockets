@@ -45,6 +45,23 @@ class GiftUserResponse(GiftUserWithdrawResponse):
     collection: CollectionResponse
 
 
+class _GiftAttribute(BaseResponse):
+    name: str
+    rarity: float
+
+
+class _GiftMetaResponse(BaseResponse):
+    model: _GiftAttribute
+    pattern: _GiftAttribute
+    backdrop: _GiftAttribute
+
+
+class LatestGiftResponse(BaseResponse):
+    gift_id: str
+    collection: CollectionResponse
+    meta: _GiftMetaResponse
+
+
 class WheelPrizeResponse(BaseResponse):
     id: int
     type: WheelPrizeEnum

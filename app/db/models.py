@@ -358,6 +358,7 @@ class Gift(_TimestampMixin, Base):
     status: Mapped[GiftUserStatusEnum] = mapped_column(String)
     price_purchase: Mapped[float] = mapped_column(Numeric, nullable=True)
     price_release: Mapped[float] = mapped_column(Numeric, nullable=True)
+    meta: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
 
     collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
 

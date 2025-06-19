@@ -54,6 +54,24 @@ class TaskService(BaseService):
         date = gift['date']
         slug = gift['gift']['slug'].split('-')[0].lower()
 
+        meta = dict()
+        for attr in gift['gift']['attributes']:
+            if not attr.get('name'):
+                continue
+
+            key = (
+                attr['_']
+                .replace('StarGiftAttribute', '')
+                .lower()
+            )
+
+            value = {
+                'name': attr['name'],
+                'rarity': attr['rarity_permille'] / 1000,
+            }
+
+            meta[key] = value
+
         if not await self.repo.get_collection(slug=slug):
             await self.repo.create_collection(
                 name=gift['gift']['title'],
@@ -69,6 +87,7 @@ class TaskService(BaseService):
             address=gift['gift']['gift_address'],
             gift_id=str(gift['gift']['id']),
             status=GiftStatusEnum.available,
+            meta=meta,
         )
 
     async def _populate_account_gifts(self) -> None:

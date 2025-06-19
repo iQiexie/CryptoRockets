@@ -51,8 +51,11 @@ class GameRepo(BaseRepo):
                 GiftUser.status != GiftUserStatusEnum.withdrawn,
                 GiftUser.created_at <= now(),
                 GiftUser.collection_id.isnot(None),
+                GiftUser.gift_id.isnot(None),
             )
-            .options(joinedload(GiftUser.collection))
+            .options(
+                joinedload(GiftUser.gift).options(joinedload(Gift.collection)),
+            )
             .limit(50)
         )
 

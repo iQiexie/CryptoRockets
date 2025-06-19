@@ -8,6 +8,7 @@ from app.api.dto.game.request import MakeBetRequest
 from app.api.dto.game.response import BetConfigResponse
 from app.api.dto.game.response import GiftUserResponse
 from app.api.dto.game.response import GiftUserWithdrawResponse
+from app.api.dto.game.response import LatestGiftResponse
 from app.api.dto.game.response import MakeBetResponse
 from app.api.dto.game.response import (
     WHEEL_PRIZES,
@@ -16,6 +17,7 @@ from app.api.dto.game.response import (
     WheelPrizeResponse,
 )
 from app.db.models import BetConfig
+from app.db.models import Gift
 from app.db.models import GiftUser
 from app.db.models import WheelPrize
 from app.services.dto.auth import WebappData
@@ -116,10 +118,10 @@ async def get_gifts(
 @router.get(
     path="/gifts/latest",
     status_code=status.HTTP_200_OK,
-    response_model=list[GiftUserResponse],
+    response_model=list[LatestGiftResponse],
     tags=["Gifts"],
 )
-async def get_gifts(service: Annotated[GameService, Depends()]) -> list[GiftUser]:
+async def get_gifts(service: Annotated[GameService, Depends()]) -> list[Gift]:
     resp = await service.get_latest_gifts()
     return resp
 

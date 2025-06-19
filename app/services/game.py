@@ -27,6 +27,7 @@ from app.api.exceptions import ClientError
 from app.config.constants import FUEL_CAPACITY_MAP
 from app.config.constants import MAX_BALANCE
 from app.db.models import BetConfig
+from app.db.models import Gift
 from app.db.models import GiftUser
 from app.db.models import GiftUserStatusEnum
 from app.db.models import (
@@ -84,8 +85,9 @@ class GameService(BaseService):
         return await self.repo.get_user_gifts(user_id=current_user.telegram_id)
 
     @BaseService.single_transaction
-    async def get_latest_gifts(self) -> list[GiftUser]:
-        return await self.repo.get_latest_gifts()
+    async def get_latest_gifts(self) -> list[Gift]:
+        resp = await self.repo.get_latest_gifts()
+        return [i.gift for i in resp]
 
     @BaseService.single_transaction
     async def make_bet(self, data: MakeBetRequest, current_user: WebappData) -> MakeBetResponse:
