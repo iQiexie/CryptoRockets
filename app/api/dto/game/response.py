@@ -58,6 +58,8 @@ class _GiftMetaResponse(BaseResponse):
 
 class LatestGiftResponse(BaseResponse):
     gift_id: str
+    gift_id_ton: str
+    image: str
     collection: CollectionResponse
     meta: _GiftMetaResponse
 

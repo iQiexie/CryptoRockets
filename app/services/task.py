@@ -52,7 +52,7 @@ class TaskService(BaseService):
     @BaseService.single_transaction
     async def _insert_gift(self, gift: dict) -> None:
         date = gift['date']
-        slug = gift['gift']['slug'].split('-')[0].lower()
+        slug, gift_id_ton = ([i.lower() for i in gift['gift']['slug'].split('-')])
 
         meta = dict()
         for attr in gift['gift']['attributes']:
@@ -76,7 +76,7 @@ class TaskService(BaseService):
             await self.repo.create_collection(
                 name=gift['gift']['title'],
                 slug=slug,
-                image=f"https://fragment.com/file/gifts/{slug}/thumb.webp",
+                image=f"https://fragment.com/file/gifts/{slug.split('-')[0]}/thumb.webp",
                 avg_price=None,
                 meta={},
             )
@@ -86,7 +86,9 @@ class TaskService(BaseService):
             transfer_date=date.astimezone(None).replace(tzinfo=None),
             address=gift['gift']['gift_address'],
             gift_id=str(gift['gift']['id']),
+            gift_id_ton=gift_id_ton,
             status=GiftStatusEnum.available,
+            image=f"https://fragment.com/file/gifts/{gift['gift']['slug']}/thumb.webp",
             meta=meta,
         )
 

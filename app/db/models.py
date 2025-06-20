@@ -355,10 +355,12 @@ class Gift(_TimestampMixin, Base):
     transfer_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP)
     address: Mapped[str] = mapped_column(String, unique=True)
     gift_id: Mapped[str] = mapped_column(String, unique=True)
+    gift_id_ton: Mapped[str] = mapped_column(String, unique=True, nullable=True)
     status: Mapped[GiftUserStatusEnum] = mapped_column(String)
     price_purchase: Mapped[float] = mapped_column(Numeric, nullable=True)
     price_release: Mapped[float] = mapped_column(Numeric, nullable=True)
     meta: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
+    image: Mapped[str] = mapped_column(String)
 
     collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
 
