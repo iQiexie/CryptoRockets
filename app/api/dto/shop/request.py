@@ -55,7 +55,7 @@ _items = (
         ton_price=2,
         xtr_price=500,
         token_price=10000000,
-        available_until=datetime(2025, 6, 20, 0, 0, 0),
+        available_until=datetime(2025, 6, 23, 0, 0, 0),
     ),
     ShopItem(
         id=iota(),
