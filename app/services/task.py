@@ -88,7 +88,7 @@ class TaskService(BaseService):
             gift_id=str(gift['gift']['id']),
             gift_id_ton=gift_id_ton,
             status=GiftStatusEnum.available,
-            image=f"https://fragment.com/file/gifts/{gift['gift']['slug']}/thumb.webp",
+            image=f"https://nft.fragment.com/gift/{gift['gift']['slug']}.medium.jpg",
             meta=meta,
         )
 
