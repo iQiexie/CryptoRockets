@@ -35,7 +35,7 @@ def send_webhook(data: WebhookData) -> None:
     retry_delay = 1  # seconds
 
     for attempt in range(1, max_retries + 1):
-        logger.info(f"Sending (Attempt {attempt}/{max_retries}) to {WEBHOOK_URL}", hash=data["hash"])
+        logger.info(f"Sending (Attempt {attempt}/{max_retries}) to {WEBHOOK_URL}", data=data)
         try:
             resp = requests.post(url=WEBHOOK_URL, json=data, timeout=10)
         except requests.RequestException as e:
