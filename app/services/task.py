@@ -1,5 +1,6 @@
 import random
 import traceback
+from collections import defaultdict
 from datetime import UTC
 from datetime import datetime, timedelta
 from typing import Annotated
@@ -31,6 +32,7 @@ from app.config.constants import (
 from app.config.constants import TON_PRICE
 from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import CurrenciesEnum, RocketTypeEnum, User
+from app.db.models import Gift
 from app.db.models import GiftStatusEnum
 from app.db.models import GiftUserStatusEnum
 from app.db.models import TransactionTypeEnum
@@ -266,11 +268,33 @@ class TaskService(BaseService):
                     exception=traceback.format_exception(e),
                 )
 
+    @staticmethod
+    def _get_random_6_gifts(available_gifts: list[Gift]) -> list[Gift]:
+        # Group available gifts by collection
+        collection_to_gifts = defaultdict(list)
+        for gift in available_gifts:
+            collection_to_gifts[gift.collection_id].append(gift)
+
+        # First, pick one random gift per unique collection (as many as possible)
+        unique_collection_gifts = [random.choice(gifts) for gifts in collection_to_gifts.values()]
+        random.shuffle(unique_collection_gifts)
+
+        # If we have 6 or more unique collections, pick 6
+        if len(unique_collection_gifts) >= 6:
+            random_6_gifts = unique_collection_gifts[:6]
+        else:
+            # Otherwise, take all unique ones, and fill the rest randomly (duplicates allowed)
+            needed = 6 - len(unique_collection_gifts)
+            random_6_gifts = unique_collection_gifts + random.choices(available_gifts, k=needed)
+
+        return random_6_gifts
+
     @BaseService.single_transaction
     async def populate_gifts_latest(self) -> None:
         blacklist_gifts = await self.repos.game.get_latest_gifts()
         available_gifts = await self.repo.get_fake_available_gifts(blacklist=[gift.id for gift in blacklist_gifts])
-        random_6_gifts = random.choices(available_gifts, k=6)
+        random_6_gifts = self._get_random_6_gifts(available_gifts)
+
         for i,  gift in enumerate(random_6_gifts):
             try:
                 await self.repos.game.create_gift_user(
