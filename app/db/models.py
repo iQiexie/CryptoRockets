@@ -345,7 +345,7 @@ class BetConfig(_TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    collection_id = mapped_column(ForeignKey("collections.id"), index=True, nullable=True)
+    collection_id: Mapped[str] = mapped_column(ForeignKey("collections.slug"), index=True, nullable=True)
     bet_from: Mapped[float] = mapped_column(Numeric)
     probability: Mapped[float] = mapped_column(Numeric)
     actual_probability: Mapped[float] = mapped_column(Numeric)
