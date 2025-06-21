@@ -120,7 +120,7 @@ class GameService(BaseService):
             tx_data = await self.services.transaction.change_user_balance(
                 telegram_id=current_user.telegram_id,
                 currency=CurrenciesEnum.boost,
-                amount=gift_option.collection.amount,
+                amount=1,
                 tx_type=TransactionTypeEnum.ton_wheel,
             )
             user = tx_data.user
