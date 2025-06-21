@@ -113,6 +113,8 @@ class WheelPrizeEnum(str, Enum):
     ton = "ton"
     wheel = "wheel"
 
+    gift = "gift"
+
     rolls = "rolls"
     gift_withdrawal = "gift_withdrawal"
 

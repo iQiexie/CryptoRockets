@@ -156,8 +156,8 @@ WHEEL_PRIZES = [
     ),
     WheelPrizeResponse(
         id=iota(),
-        type=WheelPrizeEnum.ton,
-        amount=50,
+        type=WheelPrizeEnum.gift,
+        amount=1,
         icon="NotImplemented",
         chance=0,
     ),
