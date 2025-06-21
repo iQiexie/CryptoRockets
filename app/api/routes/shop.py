@@ -1,6 +1,7 @@
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query
+from fastapi import Path
 from starlette import status
 
 from app.api.dependencies.auth import get_current_user
@@ -24,7 +25,7 @@ async def get_invoice_url(
     shop_item_id: int = Query(...),
     gift_id: int | None = Query(default=None),
     amount: int = Query(default=1),
-    payment_method: Literal["ton", "xtr", "token"] = Query(default="xtr"),
+    payment_method: Literal["ton", "xtr"] = Query(default="xtr"),
 ) -> UrlResponse:
     return await service.get_invoice_url(
         current_user=current_user,
@@ -43,10 +44,10 @@ async def get_invoice_url(
 async def get_invoice_url_withdraw(
     current_user: Annotated[WebappData, Depends(get_current_user)],
     service: Annotated[ShopService, Depends()],
-    gift_id: int = Query(default=None),
-    payment_method: Literal["ton", "xtr", "token"] = Query(default="xtr"),
+    gift_id: int = Path(default=...),
+    payment_method: Literal["ton", "xtr"] = Query(default="xtr"),
 ) -> UrlResponse:
-    shop_item_id = [key for key, value in SHOP_ITEMS if value.item == WheelPrizeEnum.gift_withdrawal][0]
+    shop_item_id = [key for key, value in SHOP_ITEMS.items() if value.item == WheelPrizeEnum.gift_withdrawal][0]
 
     return await service.get_invoice_url(
         current_user=current_user,
@@ -54,6 +55,28 @@ async def get_invoice_url_withdraw(
         payment_method=payment_method,
         amount=1,
         gift_id=gift_id,
+    )
+
+
+@router.get(
+    path="/shop/invoice/rolls",
+    status_code=status.HTTP_200_OK,
+    response_model=UrlResponse,
+)
+async def get_invoice_url_rolls(
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+    service: Annotated[ShopService, Depends()],
+    rolls_amount: float = Query(default=...),
+    rolls_cont: int = Query(default=...),
+    payment_method: Literal["ton"] = Query(default="ton"),
+) -> UrlResponse:
+    shop_item_id = [key for key, value in SHOP_ITEMS.items() if value.ton_price == rolls_amount][0]
+
+    return await service.get_invoice_url(
+        current_user=current_user,
+        shop_item_id=shop_item_id,
+        payment_method=payment_method,
+        amount=1,
     )
 
 

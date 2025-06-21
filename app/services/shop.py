@@ -95,6 +95,7 @@ class ShopService(BaseService):
         elif item.item == WheelPrizeEnum.gift_withdrawal:
             gift = await self.repos.game.get_gift_for_update(gift_user_id=data.gift_id)
             await self.repos.game.update_gift_user(gift_user_id=gift.id, status=GiftUserStatusEnum.paid)
+            await self.adapters.alerts.send_alert(message=f"Пользователь оплатил вывод подарка: {gift.id=}")
         else:
             raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")
 
