@@ -3,6 +3,7 @@ import base64
 from typing import Annotated
 
 import structlog
+from alembic.command import merge
 from fastapi.params import Depends
 from pydantic_core import to_json
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +16,7 @@ from app.api.dependencies.stubs import (
     dependency_session_factory,
     placeholder,
 )
+from app.api.dto.game.response import GiftUserWithdrawResponse
 from app.api.dto.shop.request import SHOP_ITEMS, ShopItem
 from app.api.dto.shop.response import UrlResponse
 from app.api.dto.user.response import UserResponse
@@ -96,6 +98,11 @@ class ShopService(BaseService):
             gift = await self.repos.game.get_gift_for_update(gift_user_id=data.gift_id)
             await self.repos.game.update_gift_user(gift_user_id=gift.id, status=GiftUserStatusEnum.paid)
             await self.adapters.alerts.send_alert(message=f"Пользователь оплатил вывод подарка: {gift.id=}")
+            await self.services.websocket.publish(WSMessage(
+                telegram_id=gift.user_id,
+                event=WsEventsEnum.gift_withdrawal,
+                message=GiftUserWithdrawResponse.model_validate(gift).model_dump(by_alias=True),
+            ))
         else:
             raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")
 
