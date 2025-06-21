@@ -51,7 +51,9 @@ class ShopService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
-    async def _handle_payment_callback(self, data: PaymentCallbackDTO, item: ShopItem) -> None:
+    async def _handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
+        item = SHOP_ITEMS[data.item_id]
+
         transaction_id = None
         rocket_id = None
         item_price = getattr(item, f"{data.currency.value}_price", None)
@@ -114,8 +116,8 @@ class ShopService(BaseService):
         )
 
     async def handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
-        item = SHOP_ITEMS[data.item_id]
-        await self._handle_payment_callback(data=data, item=item)
+        await self._handle_payment_callback(data=data)
+
         async with self.repo.transaction():
             user = await self.repos.user.get_user_by_telegram_id(telegram_id=data.telegram_id)
 
@@ -135,10 +137,7 @@ class ShopService(BaseService):
             message=WSMessage(
                 event=WsEventsEnum.purchase,
                 telegram_id=user.telegram_id,
-                message=dict(
-                    user=UserResponse.model_validate(user).model_dump(by_alias=True),
-                    changed=float(item.ton_price),
-                ),
+                message=dict(user=UserResponse.model_validate(user).model_dump(by_alias=True)),
             )
         )
 
