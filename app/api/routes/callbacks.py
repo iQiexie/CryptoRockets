@@ -1,3 +1,4 @@
+import traceback
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends
@@ -10,6 +11,7 @@ from app.db.models import CurrenciesEnum
 from app.db.models import WheelPrizeEnum
 from app.services.dto.shop import PaymentCallbackDTO
 from app.services.shop import ShopService
+from app.services.shop import logger
 from app.utils import SafeList
 
 router = APIRouter(tags=["Callbacks"])
@@ -25,10 +27,11 @@ async def ton(
         telegram_id = data[0]
         item_id = data[1]
         item_amount = data.get(2, 1)
-    except ValueError:
+    except ValueError as e:
         await service.adapters.alerts.send_alert(
             message=f"Invalid payload format in TON callback: {body=}",
         )
+        logger.error(f"Invalid payload in callback", exception=traceback.format_exception(e))
         raise ClientError(message="Invalid payload format in TON callback")
 
     item = SHOP_ITEMS[item_id]
