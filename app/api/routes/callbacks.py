@@ -27,7 +27,7 @@ async def ton(
         telegram_id = data[0]
         item_id = data[1]
         item_amount = data.get(2, 1)
-    except ValueError as e:
+    except (ValueError, IndexError) as e:
         await service.adapters.alerts.send_alert(
             message=f"Invalid payload format in TON callback: {body=}",
         )
