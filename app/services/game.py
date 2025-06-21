@@ -109,12 +109,21 @@ class GameService(BaseService):
             weights=[float(gift.actual_probability) for gift in gifts_options],
         )[0]
 
-        await self.repo.create_gift_user(
-            user_id=current_user.telegram_id,
-            collection_id=gift_option.collection.id if gift_option.collection else None,
-            roll_id=roll.id,
-            status=GiftUserStatusEnum.created,
-        )
+        if not gift_option.is_boost:
+            await self.repo.create_gift_user(
+                user_id=current_user.telegram_id,
+                collection_id=gift_option.collection.id if gift_option.collection else None,
+                roll_id=roll.id,
+                status=GiftUserStatusEnum.created,
+            )
+        else:
+            tx_data = await self.services.transaction.change_user_balance(
+                telegram_id=current_user.telegram_id,
+                currency=CurrenciesEnum.boost,
+                amount=gift_option.collection.amount,
+                tx_type=TransactionTypeEnum.ton_wheel,
+            )
+            user = tx_data.user
 
         return MakeBetResponse(user=user, collection=gift_option.collection)
 

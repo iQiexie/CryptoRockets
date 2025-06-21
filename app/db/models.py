@@ -26,6 +26,7 @@ class TransactionTypeEnum(str, Enum):
     ads = "ads"
     retention = "retention"
     bet = "bet"
+    ton_wheel = "ton_wheel"
 
 
 class TransactionStatusEnum(str, Enum):
@@ -41,6 +42,7 @@ class CurrenciesEnum(str, Enum):
     fuel = "fuel"
     wheel = "wheel"
     xtr = "xtr"
+    boost = "boost"
 
 
 class AdStatusEnum(str, Enum):
