@@ -76,7 +76,7 @@ async def get_invoice_url_rolls(
         current_user=current_user,
         shop_item_id=shop_item_id,
         payment_method=payment_method,
-        amount=1,
+        amount=rolls_cont,
     )
 
 

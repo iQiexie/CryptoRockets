@@ -162,7 +162,7 @@ class ShopService(BaseService):
                 "currency": "XTR",
                 "description": item_label,
                 "payload": payload,
-                "prices": to_json([{"label": item_label, "amount": int(item.xtr_price)}]).decode("utf-8"),
+                "prices": to_json([{"label": item_label, "amount": int(item.xtr_price) * amount}]).decode("utf-8"),
                 "title": item_label,
             }
 
@@ -178,6 +178,9 @@ class ShopService(BaseService):
                 payload = f"{current_user.telegram_id};{item.id};{amount}"
 
             cell.bits.write_bytes(payload.encode("utf-8"))
-            return UrlResponse(url=base64.b64encode(cell.to_boc()).decode())
+            return UrlResponse(
+                url=base64.b64encode(cell.to_boc()).decode(),
+                amount=item.ton_price * amount,
+            )
 
         raise NotImplementedError
