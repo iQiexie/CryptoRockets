@@ -92,7 +92,7 @@ class GameService(BaseService):
     @BaseService.single_transaction
     async def make_bet(self, data: MakeBetRequest, current_user: WebappData) -> MakeBetResponse:
         user = await self.repos.user.get_user_for_update(telegram_id=current_user.telegram_id)
-        new_rolls = {float(key): int(value) for key, value in user.rolls.items()}
+        new_rolls = user.rolls_dict
         new_rolls[data.amount] = new_rolls.get(data.amount, 0) - 1
 
         if new_rolls[data.amount] < 0:

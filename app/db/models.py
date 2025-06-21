@@ -208,6 +208,10 @@ class User(_TimestampMixin, Base):
     promo: Mapped[str] = mapped_column(String, nullable=True)
     rolls: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
 
+    @property
+    def rolls_dict(self) -> dict[float, int]:
+        return {float(key): int(value) for key, value in self.rolls.items()}
+
     rockets: Mapped[list["Rocket"]] = relationship(
         "Rocket",
         primaryjoin="and_(User.telegram_id == Rocket.user_id, Rocket.enabled == True)",

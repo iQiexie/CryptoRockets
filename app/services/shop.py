@@ -89,9 +89,8 @@ class ShopService(BaseService):
             rocket_id = _rocket.id
         elif item.item == WheelPrizeEnum.rolls:
             user = await self.repos.user.get_user_for_update(telegram_id=data.telegram_id)
-            new_rolls = user.rolls
-            new_rolls[item.ton_price] = new_rolls.get(str(item.ton_price), 0) + item.amount * data.item_amount
-
+            new_rolls = user.rolls_dict
+            new_rolls[item.ton_price] = (new_rolls.get(item.ton_price, 0) + item.amount) * data.item_amount
             await self.repos.user.update_user(telegram_id=data.telegram_id, rolls=new_rolls)
         elif item.item == WheelPrizeEnum.gift_withdrawal:
             gift = await self.repos.game.get_gift_for_update(gift_user_id=data.gift_id)
@@ -121,6 +120,7 @@ class ShopService(BaseService):
         if not user:
             await self.session.flush()
             user = await self.repos.user.get_user_by_telegram_id(telegram_id=data.telegram_id)
+            await self.session.refresh(user)
 
         asyncio.create_task(self.adapters.alerts.send_alert(
             message=(
