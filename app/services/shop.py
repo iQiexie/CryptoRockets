@@ -51,12 +51,11 @@ class ShopService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
-    async def _handle_payment_callback(self, data: PaymentCallbackDTO) -> User:
+    async def _handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
         item = SHOP_ITEMS[data.item_id]
 
         transaction_id = None
         rocket_id = None
-        user = None
         item_price = getattr(item, f"{data.currency.value}_price", None)
 
         if data.amount < (item_price * data.item_amount):
@@ -78,7 +77,6 @@ class ShopService(BaseService):
             )
 
             transaction_id = _resp.transaction.id
-            user = _resp.user
         elif item.item in (WheelPrizeEnum.super_rocket, WheelPrizeEnum.mega_rocket, WheelPrizeEnum.ultra_rocket):
             _rocket = await self.repos.user.create_user_rocket(
                 user_id=data.telegram_id,
@@ -117,29 +115,28 @@ class ShopService(BaseService):
             callback_data=data.callback_data,
         )
 
-        if not user:
-            await self.session.flush()
-            user = await self.repos.user.get_user_by_telegram_id(telegram_id=data.telegram_id)
-            await self.session.refresh(user)
-
-        asyncio.create_task(self.adapters.alerts.send_alert(
-            message=(
-                f"Покупочка!!\n\n"
-                f"Пользователь: {user.telegram_id}\n"
-                f"Сумма: {data.usd_amount} USD\n"
-                f"Сумма: {data.amount} {data.currency.upper()}\n"
-            ),
-            chat_id=-4920858130,
-        ))
-
-        return user
-
     async def handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
-        user = await self._handle_payment_callback(data=data)
+        await self._handle_payment_callback(data=data)
+
+        async with self.repo.transaction():
+            user = await self.repos.user.get_user_by_telegram_id(telegram_id=data.telegram_id)
+
+        asyncio.create_task(
+            self.adapters.alerts.send_alert(
+                message=(
+                    f"Покупочка!!\n\n"
+                    f"Пользователь: {data.telegram_id}\n"
+                    f"Сумма: {data.usd_amount} USD\n"
+                    f"Сумма: {data.amount} {data.currency.upper()}\n"
+                ),
+                chat_id=-4920858130,
+            )
+        )
+
         await self.services.websocket.publish(
             message=WSMessage(
                 event=WsEventsEnum.purchase,
-                telegram_id=data.telegram_id,
+                telegram_id=user.telegram_id,
                 message=dict(user=UserResponse.model_validate(user).model_dump(by_alias=True)),
             )
         )
