@@ -9,6 +9,8 @@ from app.config.constants import (
 )
 from app.db.models import Collection
 from app.db.models import Gift
+from app.db.models import GiftStatusEnum
+from app.db.models import GiftUserStatusEnum
 from app.db.models import User
 from app.db.repos.base.base import BaseRepo
 
@@ -57,6 +59,20 @@ class TaskRepo(BaseRepo):
                 User.next_wheel_at <= func.now(),
                 User.last_online >= func.now() - text(f"INTERVAL '{WHEEL_TIMEOUT} minutes'"),
             )
+        )
+
+        query = await self.session.execute(stmt)
+        return query.scalars().all()
+
+    async def get_fake_available_gifts(self, blacklist: list[int]) -> Sequence[Gift]:
+        stmt = (
+            select(Gift)
+            .where(
+                Gift.id.not_in(blacklist),
+                Gift.status == GiftStatusEnum.available,
+            )
+            .order_by(desc(Gift.transfer_date))
+            .limit(10)
         )
 
         query = await self.session.execute(stmt)

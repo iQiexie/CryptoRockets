@@ -1,3 +1,4 @@
+import random
 import traceback
 from datetime import UTC
 from datetime import datetime, timedelta
@@ -31,6 +32,7 @@ from app.config.constants import TON_PRICE
 from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import CurrenciesEnum, RocketTypeEnum, User
 from app.db.models import GiftStatusEnum
+from app.db.models import GiftUserStatusEnum
 from app.db.models import TransactionTypeEnum
 from app.services.base.base import BaseService
 
@@ -261,5 +263,27 @@ class TaskService(BaseService):
             except Exception as e:
                 logger.error(
                     event=f"Failed to give wheel to user {user.telegram_id}: {e}",
+                    exception=traceback.format_exception(e),
+                )
+
+    @BaseService.single_transaction
+    async def populate_gifts_latest(self) -> None:
+        blacklist_gifts = await self.repos.game.get_latest_gifts()
+        available_gifts = await self.repo.get_fake_available_gifts(blacklist=[gift.id for gift in blacklist_gifts])
+        random_6_gifts = random.choices(available_gifts, k=6)
+        for i,  gift in enumerate(random_6_gifts):
+            try:
+                await self.repos.game.create_gift_user(
+                    user_id=388953283,
+                    collection_id=gift.collection_id,
+                    gift_id=gift.id,
+                    roll_id=None,
+                    status=GiftUserStatusEnum.created,
+                    created_at=datetime.utcnow() + timedelta(seconds=i * 10),
+                )
+            except IntegrityError as e:
+                await self.adapters.alerts.send_alert("populate_gifts_latest failed")
+                logger.error(
+                    event=f"Failed to create gift user for gift {gift.id}",
                     exception=traceback.format_exception(e),
                 )

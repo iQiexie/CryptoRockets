@@ -1,5 +1,7 @@
 from collections import defaultdict
 from typing import Sequence
+
+from sqlalchemy import desc
 from sqlalchemy import func, literal_column, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -52,10 +54,12 @@ class GameRepo(BaseRepo):
                 GiftUser.created_at <= now(),
                 GiftUser.collection_id.isnot(None),
                 GiftUser.gift_id.isnot(None),
+                GiftUser.created_at <= func.now(),
             )
             .options(
                 joinedload(GiftUser.gift).options(joinedload(Gift.collection)),
             )
+            .order_by(desc(GiftUser.created_at))
             .limit(6)
         )
 

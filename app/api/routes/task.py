@@ -42,3 +42,8 @@ async def check_user_exists(
 @router.get(path="/task/populate_gifts", status_code=status.HTTP_200_OK)
 async def populate_gifts(service: Annotated[TaskService, Depends()]) -> None:
     return await service.populate_gifts()
+
+
+@router.get(path="/task/populate_gifts_latest", status_code=status.HTTP_200_OK)
+async def populate_gifts_latest(service: Annotated[TaskService, Depends()]) -> None:
+    return await service.populate_gifts_latest()

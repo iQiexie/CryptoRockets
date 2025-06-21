@@ -359,12 +359,12 @@ class Gift(_TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    collection_id: Mapped[int] = mapped_column(ForeignKey("collections.slug"))
+    collection_id: Mapped[str] = mapped_column(ForeignKey("collections.slug"))
     transfer_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP)
     address: Mapped[str] = mapped_column(String, unique=True)
     gift_id: Mapped[str] = mapped_column(String, unique=True)
     gift_id_ton: Mapped[str] = mapped_column(String, unique=True, nullable=True)
-    status: Mapped[GiftUserStatusEnum] = mapped_column(String)
+    status: Mapped[GiftStatusEnum] = mapped_column(String)
     price_purchase: Mapped[float] = mapped_column(Numeric, nullable=True)
     price_release: Mapped[float] = mapped_column(Numeric, nullable=True)
     meta: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
@@ -379,9 +379,9 @@ class GiftUser(_TimestampMixin, Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
-    collection_id = mapped_column(ForeignKey("collections.id"), index=True)
+    collection_id: Mapped[str] = mapped_column(ForeignKey("collections.slug"), index=True)
     gift_id: Mapped[int] = mapped_column(ForeignKey("gifts.id"), index=True, nullable=True)
-    roll_id: Mapped[int] = mapped_column(ForeignKey("rolls.id"))
+    roll_id: Mapped[int] = mapped_column(ForeignKey("rolls.id"), nullable=True)
     status: Mapped[GiftUserStatusEnum] = mapped_column(String)
 
     gift = relationship("Gift", foreign_keys=[gift_id], viewonly=True)

@@ -99,6 +99,7 @@ class ShopService(BaseService):
                 event=WsEventsEnum.gift_withdrawal,
                 message=GiftUserWithdrawResponse.model_validate(gift).model_dump(by_alias=True),
             ))
+
         else:
             raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")
 
