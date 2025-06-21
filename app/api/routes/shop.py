@@ -6,6 +6,7 @@ from starlette import status
 from app.api.dependencies.auth import get_current_user
 from app.api.dto.shop.request import SHOP_ITEMS, ShopItem
 from app.api.dto.shop.response import UrlResponse
+from app.db.models import WheelPrizeEnum
 from app.services.dto.auth import WebappData
 from app.services.shop import ShopService
 
@@ -30,6 +31,28 @@ async def get_invoice_url(
         shop_item_id=shop_item_id,
         payment_method=payment_method,
         amount=amount,
+        gift_id=gift_id,
+    )
+
+
+@router.get(
+    path="/shop/invoice/withdraw/{gift_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=UrlResponse,
+)
+async def get_invoice_url_withdraw(
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+    service: Annotated[ShopService, Depends()],
+    gift_id: int = Query(default=None),
+    payment_method: Literal["ton", "xtr", "token"] = Query(default="xtr"),
+) -> UrlResponse:
+    shop_item_id = [key for key, value in SHOP_ITEMS if value.item == WheelPrizeEnum.gift_withdrawal][0]
+
+    return await service.get_invoice_url(
+        current_user=current_user,
+        shop_item_id=shop_item_id,
+        payment_method=payment_method,
+        amount=1,
         gift_id=gift_id,
     )
 
