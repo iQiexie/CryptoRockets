@@ -183,6 +183,8 @@ class ShopService(BaseService):
             else:
                 payload = f"{current_user.telegram_id};{item.id};{amount}"
 
+            logger.info(f"Got {payload=}")
+
             cell.bits.write_bytes(payload.encode("utf-8"))
             return UrlResponse(
                 url=base64.b64encode(cell.to_boc()).decode(),
