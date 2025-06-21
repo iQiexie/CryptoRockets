@@ -99,7 +99,11 @@ class GameService(BaseService):
             raise ClientError(message="Not enough rolls for this bet")
 
         roll = await self.repos.transaction.create_roll(user_id=user.telegram_id, ton_amount=data.amount)
-        await self.repos.user.update_user(telegram_id=user.telegram_id, rolls=new_rolls)
+        await self.repos.user.update_user(
+            telegram_id=user.telegram_id,
+            rolls=new_rolls,
+            boost_balance=max(user.boost_balance - 1, 0),
+        )
         await self.session.flush()
         await self.session.refresh(user)
 
