@@ -31,6 +31,7 @@ class BetConfigResponse(BaseResponse, RootModel[dict[float, list[GiftBetResponse
 
 
 class MakeBetResponse(BaseResponse):
+    bet_config_id: int
     collection: CollectionResponse | None = None
     user: UserResponse
 

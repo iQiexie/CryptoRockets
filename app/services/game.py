@@ -125,7 +125,7 @@ class GameService(BaseService):
             )
             user = tx_data.user
 
-        return MakeBetResponse(user=user, collection=gift_option.collection)
+        return MakeBetResponse(user=user, collection=gift_option.collection, bet_config_id=gift_option.id)
 
     @BaseService.single_transaction
     async def get_latest_wheel_winners(self) -> list[WheelPrize]:
