@@ -117,7 +117,6 @@ class ShopService(BaseService):
 
     async def handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
         await self._handle_payment_callback(data=data)
-
         async with self.repo.transaction():
             user = await self.repos.user.get_user_by_telegram_id(telegram_id=data.telegram_id)
 
@@ -135,7 +134,7 @@ class ShopService(BaseService):
 
         await self.services.websocket.publish(
             message=WSMessage(
-                event=WsEventsEnum.purchase,
+                event=WsEventsEnum.roll_purchase,
                 telegram_id=user.telegram_id,
                 message=dict(user=UserResponse.model_validate(user).model_dump(by_alias=True)),
             )
