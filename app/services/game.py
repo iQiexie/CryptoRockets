@@ -112,7 +112,7 @@ class GameService(BaseService):
         if not gift_option.is_boost:
             await self.repo.create_gift_user(
                 user_id=current_user.telegram_id,
-                collection_id=gift_option.collection.id if gift_option.collection else None,
+                collection_id=gift_option.collection.slug if gift_option.collection else None,
                 roll_id=roll.id,
                 status=GiftUserStatusEnum.created,
             )
