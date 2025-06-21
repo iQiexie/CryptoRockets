@@ -34,7 +34,7 @@ async def ton(
         logger.error(f"Invalid payload in callback", exception=traceback.format_exception(e))
         raise ClientError(message="Invalid payload format in TON callback")
 
-    item = SHOP_ITEMS[item_id]
+    item = SHOP_ITEMS[int(item_id)]
     if item.item == WheelPrizeEnum.gift_withdrawal:
         new_data = {"gift_id": item_amount}
     else:
