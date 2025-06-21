@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import Any
 
 from pydantic import Field
 from pydantic import RootModel
-from pydantic import field_validator
 
 from app.api.dto.base import BaseResponse
 from app.api.dto.user.response import PublicUserResponse
@@ -29,13 +27,8 @@ class GiftBetResponse(BaseResponse):
     collection: CollectionResponse | None = None
 
 
-class BetConfigResponse(BaseResponse, RootModel[dict[str, list[GiftBetResponse]]]):
-    @field_validator('root', mode='before')
-    @classmethod
-    def cast_keys_to_str(cls, v: Any) -> dict[str, list[GiftBetResponse]]:
-        if isinstance(v, dict):
-            return {str(k): v for k, v in v.items()}
-        return v
+class BetConfigResponse(BaseResponse, RootModel[dict[float, list[GiftBetResponse]]]):
+    pass
 
 
 class MakeBetResponse(BaseResponse):
