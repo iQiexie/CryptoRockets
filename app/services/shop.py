@@ -3,7 +3,6 @@ import base64
 from typing import Annotated
 
 import structlog
-from alembic.command import merge
 from fastapi.params import Depends
 from pydantic_core import to_json
 from sqlalchemy.ext.asyncio import AsyncSession

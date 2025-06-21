@@ -5,12 +5,16 @@ from pydantic import field_validator
 from pydantic_core.core_schema import ValidationInfo
 
 from app.api.dto.base import BaseResponse
+from app.config.config import get_config
 from app.config.constants import (
     BOT_NAME,
     REFERRAL_PREFIX,
     WEBAPP_NAME,
 )
 from app.db.models import RocketTypeEnum
+
+
+config = get_config()
 
 
 class RocketResponse(BaseResponse):
@@ -31,7 +35,7 @@ class UserResponse(BaseResponse):
     usdt_balance: float
     token_balance: float
     wheel_balance: float
-    payment_address: str = "UQA824RWvHtNCPlMp-mRA1u3geuf98zyt4VZjXdGAZCAwDHC"
+    payment_address: str = config.scanner.SCANNER_WALLET
     next_wheel_at: datetime | None = Field(default=None)
     next_wheel_ad_at: datetime | None = Field(default=None)
     next_default_rocket_at: datetime | None = Field(default=None, exclude=True)
