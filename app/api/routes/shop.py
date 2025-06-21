@@ -70,7 +70,12 @@ async def get_invoice_url_rolls(
     rolls_cont: int = Query(default=...),
     payment_method: Literal["ton"] = Query(default="ton"),
 ) -> UrlResponse:
-    shop_item_id = [key for key, value in SHOP_ITEMS.items() if value.ton_price == rolls_amount][0]
+    shop_item_id = [
+        key
+        for key, value in SHOP_ITEMS.items()
+        if value.ton_price == rolls_amount
+           and value.item == WheelPrizeEnum.rolls
+    ][0]
 
     return await service.get_invoice_url(
         current_user=current_user,
