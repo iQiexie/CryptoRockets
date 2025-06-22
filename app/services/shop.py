@@ -104,7 +104,7 @@ class ShopService(BaseService):
 
             await self.adapters.bot.send_message(
                 chat_id=-4920858130,
-                message=f"Юзер {gift.user_id} выводит подарок: {gift.gift_id}",
+                text=f"Юзер {gift.user_id} выводит подарок: {gift.gift_id}",
                 reply_markup=(
                     InlineKeyboardBuilder()
                     .row(
