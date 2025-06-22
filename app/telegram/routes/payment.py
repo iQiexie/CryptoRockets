@@ -8,6 +8,7 @@ from app.services.base.services import Services
 from app.services.dto.shop import PaymentCallbackDTO
 from app.telegram.dto import Callback
 from app.telegram.dto import CallbackActions
+from app.utils import SafeList
 
 router = Router()
 
@@ -19,15 +20,20 @@ async def pre_checkout_handler(pre_checkout_query: PreCheckoutQuery) -> Telegram
 
 @router.message(F.successful_payment)
 async def success_payment_handler(message: Message, services: Services) -> None:
+    data = SafeList(message.successful_payment.invoice_payload.split(";"))
+    item_id = data[0]
+    gift_id = data.get(1, None)
+
     return await services.shop.handle_payment_callback(
         data=PaymentCallbackDTO(
             telegram_id=message.from_user.id,
-            item_id=int(message.successful_payment.invoice_payload),
+            item_id=item_id,
             amount=message.successful_payment.total_amount,
             usd_amount=message.successful_payment.total_amount * 0.013,
             currency=CurrenciesEnum.xtr,
             external_id=message.successful_payment.provider_payment_charge_id,
             callback_data=message.successful_payment.model_dump(),
+            gift_id=gift_id,
         )
     )
 
