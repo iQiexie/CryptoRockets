@@ -259,7 +259,7 @@ class GameService(BaseService):
     async def _handle_regular_rocket(self, user: User, rocket: Rocket) -> LaunchResponse:
         currency = random.choices(
             population=[CurrenciesEnum.usdt, CurrenciesEnum.token],
-            weights=[30, 30, 40]
+            weights=[50, 50]
         )[0]
         balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket.type)
 
