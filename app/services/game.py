@@ -244,6 +244,9 @@ class GameService(BaseService):
         return round(min(reward, 2), 2)
 
     def get_balance_diff(self, user: User, currency: CurrenciesEnum, rocket_type: RocketTypeEnum) -> float:
+        if currency == CurrenciesEnum.token:
+            return random.randint(50, 300)
+
         resp = self._get_balance_diff(user=user, currency=currency, rocket_type=rocket_type)
         if getattr(user, f"{currency.value}_balance") + Decimal(resp) >= MAX_BALANCE:
             resp = random.uniform(0.001, 0.01)
