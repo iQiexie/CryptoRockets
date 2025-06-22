@@ -26,6 +26,10 @@ from app.utils import struct_log
 async def on_request_start(_: ClientSession, context: SimpleNamespace, params: TraceRequestStartParams) -> None:
     context.method = params.method
     context.url = params.url.human_repr()
+    context.headers = {
+        key: (LOGGING_SENSITIVE_REPLACEMENT if key.lower() in LOGGING_SENSITIVE_FIELDS else value)
+        for key, value in params.headers.items()
+    }
 
 
 async def on_request_end(_: ClientSession, context: SimpleNamespace, params: TraceRequestEndParams) -> None:
