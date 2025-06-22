@@ -54,6 +54,10 @@ class TaskService(BaseService):
         self.adapters = adapters
 
     @BaseService.single_transaction
+    async def count_users_promo(self, promo: str) -> int:
+        return await self.repo.count_users_promo(promo=promo)
+
+    @BaseService.single_transaction
     async def _insert_gift(self, gift: dict) -> None:
         date = gift['date']
         slug, gift_id_ton = ([i.lower() for i in gift['gift']['slug'].split('-')])

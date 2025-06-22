@@ -39,6 +39,15 @@ async def check_user_exists(
     return {"exists": resp}
 
 
+@router.get(path="/task/check_promo/{telegram_id}", status_code=status.HTTP_200_OK)
+async def check_user_exists(
+    service: Annotated[TaskService, Depends()],
+    promo: str = Path(...),
+) -> dict:
+    resp = await service.count_users_promo(promo=promo)
+    return {"count": resp}
+
+
 @router.get(path="/task/populate_gifts", status_code=status.HTTP_200_OK)
 async def populate_gifts(service: Annotated[TaskService, Depends()]) -> None:
     return await service.populate_gifts()
