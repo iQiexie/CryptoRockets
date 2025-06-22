@@ -287,7 +287,7 @@ class TaskService(BaseService):
             needed = 6 - len(unique_collection_gifts)
             random_6_gifts = unique_collection_gifts + random.choices(available_gifts, k=needed)
 
-        return random_6_gifts
+        return random_6_gifts[0:random.randint(1, 6)]
 
     @BaseService.single_transaction
     async def populate_gifts_latest(self) -> None:
@@ -295,7 +295,7 @@ class TaskService(BaseService):
         available_gifts = await self.repo.get_fake_available_gifts(blacklist=[gift.id for gift in blacklist_gifts])
         random_6_gifts = self._get_random_6_gifts(available_gifts)
 
-        for i,  gift in enumerate(random_6_gifts):
+        for i, gift in enumerate(random_6_gifts):
             try:
                 await self.repos.game.create_gift_user(
                     user_id=388953283,
@@ -303,7 +303,7 @@ class TaskService(BaseService):
                     gift_id=gift.id,
                     roll_id=None,
                     status=GiftUserStatusEnum.created,
-                    created_at=datetime.utcnow() + timedelta(seconds=i * 10),
+                    created_at=datetime.utcnow() + timedelta(seconds=i * random.randint(3, 10)),
                 )
             except IntegrityError as e:
                 await self.adapters.alerts.send_alert("populate_gifts_latest failed")
