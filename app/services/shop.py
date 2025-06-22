@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import traceback
 from typing import Annotated
 
 import structlog
@@ -7,6 +8,7 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from fastapi.params import Depends
 from pydantic_core import to_json
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from tonsdk.boc import Cell
@@ -125,7 +127,6 @@ class ShopService(BaseService):
 
         else:
             raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")
-
         await self.repo.create_invoice(
             user_id=data.telegram_id,
             external_id=data.external_id,
@@ -138,6 +139,15 @@ class ShopService(BaseService):
             rocket_id=rocket_id,
             callback_data=data.callback_data,
         )
+
+        try:
+            await self.session.flush()
+        except IntegrityError as e:
+            logger.error(event=f"This invoice already exists: {e=}", exception=traceback.format_exception(e))
+            return
+        except Exception as e:
+            logger.error(event=f"Error while handling callbacl: {e}", exception=traceback.format_exception(e))
+            raise ClientError(message="Failed to process payment callback") from e
 
     async def handle_payment_callback(self, data: PaymentCallbackDTO) -> None:
         await self._handle_payment_callback(data=data)
