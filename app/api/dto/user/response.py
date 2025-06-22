@@ -5,12 +5,16 @@ from pydantic import field_validator
 from pydantic_core.core_schema import ValidationInfo
 
 from app.api.dto.base import BaseResponse
+from app.config.config import get_config
 from app.config.constants import (
     BOT_NAME,
     REFERRAL_PREFIX,
     WEBAPP_NAME,
 )
 from app.db.models import RocketTypeEnum
+
+
+config = get_config()
 
 
 class RocketResponse(BaseResponse):
@@ -31,14 +35,31 @@ class UserResponse(BaseResponse):
     usdt_balance: float
     token_balance: float
     wheel_balance: float
-    payment_address: str = "UQA824RWvHtNCPlMp-mRA1u3geuf98zyt4VZjXdGAZCAwDHC"
+    payment_address: str = config.scanner.SCANNER_WALLET
     next_wheel_at: datetime | None = Field(default=None)
     next_wheel_ad_at: datetime | None = Field(default=None)
     next_default_rocket_at: datetime | None = Field(default=None, exclude=True)
     next_offline_rocket_at: datetime | None = Field(default=None, exclude=True)
     next_premium_rocket_at: datetime | None = Field(default=None, exclude=True)
+    rolls: dict = Field(default=..., exclude=True)
+    boost_balance: int = Field(default=..., exclude=True)
 
     rockets: list[RocketResponse]
+
+    @computed_field
+    def available_rolls(self) -> dict:
+        rolls = [float(i) for i in [0.5, 1, 2, 3, 4, 5, 10, 20, 50]]
+        old_rolls = {float(key): int(value) for key, value in self.rolls.items()}
+        new_rolls = {}
+
+        for roll in rolls:
+            new_rolls[roll] = old_rolls.get(roll, 0)
+
+        return new_rolls
+
+    @computed_field
+    def has_boost(self) -> bool:
+        return self.boost_balance > 0
 
     @computed_field
     def referral(self) -> str:

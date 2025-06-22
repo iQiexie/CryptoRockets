@@ -13,3 +13,5 @@ class PaymentCallbackDTO(BaseModel):
     external_id: str
     callback_data: dict
     fee: float | None = Field(default=None)
+    item_amount: int | None = Field(default=1)
+    gift_id: int | None = Field(default=None)

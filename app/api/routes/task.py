@@ -31,9 +31,19 @@ async def give_offline_rocket(service: Annotated[TaskService, Depends()]) -> Non
 
 
 @router.get(path="/task/check_user/{telegram_id}", status_code=status.HTTP_200_OK)
-async def give_offline_rocket(
+async def check_user_exists(
     service: Annotated[TaskService, Depends()],
     telegram_id: int = Path(...),
 ) -> dict:
     resp = await service.check_user_exists(telegram_id=telegram_id)
     return {"exists": resp}
+
+
+@router.get(path="/task/populate_gifts", status_code=status.HTTP_200_OK)
+async def populate_gifts(service: Annotated[TaskService, Depends()]) -> None:
+    return await service.populate_gifts()
+
+
+@router.get(path="/task/populate_gifts_latest", status_code=status.HTTP_200_OK)
+async def populate_gifts_latest(service: Annotated[TaskService, Depends()]) -> None:
+    return await service.populate_gifts_latest()

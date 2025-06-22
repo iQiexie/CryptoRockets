@@ -4,12 +4,21 @@ from fastapi import APIRouter, Depends, Path
 from starlette import status
 
 from app.api.dependencies.auth import get_current_user
+from app.api.dto.game.request import MakeBetRequest
+from app.api.dto.game.response import BetConfigResponse
+from app.api.dto.game.response import GiftUserResponse
+from app.api.dto.game.response import GiftUserWithdrawResponse
+from app.api.dto.game.response import LatestGiftResponse
+from app.api.dto.game.response import MakeBetResponse
 from app.api.dto.game.response import (
     WHEEL_PRIZES,
     LatestWheelPrizeResponse,
     LaunchResponse,
     WheelPrizeResponse,
 )
+from app.db.models import BetConfig
+from app.db.models import Gift
+from app.db.models import GiftUser
 from app.db.models import WheelPrize
 from app.services.dto.auth import WebappData
 from app.services.game import GameService
@@ -64,3 +73,68 @@ async def get_winners(
 )
 async def wheel_prizes() -> list[WheelPrizeResponse]:
     return WHEEL_PRIZES
+
+
+@router.get(
+    path="/gift/bet/config",
+    status_code=status.HTTP_200_OK,
+    response_model=BetConfigResponse,
+    tags=["Gifts"],
+)
+async def bets_config(service: Annotated[GameService, Depends()]) -> dict[list[BetConfig]]:
+    resp = await service.get_bets_config()
+    return resp
+
+
+@router.post(
+    path="/gift/bet/make",
+    status_code=status.HTTP_200_OK,
+    response_model=MakeBetResponse,
+    tags=["Gifts"],
+)
+async def make_bet(
+    data: MakeBetRequest,
+    service: Annotated[GameService, Depends()],
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+) -> MakeBetResponse:
+    resp = await service.make_bet(data=data, current_user=current_user)
+    return resp
+
+
+@router.get(
+    path="/gifts",
+    status_code=status.HTTP_200_OK,
+    response_model=list[GiftUserResponse],
+    tags=["Gifts"],
+)
+async def get_gifts(
+    service: Annotated[GameService, Depends()],
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+) -> list[GiftUser]:
+    resp = await service.get_gifts(current_user=current_user)
+    return resp
+
+
+@router.get(
+    path="/gifts/latest",
+    status_code=status.HTTP_200_OK,
+    response_model=list[LatestGiftResponse],
+    tags=["Gifts"],
+)
+async def get_gifts(service: Annotated[GameService, Depends()]) -> list[Gift]:
+    resp = await service.get_latest_gifts()
+    return resp
+
+
+@router.post(
+    path="/gifts/withdraw/{gift_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=GiftUserWithdrawResponse,
+    tags=["Gifts"],
+)
+async def withdraw_gift(
+    service: Annotated[GameService, Depends()],
+    current_user: Annotated[WebappData, Depends(get_current_user)],
+    gift_id: int = Path(...),
+) -> GiftUser:
+    return await service.withdraw_gift(gift_id=gift_id, current_user=current_user)

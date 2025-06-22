@@ -1,13 +1,69 @@
+from datetime import datetime
+
 from pydantic import Field
+from pydantic import RootModel
 
 from app.api.dto.base import BaseResponse
 from app.api.dto.user.response import PublicUserResponse
 from app.api.dto.user.response import RocketResponse
 from app.api.dto.user.response import UserResponse
+from app.db.models import GiftUserStatusEnum
 from app.db.models import WheelPrizeEnum
 from app.utils import iota_generator
 
 iota = iota_generator()
+
+
+class CollectionResponse(BaseResponse):
+    id: int
+    name: str
+    image: str
+
+
+class GiftBetResponse(BaseResponse):
+    id: int
+    probability: float
+    is_boost: bool
+    collection: CollectionResponse | None = None
+
+
+class BetConfigResponse(BaseResponse, RootModel[dict[float, list[GiftBetResponse]]]):
+    pass
+
+
+class MakeBetResponse(BaseResponse):
+    bet_config_id: int
+    collection: CollectionResponse | None = None
+    user: UserResponse
+
+
+class GiftUserWithdrawResponse(BaseResponse):
+    id: int
+    created_at: datetime
+    status: GiftUserStatusEnum
+
+
+class GiftUserResponse(GiftUserWithdrawResponse):
+    collection: CollectionResponse
+
+
+class _GiftAttribute(BaseResponse):
+    name: str
+    rarity: float
+
+
+class _GiftMetaResponse(BaseResponse):
+    model: _GiftAttribute
+    pattern: _GiftAttribute
+    backdrop: _GiftAttribute
+
+
+class LatestGiftResponse(BaseResponse):
+    gift_id: str
+    gift_id_ton: str
+    image: str
+    collection: CollectionResponse
+    meta: _GiftMetaResponse
 
 
 class WheelPrizeResponse(BaseResponse):
@@ -100,8 +156,8 @@ WHEEL_PRIZES = [
     ),
     WheelPrizeResponse(
         id=iota(),
-        type=WheelPrizeEnum.ton,
-        amount=50,
+        type=WheelPrizeEnum.gift,
+        amount=1,
         icon="NotImplemented",
         chance=0,
     ),

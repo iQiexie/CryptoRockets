@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.services.user import UserService
     from app.services.user_task import UserTaskService
     from app.services.websocket import WebsocketService
+    from app.services.bot import BotService
 
 
 class Services:
@@ -85,6 +86,12 @@ class Services:
         from app.services.shop import ShopService
 
         return ShopService(session_factory=self.session_factory, adapters=self.adapters, session=self.session)
+
+    @property
+    def bot(self) -> "BotService":
+        from app.services.bot import BotService
+
+        return BotService(session_factory=self.session_factory, adapters=self.adapters, session=self.session)
 
     @property
     def ads(self) -> "AdsService":

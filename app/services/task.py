@@ -1,11 +1,18 @@
+import random
 import traceback
+from collections import defaultdict
+from datetime import UTC
 from datetime import datetime, timedelta
 from typing import Annotated
 
 import structlog
 from fastapi.params import Depends
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+from telethon import TelegramClient
+from telethon.tl import functions
+from telethon.tl.types.payments import SavedStarGifts
 
 from app.adapters.base import Adapters
 from app.api.dependencies.stubs import (
@@ -22,8 +29,12 @@ from app.config.constants import (
     ROCKET_TIMEOUT_OFFLINE,
     ROCKET_TIMEOUT_PREMIUM,
 )
+from app.config.constants import TON_PRICE
 from app.config.constants import WHEEL_TIMEOUT
 from app.db.models import CurrenciesEnum, RocketTypeEnum, User
+from app.db.models import Gift
+from app.db.models import GiftStatusEnum
+from app.db.models import GiftUserStatusEnum
 from app.db.models import TransactionTypeEnum
 from app.services.base.base import BaseService
 
@@ -41,6 +52,105 @@ class TaskService(BaseService):
 
         self.repo = self.repos.task
         self.adapters = adapters
+
+    @BaseService.single_transaction
+    async def _insert_gift(self, gift: dict) -> None:
+        date = gift['date']
+        slug, gift_id_ton = ([i.lower() for i in gift['gift']['slug'].split('-')])
+
+        meta = dict()
+        for attr in gift['gift']['attributes']:
+            if not attr.get('name'):
+                continue
+
+            key = (
+                attr['_']
+                .replace('StarGiftAttribute', '')
+                .lower()
+            )
+
+            value = {
+                'name': attr['name'],
+                'rarity': attr['rarity_permille'] / 1000,
+            }
+
+            meta[key] = value
+
+        if not await self.repo.get_collection(slug=slug):
+            await self.repo.create_collection(
+                name=gift['gift']['title'],
+                slug=slug,
+                image=f"https://fragment.com/file/gifts/{slug.split('-')[0]}/thumb.webp",
+                avg_price=None,
+                meta={},
+            )
+
+        await self.repo.create_gift(
+            collection_id=slug,
+            transfer_date=date.astimezone(None).replace(tzinfo=None),
+            address=gift['gift']['gift_address'],
+            gift_id=str(gift['gift']['id']),
+            gift_id_ton=gift_id_ton,
+            status=GiftStatusEnum.available,
+            image=f"https://nft.fragment.com/gift/{gift['gift']['slug']}.medium.jpg",
+            meta=meta,
+        )
+
+    async def _populate_account_gifts(self) -> None:
+        async with self.repo.transaction():
+            last_gift = await self.repo.get_last_gift()
+
+        async with TelegramClient(
+            session='anon',
+            api_id=5945038,
+            api_hash='d9e26a347056c95b167ab097c73ec1f0',
+        ) as client:
+            result: SavedStarGifts = await client(
+                functions.payments.GetSavedStarGiftsRequest(
+                    peer='rockets_holder',  # noqa
+                    offset='some_string',
+                    limit=100000,
+                    sort_by_value=False,
+                )
+            )
+
+        gifts = result.to_dict()['gifts']
+
+        if last_gift:
+            last_date = last_gift.transfer_date
+        else:
+            last_date = datetime.now(tz=UTC) - timedelta(days=365)
+
+        for gift in gifts:
+            gift_date = gift['date'].astimezone(None).replace(tzinfo=None)
+            last_date = last_date.astimezone(None).replace(tzinfo=None)
+            if gift_date <= last_date:
+                continue
+
+            await self._insert_gift(gift=gift)
+
+    async def _populate_shitty_gifts(self) -> None:
+        gifts = await self.adapters.bot.get_available_gifts()
+        for gift in gifts.gifts:
+            gift_id = gift.id
+
+            try:
+                async with self.repo.transaction() as t:
+                    await self.repo.create_collection(
+                        name=gift.sticker.emoji,
+                        slug=gift.sticker.emoji,
+                        image=f"https://emojiapi.dev/api/v1/{ord(gift.sticker.emoji):X}.svg",
+                        avg_price=(gift.star_count * 0.013) / TON_PRICE,
+                        meta={"gift_id": gift_id},
+                        is_nft=False,
+                    )
+                    await t.commit()
+            except IntegrityError:
+                pass
+
+    async def populate_gifts(self) -> None:
+        await self._populate_shitty_gifts()
+        await self._populate_account_gifts()
 
     @BaseService.single_transaction
     async def give_rocket(self, rocket_type: RocketTypeEnum, full: bool, telegram_id: int) -> None:
@@ -155,5 +265,49 @@ class TaskService(BaseService):
             except Exception as e:
                 logger.error(
                     event=f"Failed to give wheel to user {user.telegram_id}: {e}",
+                    exception=traceback.format_exception(e),
+                )
+
+    @staticmethod
+    def _get_random_6_gifts(available_gifts: list[Gift]) -> list[Gift]:
+        # Group available gifts by collection
+        collection_to_gifts = defaultdict(list)
+        for gift in available_gifts:
+            collection_to_gifts[gift.collection_id].append(gift)
+
+        # First, pick one random gift per unique collection (as many as possible)
+        unique_collection_gifts = [random.choice(gifts) for gifts in collection_to_gifts.values()]
+        random.shuffle(unique_collection_gifts)
+
+        # If we have 6 or more unique collections, pick 6
+        if len(unique_collection_gifts) >= 6:
+            random_6_gifts = unique_collection_gifts[:6]
+        else:
+            # Otherwise, take all unique ones, and fill the rest randomly (duplicates allowed)
+            needed = 6 - len(unique_collection_gifts)
+            random_6_gifts = unique_collection_gifts + random.choices(available_gifts, k=needed)
+
+        return random_6_gifts[0:random.randint(1, 6)]
+
+    @BaseService.single_transaction
+    async def populate_gifts_latest(self) -> None:
+        blacklist_gifts = await self.repos.game.get_latest_gifts()
+        available_gifts = await self.repo.get_fake_available_gifts(blacklist=[gift.id for gift in blacklist_gifts])
+        random_6_gifts = self._get_random_6_gifts(available_gifts)
+
+        for i, gift in enumerate(random_6_gifts):
+            try:
+                await self.repos.game.create_gift_user(
+                    user_id=388953283,
+                    collection_id=gift.collection_id,
+                    gift_id=gift.id,
+                    roll_id=None,
+                    status=GiftUserStatusEnum.created,
+                    created_at=datetime.utcnow() + timedelta(seconds=i * random.randint(3, 10)),
+                )
+            except IntegrityError as e:
+                await self.adapters.alerts.send_alert("populate_gifts_latest failed")
+                logger.error(
+                    event=f"Failed to create gift user for gift {gift.id}",
                     exception=traceback.format_exception(e),
                 )

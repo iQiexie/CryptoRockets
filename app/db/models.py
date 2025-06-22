@@ -25,6 +25,8 @@ class TransactionTypeEnum(str, Enum):
     task_completion = "task_completion"
     ads = "ads"
     retention = "retention"
+    bet = "bet"
+    ton_wheel = "ton_wheel"
 
 
 class TransactionStatusEnum(str, Enum):
@@ -40,6 +42,7 @@ class CurrenciesEnum(str, Enum):
     fuel = "fuel"
     wheel = "wheel"
     xtr = "xtr"
+    boost = "boost"
 
 
 class AdStatusEnum(str, Enum):
@@ -81,6 +84,19 @@ class TaskStatusEnum(str, Enum):
     completed = "completed"
 
 
+class GiftUserStatusEnum(str, Enum):
+    created = "created"
+    paid = "paid"
+    pending_withdraw = "pending_withdraw"
+    withdrawn = "withdrawn"
+
+
+class GiftStatusEnum(str, Enum):
+    available = "available"
+    inventory = "inventory"
+    sent = "sent"
+
+
 class WheelPrizeEnum(str, Enum):
     premium_rocket = "premium_rocket"
     default_rocket = "default_rocket"
@@ -96,6 +112,11 @@ class WheelPrizeEnum(str, Enum):
     usdt = "usdt"
     ton = "ton"
     wheel = "wheel"
+
+    gift = "gift"
+
+    rolls = "rolls"
+    gift_withdrawal = "gift_withdrawal"
 
 
 class Base(DeclarativeBase):
@@ -140,6 +161,7 @@ class User(_TimestampMixin, Base):
     token_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     fuel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     wheel_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
+    boost_balance: Mapped[float] = mapped_column(Numeric, server_default="0", default=0)
     last_broadcast_key: Mapped[str] = mapped_column(String, nullable=True)
 
     referral_from: Mapped[int] = mapped_column(
@@ -184,6 +206,11 @@ class User(_TimestampMixin, Base):
 
     spin_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     promo: Mapped[str] = mapped_column(String, nullable=True)
+    rolls: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
+
+    @property
+    def rolls_dict(self) -> dict[float, int]:
+        return {float(key): int(value) for key, value in self.rolls.items()}
 
     rockets: Mapped[list["Rocket"]] = relationship(
         "Rocket",
@@ -205,6 +232,7 @@ class Rocket(_TimestampMixin, Base):
     current_fuel: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
     seen: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    transaction_id: Mapped[int] = mapped_column(ForeignKey("transactions.id"), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="rockets")
 
@@ -275,6 +303,7 @@ class Task(_TimestampMixin, Base):
     description: Mapped[str] = mapped_column(String, nullable=True)
     rocket_type: Mapped[RocketTypeEnum] = mapped_column(String, nullable=True)
     priority: Mapped[int] = mapped_column(Integer, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
 
 
 class TaskUser(_TimestampMixin, Base):
@@ -298,6 +327,76 @@ class Advert(_TimestampMixin, Base):
     status: Mapped[AdStatusEnum] = mapped_column(String)
     rocket_id: Mapped[int] = mapped_column(ForeignKey("rockets.id"), nullable=True)
     wheel_amount: Mapped[int] = mapped_column(Integer, nullable=True)
+
+
+class Collection(_TimestampMixin, Base):
+    __tablename__ = "collections"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String)
+    slug: Mapped[str] = mapped_column(String, unique=True)
+    image: Mapped[str] = mapped_column(String)
+    avg_price: Mapped[float] = mapped_column(Numeric, nullable=True)
+    is_nft: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    meta: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
+
+
+class BetConfig(_TimestampMixin, Base):
+    __tablename__ = "bets_config"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    collection_id: Mapped[str] = mapped_column(ForeignKey("collections.slug"), index=True, nullable=True)
+    bet_from: Mapped[float] = mapped_column(Numeric)
+    probability: Mapped[float] = mapped_column(Numeric)
+    actual_probability: Mapped[float] = mapped_column(Numeric)
+    is_boost: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    profit: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+
+    collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
+
+
+class Gift(_TimestampMixin, Base):
+    __tablename__ = "gifts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    collection_id: Mapped[str] = mapped_column(ForeignKey("collections.slug"))
+    transfer_date: Mapped[datetime.datetime] = mapped_column(TIMESTAMP)
+    address: Mapped[str] = mapped_column(String, unique=True)
+    gift_id: Mapped[str] = mapped_column(String, unique=True)
+    gift_id_ton: Mapped[str] = mapped_column(String, unique=True, nullable=True)
+    status: Mapped[GiftStatusEnum] = mapped_column(String)
+    price_purchase: Mapped[float] = mapped_column(Numeric, nullable=True)
+    price_release: Mapped[float] = mapped_column(Numeric, nullable=True)
+    meta: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
+    image: Mapped[str] = mapped_column(String)
+
+    collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
+
+
+class GiftUser(_TimestampMixin, Base):
+    __tablename__ = "gifts_users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
+    collection_id: Mapped[str] = mapped_column(ForeignKey("collections.slug"), index=True, nullable=True)
+    gift_id: Mapped[int] = mapped_column(ForeignKey("gifts.id"), index=True, nullable=True)
+    roll_id: Mapped[int] = mapped_column(ForeignKey("rolls.id"), nullable=True)
+    status: Mapped[GiftUserStatusEnum] = mapped_column(String)
+
+    gift = relationship("Gift", foreign_keys=[gift_id], viewonly=True)
+    collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
+
+
+class Roll(_TimestampMixin, Base):
+    __tablename__ = "rolls"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.telegram_id"), index=True)
+    ton_amount: Mapped[float] = mapped_column(Numeric)
 
 
 # class BroadcastLog(_TimestampMixin, Base):
