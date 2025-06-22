@@ -19,6 +19,11 @@ class TaskRepo(BaseRepo):
     def __init__(self, session: AsyncSession):
         super().__init__(session=session)
 
+    async def count_users_promo(self, promo: str) -> int:
+        stmt = select(func.count(User.id)).where(User.promo == promo)
+        query = await self.session.execute(stmt)
+        return query.scalar_one_or_none() or 0
+
     async def get_collection(self, slug: str) -> Collection | None:
         stmt = select(Collection).where(Collection.slug == slug)
         query = await self.session.execute(stmt)
