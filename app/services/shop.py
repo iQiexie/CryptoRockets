@@ -103,7 +103,7 @@ class ShopService(BaseService):
             ))
 
             await self.adapters.bot.send_message(
-                chat_id=-4920858130,
+                chat_id=-2726537985,
                 text=f"Юзер {gift.user_id} выводит подарок: {gift.gift_id}",
                 reply_markup=(
                     InlineKeyboardBuilder()
@@ -152,7 +152,7 @@ class ShopService(BaseService):
                     f"Сумма: {data.usd_amount} USD\n"
                     f"Сумма: {data.amount} {data.currency.upper()}\n"
                 ),
-                chat_id=-4920858130,
+                chat_id=-2726537985,
             )
         )
 
