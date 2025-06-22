@@ -303,6 +303,7 @@ class Task(_TimestampMixin, Base):
     description: Mapped[str] = mapped_column(String, nullable=True)
     rocket_type: Mapped[RocketTypeEnum] = mapped_column(String, nullable=True)
     priority: Mapped[int] = mapped_column(Integer, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
 
 
 class TaskUser(_TimestampMixin, Base):

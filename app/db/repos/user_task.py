@@ -57,6 +57,7 @@ class UserTaskRepo(BaseRepo):
                 (Task.id == TaskUser.task_id)
                 & (TaskUser.user_id == telegram_id)
             )
+            .where(Task.is_active.is_(True))
             .order_by(desc(Task.priority))
         )
 
