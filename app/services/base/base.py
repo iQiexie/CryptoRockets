@@ -4,6 +4,7 @@ from typing import Callable, Type, TypeVar
 
 import structlog
 from pydantic import BaseModel, TypeAdapter
+from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from starlette import status
@@ -48,7 +49,13 @@ class BaseService:
         async def wrapper(*args, **kwargs) -> None:
             async with args[0].repo.transaction() as t:
                 result = await f(*args, **kwargs)
-                await t.commit()
+                try:
+                    await t.commit()
+                except PendingRollbackError as e:
+                    logger.error(
+                        event=f"Transaction commit failed due to rollback: {e}",
+                        exception=traceback.format_exc(),
+                    )
 
             return result
 
