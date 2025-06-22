@@ -258,8 +258,8 @@ class GameService(BaseService):
 
     async def _handle_regular_rocket(self, user: User, rocket: Rocket) -> LaunchResponse:
         currency = random.choices(
-            population=[CurrenciesEnum.usdt, CurrenciesEnum.token],
-            weights=[50, 50]
+            population=[CurrenciesEnum.usdt, CurrenciesEnum.token, CurrenciesEnum.ton],
+            weights=[30, 20, 50]
         )[0]
         balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket.type)
 
@@ -276,7 +276,7 @@ class GameService(BaseService):
     async def _handle_premium_rocket(self, user: User, rocket: Rocket) -> LaunchResponse:
         resp = dict()
 
-        for currency in (CurrenciesEnum.usdt, CurrenciesEnum.token):
+        for currency in (CurrenciesEnum.usdt, CurrenciesEnum.token, CurrenciesEnum.ton):
             balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket.type)
             tx_data = await self.services.transaction.change_user_balance(
                 telegram_id=user.telegram_id,
