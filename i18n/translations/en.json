@@ -9,5 +9,6 @@
   "bot.start_button": "Launch 🚀",
   "bot.start": "🚀 Welcome to Crypto Rockets!\n\nHere, every launch is a <strong>chance to win</strong>!\n\nLaunch rockets and <strong>earn USDT, TON</strong> and awesome Telegram <strong>GIFTS</strong>.\n\nReady for takeoff? Buckle up — the journey starts right now! 🎁💸",
   "task.premium_rocket_given": "Your Premium Rocket is ready for Launch 🔥",
-  "task.wheel_given": "Try your luck with this golden ticket 🎫"
+  "task.wheel_given": "Try your luck with this golden ticket 🎫",
+  "gift_withdrawal": "Gift Withdrawal"
 }
