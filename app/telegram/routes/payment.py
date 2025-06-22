@@ -21,7 +21,7 @@ async def pre_checkout_handler(pre_checkout_query: PreCheckoutQuery) -> Telegram
 @router.message(F.successful_payment)
 async def success_payment_handler(message: Message, services: Services) -> None:
     data = SafeList(message.successful_payment.invoice_payload.split(";"))
-    item_id = data[0]
+    item_id = int(data[0])
     gift_id = data.get(1, None)
 
     return await services.shop.handle_payment_callback(
