@@ -39,7 +39,7 @@ async def check_user_exists(
     return {"exists": resp}
 
 
-@router.get(path="/task/check_promo/{telegram_id}", status_code=status.HTTP_200_OK)
+@router.get(path="/task/check_promo/{promo}", status_code=status.HTTP_200_OK)
 async def check_user_exists(
     service: Annotated[TaskService, Depends()],
     promo: str = Path(...),
