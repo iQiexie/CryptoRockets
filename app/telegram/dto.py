@@ -9,7 +9,9 @@ class States(StatesGroup):
 
 
 class CallbackActions(str, Enum):
-    menu = "a"  # todo iota
+    menu = "a"
+    gift_withdraw = "b"
+    gift_view = "c"
 
 
 class Callback(CallbackData, prefix="t"):

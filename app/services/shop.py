@@ -3,6 +3,8 @@ import base64
 from typing import Annotated
 
 import structlog
+from aiogram.types import InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from fastapi.params import Depends
 from pydantic_core import to_json
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,7 +27,6 @@ from app.db.models import (
     RocketTypeEnum,
     TransactionStatusEnum,
     TransactionTypeEnum,
-    User,
     WheelPrizeEnum,
 )
 from app.db.models import GiftUserStatusEnum
@@ -33,6 +34,8 @@ from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
 from app.services.dto.shop import PaymentCallbackDTO
 from app.services.dto.websocket import WsEventsEnum, WSMessage
+from app.telegram.dto import Callback
+from app.telegram.dto import CallbackActions
 from app.utils import struct_log
 
 logger = structlog.stdlib.get_logger()
@@ -93,12 +96,32 @@ class ShopService(BaseService):
         elif item.item == WheelPrizeEnum.gift_withdrawal:
             gift = await self.repos.game.get_gift_for_update(gift_user_id=data.gift_id)
             await self.repos.game.update_gift_user(gift_user_id=gift.id, status=GiftUserStatusEnum.paid)
-            await self.adapters.alerts.send_alert(message=f"Пользователь оплатил вывод подарка: {gift.id=}")
             await self.services.websocket.publish(WSMessage(
                 telegram_id=gift.user_id,
                 event=WsEventsEnum.gift_withdrawal,
                 message=GiftUserWithdrawResponse.model_validate(gift).model_dump(by_alias=True),
             ))
+
+            await self.adapters.bot.send_message(
+                chat_id=-4920858130,
+                message=f"Юзер {gift.user_id} выводит подарок: {gift.gift_id}",
+                reply_markup=(
+                    InlineKeyboardBuilder()
+                    .row(
+                        InlineKeyboardButton(
+                            text="Вывести подарок",
+                            callback_data=Callback(action=CallbackActions.gift_withdraw, data=str(gift.id)).pack(),
+                        )
+                    )
+                    .row(
+                        InlineKeyboardButton(
+                            text="Какой подарок?",
+                            callback_data=Callback(action=CallbackActions.gift_view, data=str(gift.id)).pack(),
+                        )
+                    )
+                    .as_markup()
+                )
+            )
 
         else:
             raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")

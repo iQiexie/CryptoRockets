@@ -24,6 +24,11 @@ class GameRepo(BaseRepo):
         query = await self.session.execute(stmt)
         return query.scalar_one_or_none()
 
+    async def get_gift_user(self, gift_user_id: int) -> GiftUser:
+        stmt = select(GiftUser).where(GiftUser.id == gift_user_id).options(joinedload(GiftUser.collection))
+        query = await self.session.execute(stmt)
+        return query.scalar_one()
+
     async def update_gift_user(self, gift_user_id: int, **kwargs) -> GiftUser:
         return await self.update(GiftUser, GiftUser.id == gift_user_id, **kwargs)
 
