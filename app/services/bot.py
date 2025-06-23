@@ -32,7 +32,7 @@ class BotService(BaseService):
     async def gift_view(self, callback: CallbackQuery, gift_id: int) -> None:
         gift = await self.repo.get_gift_user(gift_user_id=gift_id)
         await self.adapters.bot.send_message(
-            chat_id=callback.from_user.id,
+            chat_id=callback.message.chat.id,
             text=(
                 f"Коллекция: {gift.collection.name}\n"
                 f"Fragment: https://fragment.com/gifts/{gift.collection.slug}?sort=price_asc&filter=sale\n"
@@ -45,7 +45,7 @@ class BotService(BaseService):
         await self.repo.update_gift_user(gift_user_id=gift.id, status=GiftUserStatusEnum.withdrawn)
 
         await self.adapters.bot.edit_message_text(
-            chat_id=callback.from_user.id,
+            chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
             text=callback.message.text + "\n\n✅ Выведен"
         )
