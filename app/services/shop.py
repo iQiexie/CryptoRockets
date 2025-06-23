@@ -111,8 +111,8 @@ class ShopService(BaseService):
                     InlineKeyboardBuilder()
                     .row(
                         InlineKeyboardButton(
-                            text="Вывести подарок",
-                            callback_data=Callback(action=CallbackActions.gift_withdraw, data=str(gift.id)).pack(),
+                            text="Подарок выведен",
+                            callback_data=Callback(action=CallbackActions.gift_withdrawn, data=str(gift.id)).pack(),
                         )
                     )
                     .row(

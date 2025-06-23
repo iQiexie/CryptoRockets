@@ -10,7 +10,7 @@ class States(StatesGroup):
 
 class CallbackActions(str, Enum):
     menu = "a"
-    gift_withdraw = "b"
+    gift_withdrawn = "b"
     gift_view = "c"
 
 

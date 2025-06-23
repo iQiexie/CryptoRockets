@@ -41,3 +41,8 @@ async def success_payment_handler(message: Message, services: Services) -> None:
 @router.callback_query(Callback.filter(F.action.in_({CallbackActions.gift_view})))
 async def gift_view(callback: CallbackQuery, services: Services, callback_data: Callback) -> None:
     return await services.bot.gift_view(callback=callback, gift_id=int(callback_data.data))
+
+
+@router.callback_query(Callback.filter(F.action.in_({CallbackActions.gift_withdrawn})))
+async def gift_withdrawn(callback: CallbackQuery, services: Services, callback_data: Callback) -> None:
+    return await services.bot.gift_withdrawn(callback=callback, gift_id=int(callback_data.data))
