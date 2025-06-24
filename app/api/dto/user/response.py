@@ -48,7 +48,10 @@ class UserResponse(BaseResponse):
 
     @computed_field
     def available_rolls(self) -> dict:
-        rolls = [float(i) for i in [0.5, 1, 2, 3, 4, 5, 10, 20, 50]]
+        rolls = [float(i) for i in [
+            0.5, 1, 2, 3, 4, 5, 10, 20, 50, 120, 250, 500, 700, 1000, 1200, 2300, 4500, 11500,
+        ]]
+
         old_rolls = {float(key): int(value) for key, value in self.rolls.items()}
         new_rolls = {}
 

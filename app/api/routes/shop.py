@@ -68,7 +68,7 @@ async def get_invoice_url_rolls(
     service: Annotated[ShopService, Depends()],
     rolls_amount: float = Query(default=...),
     rolls_cont: int = Query(default=...),
-    payment_method: Literal["ton"] = Query(default="ton"),
+    payment_method: Literal["ton", "xtr"] = Query(default="ton"),
 ) -> UrlResponse:
     shop_item_id = [
         key

@@ -63,7 +63,7 @@ _items = (
         item=WheelPrizeEnum.rolls,
         amount=1,
         ton_price=0.5,
-        xtr_price=10000000,
+        xtr_price=120,
         token_price=10000000,
         
     ),
@@ -82,7 +82,7 @@ _items = (
         item=WheelPrizeEnum.rolls,
         amount=1,
         ton_price=1,
-        xtr_price=10000000,
+        xtr_price=250,
         token_price=10000000,
         
     ),
@@ -92,7 +92,7 @@ _items = (
         item=WheelPrizeEnum.rolls,
         amount=1,
         ton_price=2,
-        xtr_price=10000000,
+        xtr_price=500,
         token_price=10000000,
         
     ),
@@ -102,7 +102,7 @@ _items = (
         item=WheelPrizeEnum.rolls,
         amount=1,
         ton_price=3,
-        xtr_price=10000000,
+        xtr_price=700,
         token_price=10000000,
         
     ),
@@ -112,7 +112,7 @@ _items = (
         item=WheelPrizeEnum.rolls,
         amount=1,
         ton_price=4,
-        xtr_price=10000000,
+        xtr_price=1000,
         token_price=10000000,
         
     ),
@@ -122,7 +122,7 @@ _items = (
         item=WheelPrizeEnum.rolls,
         amount=1,
         ton_price=5,
-        xtr_price=10000000,
+        xtr_price=1200,
         token_price=10000000,
         
     ),
@@ -132,7 +132,7 @@ _items = (
         item=WheelPrizeEnum.rolls,
         amount=1,
         ton_price=10,
-        xtr_price=10000000,
+        xtr_price=2300,
         token_price=10000000,
         
     ),
@@ -142,7 +142,7 @@ _items = (
         item=WheelPrizeEnum.rolls,
         amount=1,
         ton_price=20,
-        xtr_price=10000000,
+        xtr_price=4500,
         token_price=10000000,
         
     ),
@@ -152,7 +152,7 @@ _items = (
         item=WheelPrizeEnum.rolls,
         amount=1,
         ton_price=50,
-        xtr_price=10000000,
+        xtr_price=11500,
         token_price=10000000,
         
     ),
