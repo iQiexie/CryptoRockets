@@ -127,6 +127,7 @@ class ShopService(BaseService):
 
         else:
             raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")
+
         await self.repo.create_invoice(
             user_id=data.telegram_id,
             external_id=data.external_id,
@@ -142,9 +143,6 @@ class ShopService(BaseService):
 
         try:
             await self.session.flush()
-        except IntegrityError as e:
-            logger.error(event=f"This invoice already exists: {e=}", exception=traceback.format_exception(e))
-            return
         except Exception as e:
             logger.error(event=f"Error while handling callbacl: {e}", exception=traceback.format_exception(e))
             raise ClientError(message="Failed to process payment callback") from e
