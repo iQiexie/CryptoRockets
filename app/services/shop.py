@@ -93,7 +93,7 @@ class ShopService(BaseService):
         elif item.item == WheelPrizeEnum.rolls:
             user = await self.repos.user.get_user_for_update(telegram_id=data.telegram_id)
             new_rolls = user.rolls_dict
-            new_rolls[item.ton_price] = (new_rolls.get(item.ton_price, 0) + item.amount) * data.item_amount
+            new_rolls[item_price] = (new_rolls.get(item_price, 0) + item.amount) * data.item_amount
             await self.repos.user.update_user(telegram_id=data.telegram_id, rolls=new_rolls)
         elif item.item == WheelPrizeEnum.gift_withdrawal:
             gift = await self.repos.game.get_gift_for_update(gift_user_id=data.gift_id)
@@ -127,6 +127,7 @@ class ShopService(BaseService):
 
         else:
             raise NotImplementedError(f"Item type {item.model_dump()} is not implemented")
+
         await self.repo.create_invoice(
             user_id=data.telegram_id,
             external_id=data.external_id,
@@ -142,9 +143,6 @@ class ShopService(BaseService):
 
         try:
             await self.session.flush()
-        except IntegrityError as e:
-            logger.error(event=f"This invoice already exists: {e=}", exception=traceback.format_exception(e))
-            return
         except Exception as e:
             logger.error(event=f"Error while handling callbacl: {e}", exception=traceback.format_exception(e))
             raise ClientError(message="Failed to process payment callback") from e

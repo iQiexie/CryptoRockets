@@ -68,12 +68,12 @@ async def get_invoice_url_rolls(
     service: Annotated[ShopService, Depends()],
     rolls_amount: float = Query(default=...),
     rolls_cont: int = Query(default=...),
-    payment_method: Literal["ton"] = Query(default="ton"),
+    payment_method: Literal["ton", "xtr"] = Query(default="ton"),
 ) -> UrlResponse:
     shop_item_id = [
         key
         for key, value in SHOP_ITEMS.items()
-        if value.ton_price == rolls_amount and value.item == WheelPrizeEnum.rolls
+        if (value.ton_price == rolls_amount or value.xtr_price == rolls_amount) and value.item == WheelPrizeEnum.rolls
     ][0]
 
     return await service.get_invoice_url(
