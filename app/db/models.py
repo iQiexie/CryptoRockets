@@ -385,6 +385,7 @@ class GiftUser(_TimestampMixin, Base):
     gift_id: Mapped[int] = mapped_column(ForeignKey("gifts.id"), index=True, nullable=True)
     roll_id: Mapped[int] = mapped_column(ForeignKey("rolls.id"), nullable=True)
     status: Mapped[GiftUserStatusEnum] = mapped_column(String)
+    released_for_usd: Mapped[float] = mapped_column(Numeric, nullable=True)
 
     gift = relationship("Gift", foreign_keys=[gift_id], viewonly=True)
     collection = relationship("Collection", foreign_keys=[collection_id], viewonly=True)
