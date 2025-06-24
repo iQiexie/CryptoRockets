@@ -73,7 +73,7 @@ async def get_invoice_url_rolls(
     shop_item_id = [
         key
         for key, value in SHOP_ITEMS.items()
-        if value.ton_price == rolls_amount and value.item == WheelPrizeEnum.rolls
+        if (value.ton_price == rolls_amount or value.xtr_price == rolls_amount) and value.item == WheelPrizeEnum.rolls
     ][0]
 
     return await service.get_invoice_url(
