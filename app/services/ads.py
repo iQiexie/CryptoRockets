@@ -78,11 +78,7 @@ class AdsService(BaseService):
         except ValueError:
             pass
 
-        try:
-            ad = await self.repo.get_ad(ad_id=data.id, token=data.token)
-        except DBAPIError:
-            ad = await self.repo.get_ad(ad_id=data.id, token="")
-
+        ad = await self.repo.get_ad(ad_id=data.id, token="todo unique token")
         if (ad is not None) and (ad.token == data.token):
             logger.error("ad already verified")
             raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
@@ -92,7 +88,7 @@ class AdsService(BaseService):
 
         user = None
         rocket = None
-        await self.repo.update_ad(ad_id=data.id, token=data.token)
+        await self.repo.update_ad(ad_id=data.id)
 
         if ad.rocket_id:
             rocket = await self.repos.game.get_rocket_for_update(
