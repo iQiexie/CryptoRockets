@@ -5,6 +5,7 @@ from typing import Annotated
 
 import structlog
 from fastapi.params import Depends
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from starlette import status
@@ -77,7 +78,11 @@ class AdsService(BaseService):
         except ValueError:
             pass
 
-        ad = await self.repo.get_ad(ad_id=data.id, token=data.token)
+        try:
+            ad = await self.repo.get_ad(ad_id=data.id, token=data.token)
+        except DBAPIError:
+            ad = await self.repo.get_ad(ad_id=data.id, token="")
+
         if (ad is not None) and (ad.token == data.token):
             logger.error("ad already verified")
             raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
