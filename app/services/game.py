@@ -44,6 +44,15 @@ from app.services.dto.auth import WebappData
 logger = structlog.stdlib.get_logger()
 
 
+STEPS_TO_MAX = 500  # 🎯 Number of steps to get ~99.9% of MAX_BALANCE
+
+# Target progress level (asymptotically approached)
+TARGET_PROGRESS = 0.999
+
+# Compute decay factor per step to reach ~99.9% in N steps
+DECAY_FACTOR = (1 - TARGET_PROGRESS) ** (1 / STEPS_TO_MAX)
+
+
 class GameService(BaseService):
     def __init__(
         self,
@@ -232,16 +241,15 @@ class GameService(BaseService):
             elif current_balance < MAX_BALANCE - 5:
                 return round(random.uniform(0.05, 0.1), 2)  # noqa: S311
 
-        # Нормализуем баланс от 0 до 1
-        progress = min(current_balance / MAX_BALANCE, 1.0)
+        # Remaining gap to max
+        remaining = MAX_BALANCE - current_balance
 
-        # 🔀 Рандомный диапазон награды в зависимости от баланса
-        min_reward = 0.01 + (1 - progress) * 0.20  # от 0.01 до ~0.21
-        max_reward = 0.05 + (1 - progress) * 0.5  # от 0.05 до ~0.55
+        # Base reward is a fraction of what's left
+        base_reward = remaining * (1 - DECAY_FACTOR)
 
-        # 🧮 Ограничиваем диапазон
-        reward = random.uniform(min_reward, max_reward)  # noqa: S311
-        return round(min(reward, 2), 2)
+        # Add some randomness (±20%)
+        reward = base_reward * random.uniform(0.8, 1.2)  # noqa: S311
+        return round(min(reward, MAX_BALANCE - current_balance - 1e-6), 6)
 
     def get_balance_diff(self, user: User, currency: CurrenciesEnum, rocket_type: RocketTypeEnum) -> float:
         if currency == CurrenciesEnum.token:
@@ -252,7 +260,7 @@ class GameService(BaseService):
             resp = random.uniform(0.001, 0.01)
 
         if getattr(user, f"{currency.value}_balance") + Decimal(resp) >= MAX_BALANCE:
-            resp = random.uniform(0.001, 0.01)
+            resp = random.uniform(0.0001, 0.001)
 
         return resp
 
