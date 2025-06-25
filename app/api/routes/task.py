@@ -56,3 +56,8 @@ async def populate_gifts(service: Annotated[TaskService, Depends()]) -> None:
 @router.get(path="/task/populate_gifts_latest", status_code=status.HTTP_200_OK)
 async def populate_gifts_latest(service: Annotated[TaskService, Depends()]) -> None:
     return await service.populate_gifts_latest()
+
+
+@router.get(path="/task/reset_richads", status_code=status.HTTP_200_OK)
+async def reset_richads(service: Annotated[TaskService, Depends()]) -> None:
+    return await service.reset_richads()

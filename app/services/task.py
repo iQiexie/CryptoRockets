@@ -58,6 +58,10 @@ class TaskService(BaseService):
         return await self.repo.count_users_promo(promo=promo)
 
     @BaseService.single_transaction
+    async def reset_richads(self) -> None:
+        return await self.repo.reset_richads()
+
+    @BaseService.single_transaction
     async def _insert_gift(self, gift: dict) -> None:
         date = gift['date']
         slug, gift_id_ton = ([i.lower() for i in gift['gift']['slug'].split('-')])

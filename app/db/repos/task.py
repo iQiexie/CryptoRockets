@@ -2,6 +2,7 @@ from typing import Sequence
 
 from sqlalchemy import desc
 from sqlalchemy import func, or_, select, text
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.constants import (
@@ -23,6 +24,10 @@ class TaskRepo(BaseRepo):
         stmt = select(func.count(User.id)).where(User.promo == promo)
         query = await self.session.execute(stmt)
         return query.scalar_one_or_none() or 0
+
+    async def reset_richads(self) -> None:
+        stmt = update(User).where(User.id > 0).values(rich_ads_tasks=0)
+        await self.session.execute(stmt)
 
     async def get_collection(self, slug: str) -> Collection | None:
         stmt = select(Collection).where(Collection.slug == slug)
