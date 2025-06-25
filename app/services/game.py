@@ -252,14 +252,14 @@ class GameService(BaseService):
             resp = random.uniform(0.001, 0.01)
 
         if getattr(user, f"{currency.value}_balance") + Decimal(resp) >= MAX_BALANCE:
-            resp = 0.00001
+            resp = random.uniform(0.001, 0.01)
 
         return resp
 
     async def _handle_regular_rocket(self, user: User, rocket: Rocket) -> LaunchResponse:
         currency = random.choices(
             population=[CurrenciesEnum.usdt, CurrenciesEnum.token, CurrenciesEnum.ton],
-            weights=[30, 20, 50]
+            weights=[20, 60, 20]
         )[0]
         balance_diff = self.get_balance_diff(user=user, currency=currency, rocket_type=rocket.type)
 
