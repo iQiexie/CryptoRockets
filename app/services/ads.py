@@ -88,7 +88,7 @@ class AdsService(BaseService):
 
         user = None
         rocket = None
-        await self.repo.update_ad(ad_id=data.id, token=data.token)
+        await self.repo.update_ad(ad_id=data.id)
 
         if ad.rocket_id:
             rocket = await self.repos.game.get_rocket_for_update(
