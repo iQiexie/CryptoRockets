@@ -43,6 +43,7 @@ class UserResponse(BaseResponse):
     next_premium_rocket_at: datetime | None = Field(default=None, exclude=True)
     rolls: dict = Field(default=..., exclude=True)
     boost_balance: int = Field(default=..., exclude=True)
+    rich_ads_tasks: int
 
     rockets: list[RocketResponse]
 

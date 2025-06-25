@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +18,7 @@ class AdsRepo(BaseRepo):
     async def update_ad(self, ad_id: int, **kwargs) -> Advert:
         return await self.update(Advert, Advert.id == ad_id, **kwargs)
 
-    async def get_ad(self, ad_id: int) -> Advert | None:
-        stmt = select(Advert).where(Advert.id == ad_id)
+    async def get_ad(self, ad_id: int, token: str) -> Advert | None:
+        stmt = select(Advert).where(Advert.id == ad_id, or_(Advert.token != token, Advert.token.is_(None)))
         query = await self.session.execute(stmt)
         return query.scalar_one_or_none()

@@ -205,6 +205,7 @@ class User(_TimestampMixin, Base):
     )
 
     spin_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    rich_ads_tasks: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     promo: Mapped[str] = mapped_column(String, nullable=True)
     rolls: Mapped[dict] = mapped_column(JSONB, default={}, server_default="{}")
 
@@ -327,6 +328,8 @@ class Advert(_TimestampMixin, Base):
     status: Mapped[AdStatusEnum] = mapped_column(String)
     rocket_id: Mapped[int] = mapped_column(ForeignKey("rockets.id"), nullable=True)
     wheel_amount: Mapped[int] = mapped_column(Integer, nullable=True)
+    rocket_type: Mapped[RocketTypeEnum] = mapped_column(String, nullable=True)
+    token: Mapped[str] = mapped_column(String, nullable=True, unique=True)
 
 
 class Collection(_TimestampMixin, Base):

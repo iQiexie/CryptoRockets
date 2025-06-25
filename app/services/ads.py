@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 from datetime import timedelta
 from typing import Annotated
@@ -19,9 +20,11 @@ from app.api.dto.ads.response import VerifyAdResponse
 from app.api.dto.user.response import RocketResponse
 from app.api.dto.user.response import UserResponse
 from app.api.exceptions import ClientError
+from app.config.constants import FUEL_CAPACITY_MAP
 from app.config.constants import WHEEL_AD_TIMEOUT
 from app.db.models import AdStatusEnum, Advert, Rocket
 from app.db.models import CurrenciesEnum
+from app.db.models import RocketTypeEnum
 from app.db.models import TransactionTypeEnum
 from app.services.base.base import BaseService
 from app.services.dto.auth import WebappData
@@ -58,6 +61,7 @@ class AdsService(BaseService):
             status=AdStatusEnum.created,
             rocket_id=data.rocket_id,
             wheel_amount=1 if data.for_wheel else 0,
+            rocket_type=RocketTypeEnum.default if data.for_task else None,
         )
 
         return ad
@@ -68,16 +72,22 @@ class AdsService(BaseService):
             payload, hash_ = data.token.split("-")
             actual_hash_ = self.xor_encrypt(data=payload, key=f"rocket_type_{current_user.telegram_id}_{data.id}")
             if hash_ != actual_hash_:
+                logger.error("invalid hash received")
                 raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
         except ValueError:
             pass
 
-        ad = await self.repo.get_ad(ad_id=data.id)
+        ad = await self.repo.get_ad(ad_id=data.id, token=data.token)
+        if (ad is not None) and (ad.token == data.token):
+            logger.error("ad already verified")
+            raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
         if not ad:
+            logger.error("ad not found", ad_id=data.id, token=data.token)
             raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
 
         user = None
         rocket = None
+        await self.repo.update_ad(ad_id=data.id, token=data.token)
 
         if ad.rocket_id:
             rocket = await self.repos.game.get_rocket_for_update(
@@ -104,6 +114,16 @@ class AdsService(BaseService):
             )
 
             user = resp.user
+        elif ad.rocket_type:
+            resp = await self.repos.user.create_user_rocket(
+                type=ad.rocket_type,
+                user_id=ad.user_id,
+                fuel_capacity=FUEL_CAPACITY_MAP.get(ad.rocket_type, 1),
+                current_fuel=0,
+            )
+
+            user = await self.repos.user.get_user_by_telegram_id(telegram_id=current_user.telegram_id)
+            user.rockets.append(resp)
 
         return VerifyAdResponse(
             user=UserResponse.model_validate(user) if user else None,
