@@ -216,8 +216,8 @@ class GameService(BaseService):
         progress = min(current_balance / MAX_BALANCE, 1.0)
 
         # 🔀 Рандомный диапазон награды в зависимости от баланса
-        min_reward = 0.01 + (1 - progress) * 0.20  # от 0.01 до ~0.21
-        max_reward = 0.05 + (1 - progress) * 0.5  # от 0.05 до ~0.55
+        min_reward = 0.01 + (1 - progress) * 0.1  # от 0.01 до ~0.11
+        max_reward = 0.05 + (1 - progress) * 0.3  # от 0.05 до ~0.35
 
         # 🧮 Ограничиваем диапазон
         reward = random.uniform(min_reward, max_reward)  # noqa: S311
