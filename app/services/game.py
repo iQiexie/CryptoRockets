@@ -44,15 +44,6 @@ from app.services.dto.auth import WebappData
 logger = structlog.stdlib.get_logger()
 
 
-STEPS_TO_MAX = 500  # 🎯 Number of steps to get ~99.9% of MAX_BALANCE
-
-# Target progress level (asymptotically approached)
-TARGET_PROGRESS = 0.999
-
-# Compute decay factor per step to reach ~99.9% in N steps
-DECAY_FACTOR = (1 - TARGET_PROGRESS) ** (1 / STEPS_TO_MAX)
-
-
 class GameService(BaseService):
     def __init__(
         self,
@@ -220,7 +211,42 @@ class GameService(BaseService):
         return prize
 
     @staticmethod
-    def _get_balance_diff(user: User, currency: CurrenciesEnum, rocket_type: RocketTypeEnum) -> float:
+    def _old_random(current_balance: float) -> float:
+        # Нормализуем баланс от 0 до 1
+        progress = min(current_balance / MAX_BALANCE, 1.0)
+
+        # 🔀 Рандомный диапазон награды в зависимости от баланса
+        min_reward = 0.01 + (1 - progress) * 0.20  # от 0.01 до ~0.21
+        max_reward = 0.05 + (1 - progress) * 0.5  # от 0.05 до ~0.55
+
+        # 🧮 Ограничиваем диапазон
+        reward = random.uniform(min_reward, max_reward)  # noqa: S311
+        return round(min(reward, 2), 2)
+
+    @staticmethod
+    def new_random(current_balance: float) -> float:
+        STEPS_TO_MAX = 1000  # Steps to ~99.9% max balance
+        TARGET_PROGRESS = 0.999
+        STEPNESS = 2  # >1 = rewards drop faster in 2nd half, good for your case
+
+        # Compute decay factor so we reach ~99.9% in STEPS_TO_MAX
+        DECAY_FACTOR = (1 - TARGET_PROGRESS) ** (1 / STEPS_TO_MAX)
+
+        progress = current_balance / MAX_BALANCE
+
+        # Steepness shaping: slow at first, steep near end
+        shaped_progress = 1 - (1 - progress) ** STEPNESS
+
+        remaining = MAX_BALANCE * (1 - shaped_progress)
+        base_reward = remaining * (1 - DECAY_FACTOR)
+
+        # Add randomness ±20%
+        reward = base_reward * random.uniform(0.8, 1.2)
+        reward = min(reward, MAX_BALANCE - current_balance - 1e-6)
+
+        return round(reward, 6)
+
+    def _get_balance_diff(self, user: User, currency: CurrenciesEnum, rocket_type: RocketTypeEnum) -> float:
         if currency == CurrenciesEnum.token:
             return random.randint(50, 300)
 
@@ -241,15 +267,11 @@ class GameService(BaseService):
             elif current_balance < MAX_BALANCE - 5:
                 return round(random.uniform(0.05, 0.1), 2)  # noqa: S311
 
-        # Remaining gap to max
-        remaining = MAX_BALANCE - current_balance
+        if current_balance < 20:
+            return self._old_random(current_balance=current_balance)
 
-        # Base reward is a fraction of what's left
-        base_reward = remaining * (1 - DECAY_FACTOR)
-
-        # Add some randomness (±20%)
-        reward = base_reward * random.uniform(0.8, 1.2)  # noqa: S311
-        return round(min(reward, MAX_BALANCE - current_balance - 1e-6), 6)
+        else:
+            return self.new_random(current_balance=current_balance)
 
     def get_balance_diff(self, user: User, currency: CurrenciesEnum, rocket_type: RocketTypeEnum) -> float:
         if currency == CurrenciesEnum.token:
