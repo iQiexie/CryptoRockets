@@ -35,4 +35,4 @@ jobs:
         echo "$ENV" > .env
         ssh ${SSH_URL} -i ~/.ssh/id_rsa "sudo rm -rf $PROJECT_PATH"
         rsync -za -e "ssh -i ~/.ssh/id_rsa" . $(echo $SSH_URL):$PROJECT_PATH
-        ssh ${SSH_URL} -i ~/.ssh/id_rsa "cd $PROJECT_PATH ; docker compose -f $COMPOSE_PATH down && docker compose -f $COMPOSE_PATH up -d --build --no-deps 3rio-backend"
+        ssh ${SSH_URL} -i ~/.ssh/id_rsa "cd $PROJECT_PATH ; docker compose -f $COMPOSE_PATH up -d --build --no-deps 3rio-backend"
