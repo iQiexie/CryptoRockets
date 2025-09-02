@@ -22,7 +22,7 @@ logger = structlog.stdlib.get_logger()
 ADDRESS = config.scanner.SCANNER_WALLET
 WEBHOOK_URL = config.scanner.SCANNER_WEBHOOK_URL
 
-conn = sqlite3.connect("./db-data/transactions.db")
+conn = sqlite3.connect("./db-data/transactions2.db")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS transactions (hash TEXT PRIMARY KEY)")
 conn.commit()
@@ -56,7 +56,7 @@ def fetch_transactions() -> list:
         response = requests.get(
             url="https://toncenter.com/api/v2/getTransactions",
             headers={"accept": "application/json"},
-            params={"address": ADDRESS, "limit": "10", "lt": "0", "to_lt": "0", "archival": "true"},
+            params={"address": ADDRESS, "limit": "1000", "lt": "0", "to_lt": "0", "archival": "true"},
             timeout=10,
         )
         if response.status_code != 200:  # noqa: PLR2004
