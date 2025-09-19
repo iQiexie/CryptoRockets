@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 from pydantic import ConfigDict, Field, computed_field
 from pydantic import field_validator
-from pydantic_core.core_schema import ValidationInfo
 
 from app.api.dto.base import BaseResponse
 from app.config.config import get_config

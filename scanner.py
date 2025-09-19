@@ -56,7 +56,7 @@ def fetch_transactions() -> list:
         response = requests.get(
             url="https://toncenter.com/api/v2/getTransactions",
             headers={"accept": "application/json"},
-            params={"address": ADDRESS, "limit": "1000", "lt": "0", "to_lt": "0", "archival": "true"},
+            params={"address": ADDRESS, "limit": "100", "lt": "0", "to_lt": "0", "archival": "true"},
             timeout=10,
         )
         if response.status_code != 200:  # noqa: PLR2004
