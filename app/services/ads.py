@@ -79,11 +79,11 @@ class AdsService(BaseService):
         #     pass
 
         ad = await self.repo.get_ad(ad_id=data.id, token="todo unique token")
-        if (ad is not None) and (ad.token == data.token):
+        if (ad is not None):# and (ad.token == data.token):
             logger.error("ad already verified")
             raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
         if not ad:
-            logger.error("ad not found", ad_id=data.id, token=data.token)
+            logger.error("ad not found", ad_id=data.id)
             raise ClientError(message="Offer not found", status_code=status.HTTP_404_NOT_FOUND)
 
         user = None
