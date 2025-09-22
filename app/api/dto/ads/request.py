@@ -10,4 +10,3 @@ class AdRequest(BaseRequest):
 
 class AdCheckRequest(BaseRequest):
     id: int
-    token: str
